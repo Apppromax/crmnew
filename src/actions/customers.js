@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -111,6 +112,9 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
     },
   });
 
+  revalidatePath("/");
+  revalidatePath("/customers");
+
   return { success: true };
 }
 
@@ -125,6 +129,9 @@ export async function snoozeCustomer(customerId, hours = 4) {
     where: { id: customerId },
     data: { snoozedUntil },
   });
+
+  revalidatePath("/");
+  revalidatePath("/customers");
 
   return { success: true };
 }
@@ -156,6 +163,9 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       },
     });
   }
+
+  revalidatePath("/");
+  revalidatePath("/customers");
 
   return customer;
 }
