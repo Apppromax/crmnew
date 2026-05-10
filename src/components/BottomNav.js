@@ -52,7 +52,7 @@ export default function BottomNav({ activeTab = 'home' }) {
         </div>
       </div>
 
-      <div className="flex md:flex-col justify-around md:justify-start md:gap-2 items-center md:items-stretch px-2 md:px-4 py-2 md:py-0 w-full h-full">
+      <div className="flex md:flex-col justify-around md:justify-start md:gap-2 items-center md:items-stretch px-2 md:px-4 py-1 md:py-0 w-full h-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -60,7 +60,7 @@ export default function BottomNav({ activeTab = 'home' }) {
               key={tab.id}
               href={tab.href}
               prefetch={true}
-              className={`group flex flex-col md:flex-row items-center gap-0.5 md:gap-4 py-1.5 md:py-3.5 px-3 md:px-4 rounded-xl transition-all duration-200 relative overflow-hidden ${
+              className={`group flex flex-col md:flex-row items-center gap-0.5 md:gap-4 py-1 md:py-3.5 px-3 md:px-4 rounded-xl transition-all duration-200 relative overflow-hidden ${
                 isActive
                   ? 'text-primary-600 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-500/10 md:bg-primary-50 md:dark:bg-primary-500/10'
                   : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 md:hover:bg-slate-50 md:dark:hover:bg-slate-800/50'
