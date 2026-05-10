@@ -240,7 +240,7 @@ export default function Dashboard() {
       </main>
 
       {/* FAB */}
-      <div className="fixed bottom-20 right-5 z-30">
+      <div className="fixed bottom-28 right-5 z-30">
         <button 
           onClick={() => router.push("/add")}
           className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
