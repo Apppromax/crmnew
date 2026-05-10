@@ -182,11 +182,12 @@ export default function CustomerClient({ initialCustomers }) {
         </div>
       )}
 
-      {/* FAB (Add) - Moved up by increasing bottom spacing to bottom-28 (112px) */}
-      <div className="fixed bottom-28 right-5 z-30">
+      {/* FAB (Add) - Centered with animation */}
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 group">
+        <div className="absolute inset-0 bg-primary-500 rounded-full animate-ping opacity-25"></div>
         <button 
           onClick={() => router.push("/add")}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
+          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
         >
           <Plus className="w-7 h-7" strokeWidth={2.5} />
         </button>

@@ -51,10 +51,10 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard() {
-  const [queue, setQueue] = useState([]);
-  const [counts, setCounts] = useState({ total: 0, hot: 0, warm: 0 });
-  const [loading, setLoading] = useState(true);
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 } }) {
+  const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
+  const [counts, setCounts] = useState(initialCounts);
+  const [loading, setLoading] = useState(false);
   const [sheetCustomer, setSheetCustomer] = useState(null);
   const [selectedRadarCustomer, setSelectedRadarCustomer] = useState(null);
   const [exitingId, setExitingId] = useState(null);
@@ -240,10 +240,11 @@ export default function Dashboard() {
       </main>
 
       {/* FAB */}
-      <div className="fixed bottom-28 right-5 z-30">
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 group">
+        <div className="absolute inset-0 bg-primary-500 rounded-full animate-ping opacity-25"></div>
         <button 
           onClick={() => router.push("/add")}
-          className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
+          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
         >
           <Plus className="w-7 h-7" strokeWidth={2.5} />
         </button>
