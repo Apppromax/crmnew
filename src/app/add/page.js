@@ -6,6 +6,59 @@ import { parseNoteWithAI, createCustomerFromAI } from "@/actions/ai";
 import { createCustomer } from "@/actions/customers";
 import { X, Sparkles, Pen, Loader2 } from "lucide-react";
 
+const SOURCE_OPTIONS = ["Tự khai thác", "Facebook", "Zalo", "Tiktok", "Khách giới thiệu", "Hotline / Website", "Khác"];
+const BUDGET_OPTIONS = ["Dưới 2 tỷ", "2 - 3 tỷ", "3 - 5 tỷ", "5 - 10 tỷ", "10 - 20 tỷ", "Trên 20 tỷ", "Chưa xác định"];
+const PROPERTY_TYPE_OPTIONS = ["Căn hộ chung cư", "Nhà phố/Liền kề", "Biệt thự", "Đất nền", "Shophouse/TMDV", "Văn phòng", "Khác"];
+const PURPOSE_OPTIONS = [
+  { value: "Để ở", label: "Mua để ở" },
+  { value: "Đầu tư bán lại", label: "Đầu tư bán lại" },
+  { value: "Đầu tư cho thuê", label: "Đầu tư cho thuê" },
+  { value: "Giữ tiền", label: "Giữ tiền" },
+  { value: "Khác", label: "Khác" }
+];
+const AREA_OPTIONS = ["Trung tâm thành phố", "Vùng ven/Ngoại thành", "Tỉnh lân cận", "BĐS Nghỉ dưỡng", "Khác"];
+const TIMELINE_OPTIONS = [
+  { value: "Mua ngay (trong tháng)", label: "Mua ngay (trong tháng)" },
+  { value: "1 - 3 tháng tới", label: "1 - 3 tháng tới" },
+  { value: "3 - 6 tháng tới", label: "3 - 6 tháng tới" },
+  { value: "Tham khảo", label: "Tham khảo (Chưa rõ)" }
+];
+const HEAT_LEVEL_OPTIONS = [
+  { value: "Cold", label: "❄️ Lạnh (Mới/Tham khảo)", colorClass: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", selectedClass: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-500" },
+  { value: "Warm", label: "🌡️ Ấm (Cân nhắc)", colorClass: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20", selectedClass: "bg-amber-500 text-white border-amber-600" },
+  { value: "Hot", label: "🔥 Nóng (Chuẩn bị chốt)", colorClass: "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20", selectedClass: "bg-red-500 text-white border-red-600" },
+];
+
+const ScrollChipSelect = ({ label, value, onChange, options }) => {
+  return (
+    <div className="col-span-2">
+      <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">{label}</label>
+      <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar -mx-1 px-1">
+        {options.map((opt) => {
+          const val = typeof opt === 'string' ? opt : opt.value;
+          const lbl = typeof opt === 'string' ? opt : opt.label;
+          const colorClass = opt.colorClass || 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700 shadow-sm';
+          const selectedClass = opt.selectedClass || 'bg-primary-500 text-white border-primary-600 shadow-md shadow-primary-500/25 dark:bg-primary-600 dark:border-primary-500';
+          
+          const isSelected = value === val;
+          return (
+            <button
+              key={val}
+              type="button"
+              onClick={() => onChange(isSelected ? "" : val)}
+              className={`whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                isSelected ? selectedClass : colorClass
+              }`}
+            >
+              {lbl}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function AddCustomerPage() {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState("ai"); // 'ai' | 'manual'
@@ -296,91 +349,13 @@ export default function AddCustomerPage() {
                 />
               </div>
 
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Nguồn khách</label>
-                <select value={manualSource} onChange={e => setManualSource(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn nguồn --</option>
-                  <option value="Tự khai thác">Tự khai thác</option>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Zalo">Zalo</option>
-                  <option value="Tiktok">Tiktok</option>
-                  <option value="Khách giới thiệu">Khách giới thiệu</option>
-                  <option value="Hotline/Web">Hotline / Website</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Phân khúc tài chính</label>
-                <select value={manualBudget} onChange={e => setManualBudget(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn tài chính --</option>
-                  <option value="Dưới 2 tỷ">Dưới 2 tỷ</option>
-                  <option value="2 - 3 tỷ">2 - 3 tỷ</option>
-                  <option value="3 - 5 tỷ">3 - 5 tỷ</option>
-                  <option value="5 - 10 tỷ">5 - 10 tỷ</option>
-                  <option value="10 - 20 tỷ">10 - 20 tỷ</option>
-                  <option value="Trên 20 tỷ">Trên 20 tỷ</option>
-                  <option value="Chưa xác định">Chưa xác định</option>
-                </select>
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Loại hình quan tâm</label>
-                <select value={manualPropertyType} onChange={e => setManualPropertyType(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn loại hình --</option>
-                  <option value="Căn hộ chung cư">Căn hộ chung cư</option>
-                  <option value="Nhà phố/Liền kề">Nhà phố/Liền kề</option>
-                  <option value="Biệt thự">Biệt thự</option>
-                  <option value="Đất nền">Đất nền</option>
-                  <option value="Shophouse/TMDV">Shophouse/TMDV</option>
-                  <option value="Văn phòng">Văn phòng</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Mục đích mua</label>
-                <select value={manualPurpose} onChange={e => setManualPurpose(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn mục đích --</option>
-                  <option value="Để ở">Mua để ở</option>
-                  <option value="Đầu tư bán lại">Đầu tư bán lại</option>
-                  <option value="Đầu tư cho thuê">Đầu tư cho thuê</option>
-                  <option value="Giữ tiền">Giữ tiền</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Khu vực quan tâm</label>
-                <select value={manualArea} onChange={e => setManualArea(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn khu vực --</option>
-                  <option value="Trung tâm thành phố">Trung tâm thành phố</option>
-                  <option value="Vùng ven/Ngoại thành">Vùng ven/Ngoại thành</option>
-                  <option value="Tỉnh lân cận">Tỉnh lân cận</option>
-                  <option value="BĐS Nghỉ dưỡng">BĐS Nghỉ dưỡng</option>
-                  <option value="Khác">Khác</option>
-                </select>
-              </div>
-
-              <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Thời gian dự kiến mua</label>
-                <select value={manualTimeline} onChange={e => setManualTimeline(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
-                  <option value="">-- Chọn thời gian --</option>
-                  <option value="Mua ngay (trong tháng)">Mua ngay (trong tháng)</option>
-                  <option value="1 - 3 tháng tới">1 - 3 tháng tới</option>
-                  <option value="3 - 6 tháng tới">3 - 6 tháng tới</option>
-                  <option value="Tham khảo">Tham khảo (Chưa rõ)</option>
-                </select>
-              </div>
-
-              <div className="col-span-2">
-                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Độ nét (Mức độ ưu tiên)</label>
-                <select value={manualHeatLevel} onChange={e => setManualHeatLevel(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white font-bold shadow-sm">
-                  <option value="Cold" className="text-slate-500">Chưa nét (Cold) - Mới liên hệ / Tham khảo</option>
-                  <option value="Warm" className="text-orange-500">Tiềm năng (Warm) - Đang cân nhắc / Đã hẹn gặp</option>
-                  <option value="Hot" className="text-red-500">Nét căng (Hot) - Đã chốt nhu cầu / Chuẩn bị cọc</option>
-                </select>
-              </div>
+              <ScrollChipSelect label="Nguồn khách" value={manualSource} onChange={setManualSource} options={SOURCE_OPTIONS} />
+              <ScrollChipSelect label="Phân khúc tài chính" value={manualBudget} onChange={setManualBudget} options={BUDGET_OPTIONS} />
+              <ScrollChipSelect label="Loại hình quan tâm" value={manualPropertyType} onChange={setManualPropertyType} options={PROPERTY_TYPE_OPTIONS} />
+              <ScrollChipSelect label="Mục đích mua" value={manualPurpose} onChange={setManualPurpose} options={PURPOSE_OPTIONS} />
+              <ScrollChipSelect label="Khu vực quan tâm" value={manualArea} onChange={setManualArea} options={AREA_OPTIONS} />
+              <ScrollChipSelect label="Thời gian dự kiến mua" value={manualTimeline} onChange={setManualTimeline} options={TIMELINE_OPTIONS} />
+              <ScrollChipSelect label="Độ nét (Mức độ ưu tiên)" value={manualHeatLevel} onChange={setManualHeatLevel} options={HEAT_LEVEL_OPTIONS} />
 
               <div className="col-span-2">
                 <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
