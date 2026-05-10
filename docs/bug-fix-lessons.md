@@ -164,3 +164,22 @@
 - **Lỗi**: `Expected '</', got ':'` khi thêm nhánh thứ 3 vào ternary.
 - **Fix**: `condition1 ? A : condition2 ? B : condition3 ? C : null`.
 - **Rule**: Luôn plan cấu trúc ternary trước khi mở rộng. Kết thúc bằng `: null}`.
+
+### Vấn đề 14: Lỗi Bouncing (Hiện lại khách cũ) khi vuốt thẻ liên tục
+- **Lỗi**: Người dùng vuốt nhanh 3-4 thẻ trên giao diện, app lag và một lúc sau khách hàng vừa vuốt lại hiện ra (bouncing effect).
+- **Nguyên nhân**: Hành động vuốt gọi Server Action (`snoozeCustomer` hoặc `completeCustomerAction`). Đồng thời, một `setTimeout` sau 350ms gọi `loadQueue()` để nạp dữ liệu mới. Khi vuốt liên tục, hàng loạt lệnh `loadQueue()` chạy song song và nhận về dữ liệu cũ từ server do các thao tác ghi DB chưa hoàn tất.
+- **Fix**: 
+  1. Thêm `dismissedIds` (Set qua `useRef`) để lưu danh sách khách vừa gạt ở client. Lọc loại bỏ những khách này trong data trả về từ `loadQueue()`.
+  2. Tối ưu gọi API: Xóa lệnh `loadQueue()` trong setTimeout. Chỉ gọi ngầm `loadQueue()` khi thao tác ghi DB đã hoàn tất (sau `await`) VÀ số lượng thẻ còn lại trên giao diện ít hơn hoặc bằng 3.
+- **Rule**: Không bao giờ gọi API Fetch liên tục sau mỗi thao tác vuốt. Tin tưởng vào Optimistic UI (xóa tại client) và chỉ Lazy Fetch khi thực sự cạn dữ liệu để tránh Race Conditions.
+
+### Vấn đề 15: Nút bấm xử lý ngầm (startTransition) gây hiểu nhầm
+- **Lỗi**: Người dùng bấm Khôi Phục (Restore) nhưng UI không có phản hồi gì, một lúc sau danh sách tự nhiên thay đổi gây hẫng.
+- **Nguyên nhân**: `handleRestoreQueue` sử dụng `startTransition` và gọi Server Action tốn thời gian (300-1000ms), nhưng nút bấm không có trạng thái Loading.
+- **Fix**: Sử dụng biến `isPending` từ `useTransition()` để disabled nút bấm và chèn thêm class `animate-spin` cho Icon bên trong để người dùng biết hệ thống đang xử lý.
+- **Rule**: Mọi nút gọi Server Action đều phải có trạng thái Loading rõ ràng, đặc biệt trên các ứng dụng Mobile nơi người dùng dễ bối rối vì rớt mạng.
+
+### Vấn đề 16: Trùng lặp nút chức năng (Redundancy UI)
+- **Lỗi**: Trong Bottom Sheet Chi tiết khách hàng, vừa có icon Bút chì (chỉnh sửa) ở Header trên cùng, vừa có nút to "Chỉnh sửa thông tin" ở cuối cùng.
+- **Fix**: Xóa bỏ nút dưới cùng vì nó nằm xa tầm với (nếu scroll dài) và gây lặp chức năng. Ưu tiên giữ lại icon chuẩn mực ở Header.
+- **Rule**: Với các Bottom Sheet chi tiết (Detail View), các thao tác Edit / Delete nên quy hoạch vào vùng Header (góc phải) hoặc nút Floating thay vì dồn xuống đáy form.

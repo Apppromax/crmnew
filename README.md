@@ -108,6 +108,7 @@ src/
 - ✅ Phase 13: Cross-platform & Queue Mechanics (Responsive Sidebar PC/iPad, Mouse Drag Tinder Swipe, Custom Snooze Config, Queue Restore)
 - ✅ Phase 14: Customer Management Enhancement (Edit/Delete Customer, Interaction History Timeline, Schedule Actions, Settings Restructure)
 - ✅ Phase 15: Tag System & Dashboard Extension (Custom Tags, Tag Filter, KPI Dashboard, Sales Funnel Chart, Bug Fixes)
+- ✅ Phase 16: Monetization & UX Polish (Admin Manual Top-up Approval Workflow, AI Engine Dashboard Migration, Anti-Bouncing Queue Fix, Loading Indicators)
 
 ## 📝 License
 
