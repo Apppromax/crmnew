@@ -341,30 +341,20 @@ export default function ProfileClient({ initialProfile }) {
                       Auto
                     </button>
                   </div>
-                </div>
-
                 {/* Pattern Selector */}
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Hình nền (Pattern)</p>
-                  <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-2">
-                    <button onClick={() => changeBg('none')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'none' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
-                      Trơn
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Hình nền minh họa (Góc phải)</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button onClick={() => changeBg('none')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-colors ${bgPattern === 'none' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                      Tắt hình
                     </button>
-                    <button onClick={() => changeBg('dots')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'dots' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
-                      Dấu chấm
+                    <button onClick={() => changeBg('building-1')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-colors ${bgPattern === 'building-1' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                      Thành phố
                     </button>
-                    <button onClick={() => changeBg('grid')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'grid' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
-                      Lưới
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button onClick={() => changeBg('building-1')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-1' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
-                      Cao ốc
-                    </button>
-                    <button onClick={() => changeBg('building-2')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-2' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                    <button onClick={() => changeBg('building-2')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-colors ${bgPattern === 'building-2' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                       Biệt thự
                     </button>
-                    <button onClick={() => changeBg('building-3')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-3' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                    <button onClick={() => changeBg('building-3')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-colors ${bgPattern === 'building-3' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                       Kiến trúc
                     </button>
                   </div>
