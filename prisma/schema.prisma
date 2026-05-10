@@ -18,6 +18,7 @@ model Profile {
 
   customers    Customer[]
   transactions Transaction[]
+  aiReports    AiReport[]
 
   // Team Relations
   ownedTeam      Team?
@@ -157,4 +158,16 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@map("team_members")
+}
+
+model AiReport {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  profile   Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content   String   @db.Text
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("ai_reports")
 }

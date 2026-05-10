@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Home, Users, Calendar, User } from 'lucide-react';
+import { Home, Users, Calendar, User, Sparkles } from 'lucide-react';
 
 const tabs = [
   {
@@ -16,6 +16,12 @@ const tabs = [
     href: '/customers',
     label: 'Khách hàng',
     icon: <Users className="w-6 h-6" />,
+  },
+  {
+    id: 'ai',
+    href: '/ai',
+    label: 'AI Engine',
+    icon: <Sparkles className="w-6 h-6" />,
   },
   {
     id: 'schedule',
