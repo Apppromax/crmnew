@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 
 const heatConfig = {
