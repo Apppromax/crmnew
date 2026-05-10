@@ -41,19 +41,36 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
   const dot = statusDot[customer.status] || 'bg-slate-400';
 
   const cardRef = useRef(null);
-  const dragState = useRef({ startX: null, currentX: 0 });
+  const dragState = useRef({ startX: null, startY: null, currentX: 0, isSwiping: null });
 
-  const handleStart = (clientX) => {
+  const handleStart = (clientX, clientY) => {
     dragState.current.startX = clientX;
+    dragState.current.startY = clientY;
     dragState.current.currentX = 0;
+    dragState.current.isSwiping = null;
     if (cardRef.current) {
       cardRef.current.style.transition = 'none';
       cardRef.current.style.cursor = 'grabbing';
     }
   };
-  const handleMove = (clientX) => {
+  const handleMove = (clientX, clientY) => {
     if (dragState.current.startX === null) return;
+    
     const deltaX = clientX - dragState.current.startX;
+    const deltaY = clientY - dragState.current.startY;
+
+    // Lock axis on first move (wait for 5px movement)
+    if (dragState.current.isSwiping === null) {
+      if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+        dragState.current.isSwiping = Math.abs(deltaX) > Math.abs(deltaY);
+      } else {
+        return;
+      }
+    }
+
+    // Abort if vertically scrolling
+    if (dragState.current.isSwiping === false) return;
+
     dragState.current.currentX = deltaX;
     if (cardRef.current) {
       // Direct DOM manipulation for 60fps
@@ -64,18 +81,21 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
   const handleEnd = () => {
     if (dragState.current.startX === null) return;
     const deltaX = dragState.current.currentX;
+    const isSwiping = dragState.current.isSwiping;
+    
     dragState.current.startX = null;
     dragState.current.currentX = 0;
+    dragState.current.isSwiping = null;
     
     if (cardRef.current) {
       cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
       cardRef.current.style.cursor = 'grab';
       
-      if (deltaX < -100) {
+      if (isSwiping && deltaX < -100) {
         cardRef.current.style.transform = `translateX(-150%) rotate(-15deg)`;
         cardRef.current.style.opacity = '0';
         setTimeout(() => onSnooze?.(customer), 150);
-      } else if (deltaX > 100) {
+      } else if (isSwiping && deltaX > 100) {
         cardRef.current.style.transform = `translateX(150%) rotate(15deg)`;
         cardRef.current.style.opacity = '0';
         setTimeout(() => onAction?.(customer), 150);
@@ -92,12 +112,12 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
       className={`glass rounded-3xl overflow-hidden select-none cursor-grab`}
       style={{ touchAction: 'pan-y' }}
       // Touch events
-      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-      onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+      onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
+      onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
       onTouchEnd={handleEnd}
       // Mouse events for Desktop
-      onMouseDown={(e) => handleStart(e.clientX)}
-      onMouseMove={(e) => handleMove(e.clientX)}
+      onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+      onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
       onMouseUp={handleEnd}
       onMouseLeave={() => handleEnd()}
     >
