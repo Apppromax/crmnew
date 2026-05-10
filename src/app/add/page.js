@@ -175,9 +175,8 @@ export default function AddCustomerPage() {
 
       {/* City Skyline Background */}
       <div 
-        className="absolute top-0 right-0 w-full max-w-2xl h-[500px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"
+        className="dashboard-bg-illustration absolute top-0 right-0 w-full max-w-2xl h-[500px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"
         style={{
-          backgroundImage: "url('/bg-city.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
           maskImage: 'radial-gradient(100% 100% at 100% 0%, black 20%, transparent 100%)',
