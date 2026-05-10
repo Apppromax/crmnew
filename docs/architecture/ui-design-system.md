@@ -54,3 +54,9 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 | `animate-fade-in-right`| Trượt từ phải vào | 0.4s |
 | `animate-celebration` | Phóng to nhỏ ăn mừng | 0.6s |
 | `animate-pulse` | Chớp nháy nhẹ (Tailwind mặc định)| |
+
+## UI Background & Vibe (Real-Estate/Corporate)
+Để mang lại cảm giác xịn xò, đáng tin cậy của một app CRM cho dân sales bất động sản, nền tảng sử dụng kỹ thuật:
+- **City Skyline Gradient**: Dùng một hình ảnh thành phố (`public/bg-city.png`) đặt cố định ở góc trên phải. Áp dụng thuộc tính `mix-blend-multiply` và `mask-image` (để mờ dần xuống) giúp hòa quyện liền mạch với nền.
+- **Abstract Light Waves**: Các khối tròn ảo cực to (`w-[70%] blur-[120px]`) làm background điểm xuyết các vùng ánh sáng xanh bồng bềnh, tạo chiều sâu 3D phía sau Glass Card.
+- **Instant Prefetch Navigation**: Thanh `BottomNav` sử dụng Component `<Link>` của Next.js (thay vì `router.push`), kết hợp prefetching để các trang render soft-load ngay lập tức không có độ trễ giật cục.

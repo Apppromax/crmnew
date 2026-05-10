@@ -76,3 +76,11 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 3: Admin Dashboard**: Xây dựng trang `/admin` (dành riêng cho role admin) để quản lý danh sách User.
 - [x] **Step 4: Hệ thống Nạp tiền (Thủ công)**: Tạo bảng `Wallet` và `Transaction`. Admin nhận tiền chuyển khoản và bấm cộng Credits vào ví User.
 - [x] **Step 5: Mua tài khoản Pro**: Logic cho phép User dùng Credits để mua gói Pro (mở khóa số lượng khách hàng, tính năng AI...).
+
+### Phase 8: Giao diện và Trải nghiệm (UI/UX Polish) (✅ Hoàn thành)
+- [x] **Step 1: shadcn/ui**: Thiết lập thư viện UI với biến CSS oklch (Light/Dark mode).
+- [x] **Step 2: Glassmorphism**: Thêm class `.glass` và style các card, sheet.
+- [x] **Step 3: Real-estate Vibe Background**: Generate hình thành phố mờ bằng AI và áp dụng mix-blend-mode làm nền để tạo sự sang trọng.
+- [x] **Step 4: Prefetch Navigation**: Chuyển BottomNav từ `router.push` sang `<Link>` để loại bỏ hoàn toàn độ trễ khi chuyển tab (instant navigation).
+- [x] **Step 5: Unauthenticated Landing Page**: Trang chủ bắt mắt cho user chưa đăng nhập với các nút điều hướng.
+- [x] **Step 6: Thêm khách thủ công**: Tính năng Add Manual không dùng AI cho phép thao tác nhanh.

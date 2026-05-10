@@ -44,3 +44,22 @@
 ### Vấn đề: Token bị lưu plaintext trong remote URL
 - **Fix**: Dùng `git remote set-url origin` để xóa token, lưu vào Windows Credential Manager.
 - **Rule**: Không bao giờ commit token vào code hay remote URL.
+
+---
+
+## 🟠 Vercel Deployment & Middleware Loops (2026-05-10)
+
+### Vấn đề: Vercel liên tục chạy bản code cũ (Redirect về /login) dù đã rename middleware
+- **Lỗi**: Người dùng truy cập URL nhưng luôn bị redirect `307 /login` dù code mới đã xóa/đổi tên `middleware.js` thành `proxy.js` và cập nhật luồng auth.
+- **Nguyên nhân**: 
+  1. Commit mới nhất chứa code fix lỗi bị Vercel **build thất bại** do các nguyên nhân (Syntax Error, sau đó là cảnh báo Strict ESLint của Next.js 15+ liên quan đến dấu ngoặc kép hoặc `react-hooks/set-state-in-effect`).
+  2. Cơ chế của Vercel: Khi bản build bị `Exit code: 1`, nó sẽ **tự động fallback về bản build thành công gần nhất**.
+  3. Bản build thành công gần nhất lại chính là bản code cũ có chứa `middleware.js` độc hại! Do đó, Vercel tiếp tục phục vụ bản cũ này vô thời hạn.
+- **Fix**:
+  - Tạm thời bypass ESLint trên Vercel để ép Vercel thay thế bản build cũ bằng cách cấu hình file `next.config.mjs`:
+    ```javascript
+    export default {
+      eslint: { ignoreDuringBuilds: true },
+    }
+    ```
+- **Rule**: Nếu Vercel vẫn giữ behaviour (hành vi) của code cũ sau khi deploy, hãy lập tức kiểm tra **Build Logs** của Vercel xem tiến trình build mới có bị Fail và fallback hay không. Không bao giờ assume rằng code đã lên Production nếu chưa pass `eslint` / `build`.

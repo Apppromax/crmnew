@@ -86,9 +86,10 @@ src/
 
 - ✅ Phase 1-3: Phân tích, Kế hoạch, Kiến trúc
 - ✅ Phase 4: Smart Queue UI + Supabase + Prisma 7
+- ✅ Phase 5: SaaS Multi-tenant (Auth, Admin, Wallet, Pro)
 - ✅ Phase 6: AI Data Entry, Kho khách, Schedule, Cleanup
-- ✅ Phase 7: SaaS Multi-tenant (Auth, Admin, Wallet, Pro)
-- ✅ Phase 5: Deploy Vercel thành công
+- ✅ Phase 7: UI/UX Refactor (shadcn, Glassmorphism, Prefetch Navigation)
+- ✅ Phase 8: Deploy Vercel thành công
 
 ## 📝 License
 
