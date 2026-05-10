@@ -118,9 +118,26 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen pb-24">
-      {/* Header */}
-      <header className="pt-safe px-6 pt-6 pb-2">
+    <div className="min-h-screen pb-24 relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans">
+      {/* City Skyline Background */}
+      <div 
+        className="absolute top-0 right-0 w-full max-w-lg h-[400px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"
+        style={{
+          backgroundImage: "url('/bg-city.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          maskImage: 'linear-gradient(to bottom, black 10%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 10%, transparent 100%)'
+        }}
+      />
+      
+      {/* Soft Wave Gradients */}
+      <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[400px] rounded-full bg-blue-200/50 dark:bg-blue-900/20 blur-[100px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-[5%] right-[-10%] w-[60%] h-[500px] rounded-full bg-blue-300/30 dark:bg-blue-800/20 blur-[120px] pointer-events-none z-0"></div>
+
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="pt-safe px-6 pt-8 pb-4">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-black text-slate-800 dark:text-white">
@@ -225,6 +242,7 @@ export default function Dashboard() {
         onComplete={handleComplete}
         onClose={() => setSheetCustomer(null)}
       />
+      </div>
     </div>
   );
 }
