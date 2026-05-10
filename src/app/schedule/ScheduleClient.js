@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import { format, addDays, isSameDay, startOfDay } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Phone, X, MapPin } from "lucide-react";
+import { Phone, X, MapPin, CheckCircle2, Clock, Calendar as CalendarIcon, Target, Activity, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { completeCustomerAction, updateCustomer } from "@/actions/customers";
 
 export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const router = useRouter();
@@ -13,6 +14,35 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const [overdue] = useState(initialOverdue || []);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const handleComplete = (e) => {
+    e.stopPropagation();
+    startTransition(async () => {
+      try {
+        await completeCustomerAction({ customerId: selectedItem.id, note: "Đã liên hệ theo lịch trình" });
+        setSelectedItem(null);
+        router.refresh();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  };
+
+  const handleReschedule = (e, days) => {
+    e.stopPropagation();
+    startTransition(async () => {
+      try {
+        const nextFollowUp = addDays(new Date(), days).toISOString();
+        await updateCustomer(selectedItem.id, { nextFollowUp, status: "Waiting" });
+        setSelectedItem(null);
+        router.refresh();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  };
 
   const calendarDays = useMemo(() => {
     const today = startOfDay(new Date());
@@ -141,14 +171,14 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
 
       {/* Quick Action Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setSelectedItem(null)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => { setSelectedItem(null); setIsDetailExpanded(false); }}>
           <div 
             className="w-full sm:w-[400px] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-full sm:zoom-in-95 duration-200 pb-safe"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Hành động nhanh</h2>
-              <button onClick={() => setSelectedItem(null)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+            <div className="flex justify-between items-center mb-5 shrink-0">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Chi tiết lịch hẹn</h2>
+              <button onClick={() => { setSelectedItem(null); setIsDetailExpanded(false); }} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -168,28 +198,109 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
               </div>
             </div>
 
-            {selectedItem.demand && (
+            {selectedItem.demand && !isDetailExpanded && (
               <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl mb-5 border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Nhu cầu</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300">{selectedItem.demand}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-2">{selectedItem.demand}</p>
               </div>
             )}
 
-            <div className="flex gap-3 mb-4">
-              <a href={`tel:${selectedItem.phone}`} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+            {/* EXPANDABLE DETAILS */}
+            <div className={`overflow-hidden transition-all duration-300 ${isDetailExpanded ? "max-h-[50vh] opacity-100 mb-5 overflow-y-auto custom-scrollbar" : "max-h-0 opacity-0"}`}>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-3.5 border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-3 gap-2 pb-3 border-b border-slate-200 dark:border-slate-700/50">
+                  <div className="text-center">
+                    <p className="text-[9px] uppercase text-slate-400 mb-0.5">Trạng thái</p>
+                    <p className="font-bold text-xs text-slate-900 dark:text-white">{selectedItem.status}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[9px] uppercase text-slate-400 mb-0.5">Độ nóng</p>
+                    <p className="font-bold text-xs text-slate-900 dark:text-white">{selectedItem.heatLevel}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[9px] uppercase text-slate-400 mb-0.5">Hành trình</p>
+                    <p className="font-bold text-xs text-slate-900 dark:text-white truncate">{selectedItem.journeyStage}</p>
+                  </div>
+                </div>
+
+                {selectedItem.budget && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-slate-400 font-bold text-sm w-4 text-center shrink-0">₫</span>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ngân sách</p>
+                      <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{selectedItem.budget}</p>
+                    </div>
+                  </div>
+                )}
+                {selectedItem.timeline && (
+                  <div className="flex items-start gap-2">
+                    <Target className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thời gian mua</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedItem.timeline}</p>
+                    </div>
+                  </div>
+                )}
+                {selectedItem.demand && isDetailExpanded && (
+                  <div className="flex items-start gap-2 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô tả nhu cầu</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white whitespace-pre-wrap">{selectedItem.demand}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setIsDetailExpanded(!isDetailExpanded)}
+              className="w-full flex items-center justify-center gap-1.5 mb-5 text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors"
+            >
+              {isDetailExpanded ? (
+                <><ChevronUp className="w-4 h-4" /> Thu gọn thông tin</>
+              ) : (
+                <><ChevronDown className="w-4 h-4" /> Xem toàn bộ thông tin</>
+              )}
+            </button>
+
+            {/* ACTION BUTTONS */}
+            <div className="grid grid-cols-2 gap-3 mb-4 shrink-0">
+              <a href={`tel:${selectedItem.phone}`} className="bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
                 <Phone className="w-4 h-4 fill-current" /> Gọi Điện
               </a>
-              <a href={`https://zalo.me/${selectedItem.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+              <a href={`https://zalo.me/${selectedItem.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20">
                 <span className="font-black text-sm">Zalo</span> Nhắn Tin
               </a>
             </div>
 
-            <button 
-              onClick={() => { setSelectedItem(null); router.push('/customers'); }}
-              className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 hover:border-primary-500 hover:text-primary-600 active:scale-95 transition-all"
-            >
-              Xem chi tiết khách hàng
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              <button 
+                onClick={(e) => handleComplete(e)}
+                disabled={isPending}
+                className="flex-1 py-3 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-slate-500/20"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Đã xong
+              </button>
+              
+              <div className="relative flex-1 group">
+                <button disabled={isPending} className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 group-hover:border-primary-500 group-hover:text-primary-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                  <Clock className="w-4 h-4" /> Dời lịch
+                </button>
+                {/* Dropdown menu for Reschedule */}
+                <div className="absolute bottom-full left-0 right-0 mb-2 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-10">
+                  <button onClick={(e) => handleReschedule(e, 1)} className="p-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left w-full transition-colors">
+                    Dời sang Ngày mai
+                  </button>
+                  <button onClick={(e) => handleReschedule(e, 3)} className="p-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left w-full transition-colors">
+                    Dời thêm 3 ngày
+                  </button>
+                  <button onClick={(e) => handleReschedule(e, 7)} className="p-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left w-full transition-colors">
+                    Dời sang Tuần sau
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
