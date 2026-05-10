@@ -95,3 +95,10 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 6: SSR Optimization**: Chuyển trang Lịch hẹn (`/schedule`) và Dọn dẹp (`/cleanup`) từ client-side fetch (`useEffect`) sang Server Component pre-fetch để loại bỏ client waterfall, tải trang nhanh hơn.
 - [x] **Step 7: Background Seamless Blend**: Sửa mask-image nền thành phố từ `linear-gradient` sang `radial-gradient` để hòa tan mượt vào nền ở cạnh trái và dưới.
 
+### Phase 10: UX Refinement & Stability (✅ Hoàn thành)
+- [x] **Step 1: Background Illustration Customization**: Loại bỏ các hiệu ứng thay đổi background toàn trang (lớp phủ sọc/lưới/ảnh nền) để giữ giao diện sạch. Thay vào đó, áp dụng tùy chọn đổi background minh họa ở góc phải màn hình Dashboard.
+- [x] **Step 2: Smooth Swipe 60FPS**: Tối ưu hóa hiệu ứng quẹt thẻ (FocusCard/RadarCard) bằng cách chuyển từ React State sang `useRef` (Direct DOM Manipulation), khắc phục triệt để độ trễ (lag) khi vuốt trên thiết bị di động.
+- [x] **Step 3: Resolve CSS Animation Conflicts**: Sửa lỗi thẻ Khách hàng không di chuyển được khi quẹt do bị ghi đè bởi thuộc tính `forwards` của CSS Animation lúc khởi tạo (`animate-fade-in-up`).
+- [x] **Step 4: Swipe Direction Locking**: Lập trình thuật toán theo dõi quỹ đạo ngón tay trong 5px đầu tiên để khóa hướng vuốt. Tự động vô hiệu hóa vuốt ngang nếu phát hiện hành vi cuộn dọc (scroll), chấm dứt tình trạng vô tình gạt trúng thẻ.
+- [x] **Step 5: Bottom Navigation Spacing**: Khắc phục lỗi hiển thị "lửng lơ" của BottomNav trên Android/Desktop do thuộc tính `pb-safe` thêm padding cứng. Loại bỏ khoảng trắng thừa và giảm padding bên trong để thanh điều hướng mỏng và bám sát mép viền dưới một cách tinh tế.
+- [x] **Step 6: JSX Syntax Error Debugging**: Dọn dẹp và đóng gói lại các thẻ JSX (`</div>`, `<>`) bị hỏng trong quá trình refactor tính năng Theme Selector, đảm bảo hệ thống build ổn định trên Vercel.
