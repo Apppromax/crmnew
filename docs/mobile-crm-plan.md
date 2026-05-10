@@ -6,8 +6,8 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - **Mục tiêu**: Xây dựng ứng dụng quản lý khách hàng (CRM) tinh gọn, tập trung vào việc thúc đẩy hành động (Smart Cards, 6 Trạng thái).
 - **Nền tảng**: Web App tối ưu hóa cho thiết bị di động (Mobile-first).
 - **Stack công nghệ**: 
-  - **Frontend**: Next.js (App Router), React, Tailwind CSS.
-  - **Backend/DB**: Supabase (PostgreSQL) + Prisma ORM.
+  - **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4.
+  - **Backend/DB**: Supabase (PostgreSQL) + Prisma 7 ORM + `@prisma/adapter-pg`.
   - **Deploy**: Vercel.
 - **Xử lý ngoại lệ**: Hiển thị thông báo khi mất kết nối mạng (cơ chế cơ bản cho MVP).
 
@@ -15,47 +15,57 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 
 ## 2. Quy trình 4-Phase
 
-### Phase 1: Phân tích & Khám phá (Đã hoàn thành)
+### Phase 1: Phân tích & Khám phá (✅ Hoàn thành)
 - [x] Thu thập yêu cầu từ dự án cũ (`d:\CRM`).
 - [x] Quyết định sử dụng Next.js & Supabase để dễ scale trên Vercel.
 - [x] Chốt yêu cầu giao diện tập trung vào Mobile.
 
-### Phase 2: Lập kế hoạch (Hiện tại)
+### Phase 2: Lập kế hoạch (✅ Hoàn thành)
 - [x] Thiết lập tài liệu `mobile-crm-plan.md`.
 - [x] Xác định các đầu việc cốt lõi (Task breakdown).
+- [x] Brainstorm 3 phương án UI (Inbox Zero / Endless Feed / Focus+Radar).
+- [x] Chốt phương án: **Focus + Radar** (1 thẻ lớn + 2 thẻ nhỏ).
+- [x] Thiết kế Completion Flow 10 giây.
 
-### Phase 3: Kiến trúc & Thiết kế (Solutioning)
+### Phase 3: Kiến trúc & Thiết kế (✅ Hoàn thành)
 *(Lưu ý: Không viết code ở phase này)*
-- **3.1 Kiến trúc Cơ sở dữ liệu (Supabase)**:
-  - Bảng `customers`: `id`, `name`, `phone`, `status` (New, Active, Waiting, Dormant, Closed, Lost), `qualification_level`, `next_follow_up`, `created_at`.
-- **3.2 Cấu trúc Giao diện (UI/UX)**:
-  - App layout: Viewport giới hạn cho Mobile, có Bottom Navigation.
-  - Components: `SmartCard` (Hiển thị khách hàng), `StatusModal` (Cập nhật trạng thái), `ActionDashboard` (Ưu tiên hiển thị top 3 khách hàng cần tương tác).
-- **3.3 Biện pháp bảo mật**: 
-  - Cấu hình Row Level Security (RLS) để đảm bảo an toàn dữ liệu.
+- **3.1 Kiến trúc CSDL mới (3 bảng)**:
+  - `customers`: 20+ trường bao gồm AI-parsed fields, clarity_score, heat_level, journey_stage, snoozed_until.
+  - `interactions`: Lịch sử tương tác (type, summary, outcome).
+  - `notes`: Ghi chú thô cho AI parse (raw_text, parsed_data).
+- **3.2 Thuật toán Smart Queue**: Overdue → Clarity Score → Last Contact → Next Follow-up.
+- **3.3 Clarity Score**: Công thức 100 điểm (Budget 20, Demand 20, Timeline 20, Area 15, Interaction 15, Finance 10).
+- **3.4 Cấu trúc UI**: Focus Card lớn + 2 Radar Cards + CompletionSheet + BottomNav 4 tab.
+- **3.5 AI Entry**: LLM parse note → bóc tách 5 trường → tính score (đề xuất Gemini Flash).
 
-### Phase 4: Thực thi (Implementation)
-*Phần này sẽ được thực hiện sau khi chốt Phase 3.*
+### Phase 4: Thực thi — MVP cơ bản (✅ Hoàn thành)
 - [x] **Step 1**: Khởi tạo dự án Next.js (`npx create-next-app`).
 - [x] **Step 2**: Cài đặt Supabase Client và cấu hình biến môi trường (`.env.local`).
 - [x] **Step 3**: Thiết lập hệ thống Design System (Tailwind CSS) cho giao diện Mobile.
 - [x] **Step 4**: Code UI Components (SmartCard, StatusModal, Dashboard).
 - [x] **Step 5**: Viết logic kết nối Supabase (CRUD khách hàng) bằng `@supabase/supabase-js` (Bản nháp).
-- [x] **Step 6**: Chạy các kịch bản kiểm tra (UX Audit, Lint) bằng hệ thống Scripts của Antigravity Kit.
+- [x] **Step 6**: Chạy các kịch bản kiểm tra (UX Audit, Lint) bằng hệ thống Scripts.
 
-### Phase 4.1: Chuyển đổi kiến trúc sang Prisma (Current)
-- [ ] **Step 1**: Cài đặt Prisma (`npm i -D prisma` & `npm i @prisma/client`).
-- [ ] **Step 2**: Khởi tạo cấu trúc Prisma (`npx prisma init`) và viết schema cho bảng `customers`.
-- [ ] **Step 3**: Viết Next.js Server Actions cho chức năng lấy danh sách và cập nhật trạng thái.
-- [ ] **Step 4**: Refactor lại component `page.js` để bỏ `@supabase/supabase-js` client-side và chuyển sang gọi Server Actions.
-- [ ] **Step 5**: Chạy `npx prisma generate` và test tích hợp.
+### Phase 4.1: Chuyển đổi kiến trúc sang Prisma 7 (✅ Hoàn thành)
+- [x] **Step 1**: Cài đặt Prisma 7 + `@prisma/adapter-pg` + `pg`.
+- [x] **Step 2**: Viết schema 3 bảng (customers, interactions, notes) và push lên Supabase.
+- [x] **Step 3**: Viết Next.js Server Actions (`src/actions/customers.js`) cho Queue, Complete, Snooze.
+- [x] **Step 4**: Refactor `page.js` từ mock data sang gọi Server Actions (data thật từ Supabase).
+- [x] **Step 5**: Seed 5 khách hàng mẫu vào DB.
+
+### Phase 4.2: Smart Queue UI (✅ Hoàn thành)
+- [x] **Step 1**: Tạo `FocusCard.js` — Thẻ lớn (avatar, heat badge, reason, next step, info row, CTA, swipe).
+- [x] **Step 2**: Tạo `RadarCard.js` — Thẻ nhỏ (tên, heat badge, countdown).
+- [x] **Step 3**: Tạo `CompletionSheet.js` — Bottom Sheet 10 giây (note, mic, date chips, swipe-to-complete).
+- [x] **Step 4**: Tạo `BottomNav.js` — 4 tab (Hôm nay, Khách hàng, Lịch hẹn, Cá nhân).
+- [x] **Step 5**: Tạo `InboxZero.js` — Màn hình chúc mừng khi hết queue.
+- [x] **Step 6**: Viết thuật toán Smart Queue (Overdue → Score → Last Contact → Next FollowUp).
+
+### Phase 6: Nâng cấp cốt lõi — Smart Queue & AI Entry (🔲 Chưa bắt đầu)
+- [ ] **Step 1: AI Data Entry**: Xây dựng trang `/add` thêm khách bằng Text/Voice note. Tích hợp AI (LLM API) để tự động bóc tách và tính `Độ nét`.
+- [ ] **Step 2: Trang Khách hàng**: Xây dựng trang `/customers` — Kho khách tổng (danh sách, tìm kiếm, lọc).
+- [ ] **Step 3: Overdue Cleanup Flow**: Thiết kế trang `/cleanup` riêng biệt cho các thẻ quá hạn.
+- [ ] **Step 4: Trang Lịch hẹn**: Xây dựng trang `/schedule` — Calendar view lịch follow-up.
 
 ### Phase 5: Bàn giao
 - [ ] Deploy lên Vercel.
-
-### Phase 6: Nâng cấp cốt lõi - Smart Queue & AI Entry (New Epic)
-- [ ] **Step 1: AI Data Entry**: Xây dựng UI thêm khách bằng Text/Voice note. Tích hợp AI (LLM API) để tự động bóc tách (Ngân sách, Nhu cầu, Khu vực) và tính toán điểm `Độ nét`.
-- [ ] **Step 2: Smart Queue Engine**: Phát triển cơ chế "Focus + Radar" (1 Thẻ chính, 2 Thẻ phụ). Viết query/thuật toán lấy Top 3 ưu tiên dựa trên `Độ nét` và `Lịch hẹn`.
-- [ ] **Step 3: Overdue Cleanup Flow**: Thiết kế màn hình "Dọn dẹp" (Cleanup) độc lập dành riêng cho các thẻ quá hạn, tách biệt hoàn toàn khỏi luồng 3 thẻ chính để tránh gây ngợp.
-- [ ] **Step 4: 10-Second Completion UI**: Xây dựng Bottom Sheet "Ghi chú nhanh" tối ưu thao tác 1 tay (Text, Quick Date Chips, Swipe to complete).
-

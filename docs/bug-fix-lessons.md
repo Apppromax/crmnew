@@ -1,9 +1,46 @@
-# Bug Fix Lessons
-Tài liệu này lưu trữ các bài học khi fix bug để AI và lập trình viên không mắc lại sai lầm trong tương lai.
+# Bug Fix & Lessons Learned
+**Dự án:** SalesPush CRM MVP
 
-## 1. Lỗi ESLint với React Hooks trong Next.js
-- **Lỗi:** `react-hooks/set-state-in-effect` hoặc `Cannot access variable before it is declared`.
-- **Nguyên nhân:** Khai báo hàm fetch dữ liệu bên ngoài `useEffect` bằng biến `const` hoặc khai báo nhưng gọi trước định nghĩa, vi phạm rule nghiêm ngặt của Next.js ESLint.
-- **Giải pháp/Bài học:** Luôn ưu tiên khai báo function fetching dữ liệu (như `fetchCustomers`) ở **bên trong** khối `useEffect` để tránh lỗi render và rò rỉ bộ nhớ, hoặc phải bọc hàm bằng `useCallback`.
+---
 
-*(Thêm log mới lên trên cùng nếu gặp bug mới)*
+## 🔴 Prisma 7 Breaking Changes (2026-05-10)
+
+### Vấn đề 1: `url`/`directUrl` bị xóa khỏi schema.prisma
+- **Lỗi**: `The datasource property "url" is no longer supported in schema files.`
+- **Nguyên nhân**: Prisma 7 chuyển cấu hình connection string ra `prisma.config.ts`.
+- **Fix**: Xóa `url` và `directUrl` khỏi `datasource db {}`, thêm vào `prisma.config.ts`:
+  ```ts
+  datasource: { url: process.env["DIRECT_URL"] }
+  ```
+
+### Vấn đề 2: `datasourceUrl` bị xóa khỏi PrismaClient constructor
+- **Lỗi**: `Unknown property datasourceUrl provided to PrismaClient constructor.`
+- **Nguyên nhân**: Prisma 7 bắt buộc dùng driver adapter hoặc `accelerateUrl`.
+- **Fix**: Cài `@prisma/adapter-pg` + `pg`, dùng adapter pattern:
+  ```js
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
+  const prisma = new PrismaClient({ adapter });
+  ```
+
+### Vấn đề 3: `db push` treo khi dùng pooler URL (port 6543)
+- **Nguyên nhân**: PgBouncer (Transaction pooler) không hỗ trợ DDL operations.
+- **Fix**: `prisma.config.ts` phải dùng `DIRECT_URL` (port 5432), không dùng `DATABASE_URL` (port 6543).
+- **Rule**: CLI commands (migrate, push, studio) → `DIRECT_URL`. Runtime code → `DATABASE_URL`.
+
+---
+
+## 🟡 Supabase Connection String (2026-05-10)
+
+### Vấn đề: Host `db.PROJECT_REF.supabase.co` không kết nối được
+- **Nguyên nhân**: Supabase mới dùng hostname `aws-1-REGION.pooler.supabase.com`.
+- **Fix**: Lấy connection string từ Supabase Dashboard → Connect → ORM tab.
+- **Rule**: Luôn copy từ Dashboard, không tự ghép URL.
+
+---
+
+## 🟢 Git Token Security (2026-05-10)
+
+### Vấn đề: Token bị lưu plaintext trong remote URL
+- **Fix**: Dùng `git remote set-url origin` để xóa token, lưu vào Windows Credential Manager.
+- **Rule**: Không bao giờ commit token vào code hay remote URL.

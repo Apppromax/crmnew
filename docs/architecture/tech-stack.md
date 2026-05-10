@@ -2,14 +2,30 @@
 **Dự án:** SalesPush CRM MVP
 
 ## Core Stack
-- **Framework:** Next.js (App Router)
-- **Language:** JavaScript
+- **Framework:** Next.js 16.2.6 (App Router)
+- **Language:** JavaScript (React 19)
 - **Styling:** Tailwind CSS 4
 - **Database:** Supabase (PostgreSQL)
-- **ORM:** Prisma
-- **Hosting:** Vercel
+- **ORM:** Prisma 7 + `@prisma/adapter-pg` + `pg`
+- **Hosting:** Vercel (dự kiến)
 
 ## Key Decisions
-- **Why Next.js?** Tối ưu SEO, dễ dàng deploy trên Vercel, chia component tốt.
-- **Why Supabase + Prisma?** Supabase cung cấp PostgreSQL cực kỳ mạnh mẽ. Prisma ORM giúp việc quản lý Schema trở nên trực quan, sinh Type an toàn, và dễ dàng query dữ liệu từ Server-side, bảo mật hơn nhiều so với việc gọi trực tiếp API từ Client.
-- **Why Tailwind CSS 4?** Cấu hình cực kỳ tinh gọn (`@theme`), tốc độ build nhanh, code sạch.
+- **Why Next.js?** Tối ưu SEO, Server Actions cho data fetching an toàn, deploy dễ trên Vercel.
+- **Why Supabase + Prisma 7?** Supabase cung cấp PostgreSQL mạnh mẽ. Prisma 7 sử dụng driver adapter (`@prisma/adapter-pg`) thay vì binary engine → bundle nhỏ hơn 90%, query nhanh hơn.
+- **Why Tailwind CSS 4?** Cấu hình `@theme` tinh gọn, tốc độ build nhanh, code sạch.
+- **Prisma 7 Breaking Changes:**
+  - `url`/`directUrl` trong schema.prisma đã bị xóa → phải dùng `prisma.config.ts`.
+  - Constructor PrismaClient bắt buộc `adapter` hoặc `accelerateUrl` → dùng `PrismaPg(pool)`.
+  - CLI operations (db push, migrate) dùng `DIRECT_URL` (port 5432), runtime dùng `DATABASE_URL` (pooler, port 6543).
+
+## Dependencies chính
+```json
+{
+  "@prisma/client": "^7.8.0",
+  "@prisma/adapter-pg": "^7.x",
+  "pg": "^8.x",
+  "next": "16.2.6",
+  "react": "19.2.4",
+  "tailwindcss": "^4"
+}
+```
