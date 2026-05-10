@@ -50,7 +50,7 @@ export default function SchedulePage() {
   }, [schedule]);
 
   return (
-    <div className="min-h-screen bg-[#F4F8FB] dark:bg-slate-950 pb-24 font-sans">
+    <div className="min-h-screen bg-[#F4F8FB] dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
       <header className="pt-[max(2rem,env(safe-area-inset-top))] px-6 pb-2 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-20">
         <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-4">Lịch hẹn</h1>
         
@@ -89,7 +89,7 @@ export default function SchedulePage() {
         </div>
       </header>
 
-      <main className="px-5 pt-6">
+      <main className="px-5 pt-6 md:max-w-3xl md:mx-auto w-full">
         {/* Overdue Section (only show if overdue exists) */}
         {overdue.length > 0 && isSameDay(selectedDate, startOfDay(new Date())) && (
           <div className="mb-8">

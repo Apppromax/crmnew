@@ -71,3 +71,12 @@ export async function updateProfileInfo({ fullName }) {
   });
   return { success: true };
 }
+
+export async function updateDefaultSnoozeHours(hours) {
+  const userId = await requireUser();
+  await prisma.profile.update({
+    where: { id: userId },
+    data: { defaultSnoozeHours: hours }
+  });
+  return { success: true };
+}

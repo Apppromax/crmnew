@@ -8,10 +8,11 @@ import CompletionSheet from "@/components/CompletionSheet";
 import InboxZero from "@/components/InboxZero";
 import BottomNav from "@/components/BottomNav";
 import {
-  getSmartQueue,
   completeCustomerAction,
   snoozeCustomer,
   getCustomerCount,
+  clearAllSnoozes,
+  getSmartQueue,
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
@@ -139,7 +140,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
 
       startTransition(async () => {
         try {
-          await snoozeCustomer(customer.id, 4);
+          await snoozeCustomer(customer.id);
         } catch (e) {
           console.error("Snooze failed", e);
           loadQueue(); // Revert on failure
@@ -149,8 +150,19 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
     [loadQueue]
   );
 
+  const handleRestoreQueue = useCallback(() => {
+    startTransition(async () => {
+      try {
+        await clearAllSnoozes();
+        loadQueue();
+      } catch (e) {
+        console.error("Restore failed", e);
+      }
+    });
+  }, [loadQueue]);
+
   return (
-    <div className="min-h-screen pb-24 relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans">
+    <div className="min-h-screen pb-24 md:pb-0 md:pl-64 relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans transition-all duration-300">
       {/* City Skyline Background */}
       <div 
         className="absolute top-0 right-0 w-full max-w-lg h-[400px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"
@@ -172,26 +184,46 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
         <header className="px-6 pt-[max(2rem,env(safe-area-inset-top))] pb-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-black text-slate-800 dark:text-white">
-              Hôm nay
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              {queue.length > 0
-                ? `${queue.length} khách hàng cần chăm sóc`
-                : "Không có khách cần xử lý"}
-            </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-black text-slate-800 dark:text-white">
+                Hôm nay
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {queue.length > 0
+                  ? `${queue.length} khách hàng cần chăm sóc`
+                  : "Không có khách cần xử lý"}
+              </p>
+              <button 
+                onClick={handleRestoreQueue}
+                className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition-colors"
+                title="Khôi phục toàn bộ thẻ đang tạm gác"
+              >
+                Khôi phục
+              </button>
+            </div>
           </div>
-          <button 
-            onClick={() => setIsNotifOpen(true)}
-            className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
-          >
-            <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-            {unreadNotifCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
-                {unreadNotifCount}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => router.push("/add")}
+              className="h-11 px-4 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 font-bold text-sm"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden sm:inline">Thêm khách</span>
+            </button>
+            <button 
+              onClick={() => setIsNotifOpen(true)}
+              className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
+            >
+              <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              {unreadNotifCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                  {unreadNotifCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -209,7 +241,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
       </header>
 
       {/* Main Queue */}
-      <main className="px-5 pt-5 max-w-lg mx-auto">
+      <main className="px-5 pt-5 max-w-lg md:max-w-4xl mx-auto w-full">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -240,12 +272,13 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 px-1">
                   📡 Tiếp theo
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4">
                   {radarCustomers.map((c) => (
                     <RadarCard
                       key={c.id}
                       customer={c}
                       onClick={(customer) => setSelectedRadarCustomer(customer)}
+                      onSnooze={handleSnooze}
                       animClass={exitingId === c.id ? "animate-fade-out-left" : "animate-fade-in-up"}
                     />
                   ))}
@@ -256,16 +289,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
         )}
       </main>
 
-      {/* FAB */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 group">
-        <div className="absolute inset-0 bg-primary-500 rounded-full animate-ping opacity-25"></div>
-        <button 
-          onClick={() => router.push("/add")}
-          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
-        >
-          <Plus className="w-7 h-7" strokeWidth={2.5} />
-        </button>
-      </div>
+      {/* FAB removed - moved to header */}
 
       <BottomNav activeTab="home" />
 

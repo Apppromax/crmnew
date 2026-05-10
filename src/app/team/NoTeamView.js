@@ -48,7 +48,7 @@ export default function NoTeamView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
       {/* Hero Section */}
       <div className="relative bg-slate-900 overflow-hidden px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-12 rounded-b-[2.5rem] shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl"></div>

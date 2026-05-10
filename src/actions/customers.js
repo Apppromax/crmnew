@@ -118,12 +118,18 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
   return { success: true };
 }
 
-export async function snoozeCustomer(customerId, hours = 4) {
+export async function snoozeCustomer(customerId, hours = null) {
   const userId = await requireUser();
   const existing = await prisma.customer.findFirst({ where: { id: customerId, userId } });
   if (!existing) throw new Error("Not found or unauthorized");
 
-  const snoozedUntil = new Date(Date.now() + hours * 3600000);
+  let snoozeDuration = hours;
+  if (!snoozeDuration) {
+    const profile = await prisma.profile.findUnique({ where: { id: userId } });
+    snoozeDuration = profile?.defaultSnoozeHours || 4;
+  }
+
+  const snoozedUntil = new Date(Date.now() + snoozeDuration * 3600000);
 
   await prisma.customer.update({
     where: { id: customerId },
@@ -133,6 +139,17 @@ export async function snoozeCustomer(customerId, hours = 4) {
   revalidatePath("/");
   revalidatePath("/customers");
 
+  return { success: true };
+}
+
+export async function clearAllSnoozes() {
+  const userId = await requireUser();
+  await prisma.customer.updateMany({
+    where: { userId },
+    data: { snoozedUntil: null },
+  });
+  revalidatePath("/");
+  revalidatePath("/customers");
   return { success: true };
 }
 

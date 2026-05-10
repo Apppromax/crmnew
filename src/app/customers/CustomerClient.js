@@ -38,12 +38,21 @@ export default function CustomerClient({ initialCustomers }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 transition-all duration-300">
       {/* Header */}
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Kho khách hàng</h1>
-          <div className="text-sm font-medium text-slate-500">{initialCustomers.length} người</div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-slate-500 hidden sm:inline">{initialCustomers.length} người</span>
+            <button 
+              onClick={() => router.push("/add")}
+              className="h-9 px-3 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform hover:bg-primary-700 font-bold text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Thêm khách</span>
+            </button>
+          </div>
         </div>
         
         {/* Search Bar */}
@@ -95,12 +104,16 @@ export default function CustomerClient({ initialCustomers }) {
             <p className="text-slate-500 dark:text-slate-400">Không tìm thấy khách hàng nào</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {filteredCustomers.map((c) => (
               <div 
                 key={c.id} 
                 onClick={() => setSelectedCustomer(c)}
-                className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform"
+                className={`bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border ${
+                  c.snoozedUntil && new Date(c.snoozedUntil) > new Date() 
+                  ? 'border-purple-200 dark:border-purple-900/50 opacity-80' 
+                  : 'border-slate-100 dark:border-slate-800'
+                } flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`}
               >
                 <div>
                   <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
@@ -116,7 +129,7 @@ export default function CustomerClient({ initialCustomers }) {
                   <p className="text-sm text-slate-500 mt-1">{c.phone}</p>
                   {c.demand && <p className="text-xs text-slate-400 mt-1 truncate max-w-[200px]">{c.demand}</p>}
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end gap-2">
                   <span className={`text-xs font-medium px-2 py-1 rounded-md ${
                     c.status === 'New' ? 'bg-indigo-50 text-indigo-700' :
                     c.status === 'Active' ? 'bg-emerald-50 text-emerald-700' :
@@ -125,6 +138,11 @@ export default function CustomerClient({ initialCustomers }) {
                   }`}>
                     {c.status}
                   </span>
+                  {c.snoozedUntil && new Date(c.snoozedUntil) > new Date() && (
+                    <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20">
+                      Đang gác
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -153,14 +171,20 @@ export default function CustomerClient({ initialCustomers }) {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{selectedCustomer.name}</h3>
-                  <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
-                    <Phone className="w-3.5 h-3.5" />
-                    {selectedCustomer.phone}
-                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-sm text-slate-500 flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5" />
+                      {selectedCustomer.phone}
+                    </p>
+                    {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
+                      <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 whitespace-nowrap">
+                        Gác đến: {formatDate(selectedCustomer.snoozedUntil)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Quick Actions */}
               <div className="flex gap-3 pt-2">
                 <a href={`tel:${selectedCustomer.phone}`} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
                   <Phone className="w-4 h-4 fill-current" /> Gọi Điện
@@ -170,71 +194,122 @@ export default function CustomerClient({ initialCustomers }) {
                 </a>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-xs text-slate-400 flex items-center gap-1"><Activity className="w-3.5 h-3.5"/> Trạng thái</p>
-                  <p className="font-medium text-slate-900 dark:text-white mt-1">{selectedCustomer.status}</p>
+              {/* Status and Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
+                  <p className="text-[10px] uppercase text-slate-400 mb-1">Trạng thái</p>
+                  <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status}</p>
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-xs text-slate-400 flex items-center gap-1"><Target className="w-3.5 h-3.5"/> Mức độ</p>
-                  <p className="font-medium text-slate-900 dark:text-white mt-1">{selectedCustomer.heatLevel}</p>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
+                  <p className="text-[10px] uppercase text-slate-400 mb-1">Độ nóng</p>
+                  <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
+                  <p className="text-[10px] uppercase text-slate-400 mb-1">Hành trình</p>
+                  <p className="font-bold text-sm text-slate-900 dark:text-white truncate" title={selectedCustomer.journeyStage}>{selectedCustomer.journeyStage}</p>
                 </div>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-3 border border-slate-100 dark:border-slate-800">
-                {selectedCustomer.area && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-slate-400">Khu vực</p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.area}</p>
-                    </div>
-                  </div>
-                )}
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-3.5 border border-slate-100 dark:border-slate-800 max-h-[40vh] overflow-y-auto custom-scrollbar">
                 
-                {selectedCustomer.budget && (
+                {/* Timings */}
+                <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-200 dark:border-slate-700/50">
                   <div className="flex items-start gap-2">
-                    <span className="text-slate-400 font-bold text-sm w-4 text-center">₫</span>
+                    <Calendar className="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-xs text-slate-400">Tài chính</p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.budget}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lịch hẹn tiếp theo</p>
+                      <p className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                        {selectedCustomer.nextFollowUp ? formatDate(selectedCustomer.nextFollowUp) : "Chưa lên lịch"}
+                      </p>
                     </div>
                   </div>
-                )}
+                  <div className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tương tác cuối</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        {selectedCustomer.lastContactAt ? formatDate(selectedCustomer.lastContactAt) : "Chưa có"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                {selectedCustomer.demand && (
-                  <div className="flex items-start gap-2">
-                    <FileText className="w-4 h-4 text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-xs text-slate-400">Nhu cầu</p>
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.demand}</p>
+                {/* Info Fields */}
+                <div className="space-y-3 pt-1">
+                  {selectedCustomer.area && (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Khu vực quan tâm</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.area}</p>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                <div className="flex items-start gap-2 border-t border-slate-200 dark:border-slate-700 pt-3">
-                  <Clock className="w-4 h-4 text-slate-400 mt-0.5" />
-                  <div>
-                    <p className="text-xs text-slate-400">Thời gian tạo (Lưu hệ thống)</p>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">{formatDate(selectedCustomer.createdAt)}</p>
+                  )}
+                  
+                  {selectedCustomer.budget && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-slate-400 font-bold text-sm w-4 text-center shrink-0">₫</span>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ngân sách dự kiến</p>
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{selectedCustomer.budget}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedCustomer.finance && (
+                    <div className="flex items-start gap-2">
+                      <Activity className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tình trạng tài chính</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.finance}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedCustomer.timeline && (
+                    <div className="flex items-start gap-2">
+                      <Target className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thời gian dự kiến mua</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.timeline}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedCustomer.demand && (
+                    <div className="flex items-start gap-2 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                      <FileText className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô tả nhu cầu chi tiết</p>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white whitespace-pre-wrap">{selectedCustomer.demand}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Additional info block */}
+                  <div className="flex flex-col gap-1 pt-2">
+                    <p className="text-[10px] text-slate-400">
+                      Tạo ngày: {formatDate(selectedCustomer.createdAt)}
+                    </p>
+                    <p className="text-[10px] text-slate-400">
+                      ID Khách hàng: {selectedCustomer.id.substring(0, 8).toUpperCase()}
+                    </p>
+                    {(selectedCustomer.channel || selectedCustomer.source) && (
+                      <p className="text-[10px] font-bold text-primary-500">
+                        Nguồn: {selectedCustomer.channel || selectedCustomer.source}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
+
+
             </div>
           </div>
         </div>
       )}
 
-      {/* FAB (Add) - Centered with animation */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-30 group">
-        <div className="absolute inset-0 bg-primary-500 rounded-full animate-ping opacity-25"></div>
-        <button 
-          onClick={() => router.push("/add")}
-          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
-        >
-          <Plus className="w-7 h-7" strokeWidth={2.5} />
-        </button>
-      </div>
+      {/* FAB removed - moved to header */}
 
       <BottomNav activeTab="customers" />
     </div>

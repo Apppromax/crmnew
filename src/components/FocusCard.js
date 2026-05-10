@@ -40,33 +40,43 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
   const stage = stageLabels[customer.journeyStage] || customer.journeyStage;
   const dot = statusDot[customer.status] || 'bg-slate-400';
 
-  const [touchX, setTouchX] = useState(null);
+  const [startX, setStartX] = useState(null);
   const [deltaX, setDeltaX] = useState(0);
-  const dragging = touchX !== null;
+  const dragging = startX !== null;
 
-  const onTouchStart = (e) => setTouchX(e.touches[0].clientX);
-  const onTouchMove = (e) => {
-    if (touchX === null) return;
-    const d = e.touches[0].clientX - touchX;
-    if (d < 0) setDeltaX(d);
+  const handleStart = (clientX) => setStartX(clientX);
+  const handleMove = (clientX) => {
+    if (startX === null) return;
+    const d = clientX - startX;
+    setDeltaX(d); // Allow both left and right swipe
   };
-  const onTouchEnd = () => {
-    if (deltaX < -100) onSnooze?.(customer);
-    setTouchX(null);
+  const handleEnd = () => {
+    if (deltaX < -100) {
+      onSnooze?.(customer);
+    } else if (deltaX > 100) {
+      onAction?.(customer);
+    }
+    setStartX(null);
     setDeltaX(0);
   };
 
   return (
     <div
-      className={`glass rounded-3xl overflow-hidden ${animClass}`}
+      className={`glass rounded-3xl overflow-hidden select-none ${animClass} ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{
-        transform: deltaX < 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.06}deg) scale(${1 - Math.abs(deltaX) * 0.0005})` : undefined,
-        opacity: deltaX < -80 ? 0.5 : 1,
+        transform: deltaX !== 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.06}deg) scale(${1 - Math.abs(deltaX) * 0.0005})` : undefined,
+        opacity: Math.abs(deltaX) > 80 ? 0.5 : 1,
         transition: dragging ? 'none' : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease',
       }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
+      // Touch events
+      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
+      onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+      onTouchEnd={handleEnd}
+      // Mouse events for Desktop
+      onMouseDown={(e) => handleStart(e.clientX)}
+      onMouseMove={(e) => handleMove(e.clientX)}
+      onMouseUp={handleEnd}
+      onMouseLeave={() => { if (dragging) handleEnd() }}
     >
       {/* Top: Avatar + Name + Heat Badge */}
       <div className="p-5 pb-3">
@@ -143,9 +153,16 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
       </div>
 
       {/* Swipe Hint */}
-      <div className="text-center pb-3 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-1">
-        <ArrowLeft className="w-3 h-3" />
-        <span>Vuốt trái để tạm gác</span>
+      <div className="text-center pb-3 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-2">
+        <div className="flex items-center gap-1">
+          <ArrowLeft className="w-3 h-3" />
+          <span>Tạm gác</span>
+        </div>
+        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
+        <div className="flex items-center gap-1">
+          <span>Cập nhật</span>
+          <ArrowLeft className="w-3 h-3 rotate-180" />
+        </div>
       </div>
     </div>
   );

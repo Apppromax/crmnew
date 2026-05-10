@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { upgradeToPro, updateProfileInfo } from "@/actions/user";
+import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, Image as ImageIcon, X, Palette } from "lucide-react";
@@ -20,6 +20,7 @@ export default function ProfileClient({ initialProfile }) {
   // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile?.fullName || "");
+  const [editSnoozeHours, setEditSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
   const [isSavingInfo, setIsSavingInfo] = useState(false);
 
   useEffect(() => {
@@ -88,7 +89,8 @@ export default function ProfileClient({ initialProfile }) {
     setIsSavingInfo(true);
     try {
       await updateProfileInfo({ fullName: editName });
-      setProfile(p => ({ ...p, fullName: editName }));
+      await updateDefaultSnoozeHours(Number(editSnoozeHours));
+      setProfile(p => ({ ...p, fullName: editName, defaultSnoozeHours: Number(editSnoozeHours) }));
       setIsEditing(false);
     } catch (err) {
       setError("Lỗi cập nhật thông tin.");
@@ -98,7 +100,7 @@ export default function ProfileClient({ initialProfile }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950/80 pb-24 font-sans relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950/80 pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10 flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Cá nhân</h1>
         <button onClick={handleLogout} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
@@ -106,7 +108,7 @@ export default function ProfileClient({ initialProfile }) {
         </button>
       </header>
 
-      <main className="px-4 pt-6 space-y-6 relative z-0">
+      <main className="px-4 pt-6 space-y-6 relative z-0 md:max-w-3xl md:mx-auto w-full">
         {profile ? (
           <>
             {/* User Card */}
@@ -255,6 +257,19 @@ export default function ProfileClient({ initialProfile }) {
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
                   placeholder="Nhập tên của bạn..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Thời gian Tạm gác mặc định (Giờ)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  max="168"
+                  value={editSnoozeHours}
+                  onChange={(e) => setEditSnoozeHours(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
+                  placeholder="Ví dụ: 4"
                 />
               </div>
 

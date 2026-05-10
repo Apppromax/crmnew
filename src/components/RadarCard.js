@@ -22,15 +22,51 @@ function formatFollowUp(dateStr) {
   return `${absD} ngày nữa`;
 }
 
-export default function RadarCard({ customer, onClick, animClass = '' }) {
+export default function RadarCard({ customer, onClick, onSnooze, animClass = '' }) {
   const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
+
+  const [startX, setStartX] = useState(null);
+  const [deltaX, setDeltaX] = useState(0);
+  const dragging = startX !== null;
+
+  const handleStart = (clientX) => setStartX(clientX);
+  const handleMove = (clientX) => {
+    if (startX === null) return;
+    const d = clientX - startX;
+    setDeltaX(d); // Allow both left and right swipe
+  };
+  const handleEnd = () => {
+    if (deltaX < -80) {
+      if (onSnooze) onSnooze(customer);
+    } else if (deltaX > 80) {
+      onClick?.(customer); // Using onClick to open the action modal for RadarCard
+    } else if (deltaX === 0) {
+      // If no drag, treat as click
+      onClick?.(customer);
+    }
+    setStartX(null);
+    setDeltaX(0);
+  };
 
   return (
     <div
-      onClick={() => onClick?.(customer)}
-      className={`glass rounded-2xl p-4 cursor-pointer active:scale-[0.97] transition-all duration-200 ${animClass}`}
+      className={`glass rounded-2xl p-4 select-none ${animClass} ${dragging ? 'cursor-grabbing' : 'cursor-pointer'} transition-all`}
+      style={{
+        transform: deltaX !== 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.03}deg)` : undefined,
+        opacity: Math.abs(deltaX) > 50 ? 0.5 : 1,
+        transition: dragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease',
+      }}
+      // Touch events
+      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
+      onTouchMove={(e) => handleMove(e.touches[0].clientX)}
+      onTouchEnd={handleEnd}
+      // Mouse events for Desktop
+      onMouseDown={(e) => handleStart(e.clientX)}
+      onMouseMove={(e) => handleMove(e.clientX)}
+      onMouseUp={handleEnd}
+      onMouseLeave={() => { if (dragging) handleEnd() }}
     >
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-3 pointer-events-none">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
           {customer.name?.charAt(0)}
         </div>
@@ -40,7 +76,7 @@ export default function RadarCard({ customer, onClick, animClass = '' }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pointer-events-none">
         <div className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${heat.bg} ${heat.text} flex items-center gap-1`}>
           <span>{heat.emoji}</span> {customer.heatLevel}
         </div>
