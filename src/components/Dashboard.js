@@ -67,13 +67,17 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const router = useRouter();
 
+  const dismissedIds = React.useRef(new Set());
+
   const loadQueue = useCallback(async () => {
     try {
       const [data, countData] = await Promise.all([
         getSmartQueue(),
         getCustomerCount(),
       ]);
-      setQueue(data.map(enrichCustomer));
+      // Filter out items that were optimistically dismissed but might still be returned by a stale server response
+      const enriched = data.map(enrichCustomer).filter(c => !dismissedIds.current.has(c.id));
+      setQueue(enriched);
       setCounts(countData);
     } catch (err) {
       console.error("Failed to load queue:", err);
@@ -107,19 +111,25 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
     (data) => {
       setSheetCustomer(null);
       setExitingId(data.customerId);
+      dismissedIds.current.add(data.customerId);
 
       // Optimistically remove from queue after animation finishes
       setTimeout(() => {
         setQueue((prev) => prev.filter((c) => c.id !== data.customerId));
         setExitingId(null);
-        loadQueue(); // Fetch silently in background
       }, 350);
 
       startTransition(async () => {
         try {
           await completeCustomerAction(data);
+          // Background fetch only if queue is running low
+          setQueue((prev) => {
+            if (prev.length <= 3) loadQueue();
+            return prev;
+          });
         } catch (e) {
           console.error("Action failed", e);
+          dismissedIds.current.delete(data.customerId);
           loadQueue(); // Revert on failure
         }
       });
@@ -130,19 +140,25 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   const handleSnooze = useCallback(
     (customer) => {
       setExitingId(customer.id);
+      dismissedIds.current.add(customer.id);
 
       // Optimistically remove from queue after animation finishes
       setTimeout(() => {
         setQueue((prev) => prev.filter((c) => c.id !== customer.id));
         setExitingId(null);
-        loadQueue(); // Fetch silently in background
       }, 350);
 
       startTransition(async () => {
         try {
           await snoozeCustomer(customer.id);
+          // Background fetch only if queue is running low
+          setQueue((prev) => {
+            if (prev.length <= 3) loadQueue();
+            return prev;
+          });
         } catch (e) {
           console.error("Snooze failed", e);
+          dismissedIds.current.delete(customer.id);
           loadQueue(); // Revert on failure
         }
       });
@@ -154,6 +170,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
     startTransition(async () => {
       try {
         await clearAllSnoozes();
+        dismissedIds.current.clear(); // Clear local dismissals so restored items can show
         loadQueue();
       } catch (e) {
         console.error("Restore failed", e);
