@@ -133,3 +133,43 @@ export async function getCustomerCount() {
 
   return { total, hot, warm };
 }
+
+export async function getOverdueCustomers() {
+  const now = new Date();
+  const customers = await prisma.customer.findMany({
+    where: {
+      status: { notIn: ["Closed", "Lost"] },
+      nextFollowUp: { lt: now },
+    },
+    orderBy: { nextFollowUp: "asc" },
+  });
+
+  return customers.map((c) => ({
+    ...c,
+    nextFollowUp: c.nextFollowUp?.toISOString() || null,
+    lastContactAt: c.lastContactAt?.toISOString() || null,
+    snoozedUntil: c.snoozedUntil?.toISOString() || null,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }));
+}
+
+export async function getUpcomingSchedule() {
+  const now = new Date();
+  const customers = await prisma.customer.findMany({
+    where: {
+      status: { notIn: ["Closed", "Lost"] },
+      nextFollowUp: { gte: now },
+    },
+    orderBy: { nextFollowUp: "asc" },
+  });
+
+  return customers.map((c) => ({
+    ...c,
+    nextFollowUp: c.nextFollowUp?.toISOString() || null,
+    lastContactAt: c.lastContactAt?.toISOString() || null,
+    snoozedUntil: c.snoozedUntil?.toISOString() || null,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }));
+}

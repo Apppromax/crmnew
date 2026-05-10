@@ -92,3 +92,24 @@ ORDER BY:
 WHERE: status NOT IN (Closed, Lost) AND (snoozed_until IS NULL OR < NOW)
 LIMIT 3
 ```
+
+---
+
+## 🚀 Kế hoạch Nâng cấp SaaS (Sau MVP)
+
+Dựa trên yêu cầu phát triển thành hệ thống Multi-user (nhiều người dùng), kiến trúc CSDL sẽ được bổ sung các phần sau trong giai đoạn tới:
+
+### 1. Phân quyền và Cô lập Dữ liệu (Multi-tenant - Cá nhân độc lập)
+- Tích hợp **Supabase Auth**. Bảng `users` sẽ do Supabase quản lý (`auth.users`).
+- Bảng `Profile` mở rộng từ `auth.users` để lưu thông tin như Role (`admin`, `user`), Pro status.
+- Bổ sung trường `userId` (`String`) vào các bảng hiện tại: `Customer`, `Interaction`, `Note`.
+- Kích hoạt **Row-Level Security (RLS)** trên Supabase: Ai là chủ của Record (dựa vào `userId`) thì mới được Select/Update/Delete. 
+
+### 2. Hệ thống Nạp tiền (Wallet & Transaction)
+Vì chọn phương án **Admin nạp thủ công**, sẽ có 2 bảng mới:
+- `Wallet`: Lưu số dư `balance` hiện tại của mỗi User.
+- `Transaction`: Lưu lịch sử giao dịch (id, userId, amount, type `TOPUP|SPEND`, status, createdAt). Admin thao tác cộng/trừ thì hệ thống ghi nhận vào đây.
+
+### 3. Gói cước Pro (Subscriptions)
+- Bảng `Subscription`: Quản lý gói cước của User (tier: `free`|`pro`, startDate, endDate, status).
+- Logic Backend: Khi User cố thêm Khách hàng mới, check `Subscription` để biết giới hạn (Free chỉ được 50 khách, Pro được không giới hạn). User có thể dùng số dư `Wallet` để tự kích hoạt `Subscription`.

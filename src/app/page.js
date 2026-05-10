@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import FocusCard from "@/components/FocusCard";
 import RadarCard from "@/components/RadarCard";
 import CompletionSheet from "@/components/CompletionSheet";
@@ -57,6 +58,7 @@ export default function Home() {
   const [exitingId, setExitingId] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const loadQueue = useCallback(async () => {
     try {
@@ -205,14 +207,21 @@ export default function Home() {
 
       {/* FAB */}
       <div className="fixed bottom-20 right-5 z-30">
-        <button className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform">
+        <button 
+          onClick={() => router.push("/add")}
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
+        >
           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
         </button>
       </div>
 
-      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <BottomNav activeTab="home" onTabChange={(tab) => {
+        if (tab === 'home') router.push('/');
+        else if (tab === 'customers') router.push('/customers');
+        else setActiveTab(tab);
+      }} />
 
       <CompletionSheet
         isOpen={!!sheetCustomer}

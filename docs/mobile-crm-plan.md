@@ -61,11 +61,18 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 5**: Tạo `InboxZero.js` — Màn hình chúc mừng khi hết queue.
 - [x] **Step 6**: Viết thuật toán Smart Queue (Overdue → Score → Last Contact → Next FollowUp).
 
-### Phase 6: Nâng cấp cốt lõi — Smart Queue & AI Entry (🔲 Chưa bắt đầu)
-- [ ] **Step 1: AI Data Entry**: Xây dựng trang `/add` thêm khách bằng Text/Voice note. Tích hợp AI (LLM API) để tự động bóc tách và tính `Độ nét`.
-- [ ] **Step 2: Trang Khách hàng**: Xây dựng trang `/customers` — Kho khách tổng (danh sách, tìm kiếm, lọc).
-- [ ] **Step 3: Overdue Cleanup Flow**: Thiết kế trang `/cleanup` riêng biệt cho các thẻ quá hạn.
-- [ ] **Step 4: Trang Lịch hẹn**: Xây dựng trang `/schedule` — Calendar view lịch follow-up.
+### Phase 6: Nâng cấp cốt lõi — Smart Queue & AI Entry
+- [x] **Step 1: AI Data Entry**: Xây dựng trang `/add` thêm khách bằng Text/Voice note. Tích hợp AI (LLM API) để tự động bóc tách và tính `Độ nét`.
+- [x] **Step 2: Trang Khách hàng**: Xây dựng trang `/customers` — Kho khách tổng (danh sách, tìm kiếm, lọc).
+- [x] **Step 3: Overdue Cleanup Flow**: Thiết kế trang `/cleanup` riêng biệt cho các thẻ quá hạn.
+- [x] **Step 4: Trang Lịch hẹn**: Xây dựng trang `/schedule` — Calendar view lịch follow-up.
 
 ### Phase 5: Bàn giao
 - [ ] Deploy lên Vercel.
+
+### Phase 7: SaaS Multi-tenant & Admin features (Mục tiêu sau MVP)
+- [ ] **Step 1: Authentication**: Tích hợp Supabase Auth (Đăng nhập, Đăng ký). Thiết lập RLS (Row-Level Security) để bảo mật cấp Database.
+- [ ] **Step 2: Database Multi-tenant**: Bổ sung trường `userId` vào các bảng (`Customer`, `Interaction`, `Note`) để mỗi tài khoản tự quản lý khách của mình.
+- [ ] **Step 3: Admin Dashboard**: Xây dựng trang `/admin` (dành riêng cho role admin) để quản lý danh sách User.
+- [ ] **Step 4: Hệ thống Nạp tiền (Thủ công)**: Tạo bảng `Wallet` và `Transaction`. Admin nhận tiền chuyển khoản và bấm cộng Credits vào ví User.
+- [ ] **Step 5: Mua tài khoản Pro**: Logic cho phép User dùng Credits để mua gói Pro (mở khóa số lượng khách hàng, tính năng AI...).
