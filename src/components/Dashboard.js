@@ -13,6 +13,8 @@ import {
   snoozeCustomer,
   getCustomerCount,
 } from "@/actions/customers";
+import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
+import NotificationSheet from "@/components/NotificationSheet";
 import { Bell, Plus, X } from "lucide-react";
 
 // Fallback reasons/next steps based on data
@@ -60,6 +62,8 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   const [exitingId, setExitingId] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [isPending, startTransition] = useTransition();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const router = useRouter();
 
   const loadQueue = useCallback(async () => {
@@ -77,9 +81,19 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
     }
   }, []);
 
+  const loadNotifications = useCallback(async () => {
+    // Kích hoạt thông minh AI Alert ngầm
+    await triggerSmartAlerts();
+    const res = await getNotifications();
+    if (res.notifications) {
+      setUnreadNotifCount(res.notifications.filter(n => !n.isRead).length);
+    }
+  }, []);
+
   useEffect(() => {
     loadQueue();
-  }, [loadQueue]);
+    loadNotifications();
+  }, [loadQueue, loadNotifications]);
 
   const focusCustomer = queue[0] || null;
   const radarCustomers = queue.slice(1, 3);
@@ -167,11 +181,14 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 : "Không có khách cần xử lý"}
             </p>
           </div>
-          <button className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative">
+          <button 
+            onClick={() => setIsNotifOpen(true)}
+            className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
+          >
             <Bell className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-            {queue.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
-                {queue.length}
+            {unreadNotifCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                {unreadNotifCount}
               </span>
             )}
           </button>
@@ -257,6 +274,14 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
         customer={sheetCustomer}
         onComplete={handleComplete}
         onClose={() => setSheetCustomer(null)}
+      />
+
+      <NotificationSheet 
+        isOpen={isNotifOpen} 
+        onClose={() => {
+          setIsNotifOpen(false);
+          loadNotifications();
+        }} 
       />
 
       {/* Radar Details Modal */}

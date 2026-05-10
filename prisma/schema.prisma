@@ -21,6 +21,7 @@ model Profile {
   customers    Customer[]
   transactions Transaction[]
   aiReports    AiReport[]
+  notifications Notification[]
 
   // Team Relations
   ownedTeam      Team?
@@ -172,4 +173,20 @@ model AiReport {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("ai_reports")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  profile   Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title     String
+  body      String
+  type      String   @default("SYSTEM") // SYSTEM, REMINDER, ALERT, TEAM
+  isRead    Boolean  @default(false) @map("is_read")
+  actionUrl String?  @map("action_url")
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
 }
