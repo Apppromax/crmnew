@@ -217,10 +217,11 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
           <div className="flex items-center gap-2">
             <button 
               onClick={handleRestoreQueue}
+              disabled={isPending}
               title="Khôi phục thẻ đang gác"
-              className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
+              className={`w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative transition-transform ${isPending ? 'opacity-70' : 'active:scale-95'}`}
             >
-              <RotateCcw className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              <RotateCcw className={`w-5 h-5 text-slate-600 dark:text-slate-300 ${isPending ? 'animate-spin' : ''}`} />
             </button>
             <button 
               onClick={() => router.push("/add")}
