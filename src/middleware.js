@@ -7,8 +7,8 @@ export async function middleware(request) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://jhjojgjuonmwjgoxzicy.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_s6S9a3rsqglHn7wVvLw_eg_FFRNKN_F',
     {
       cookies: {
         getAll() {
@@ -32,10 +32,11 @@ export async function middleware(request) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect all routes except /login, /register, and static files
+  // Define public routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
+  const isPublicRoute = isAuthRoute || request.nextUrl.pathname === '/'
   
-  if (!user && !isAuthRoute) {
+  if (!user && !isPublicRoute) {
     // Redirect unauthenticated users to login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -43,7 +44,7 @@ export async function middleware(request) {
   }
 
   if (user && isAuthRoute) {
-    // Redirect authenticated users away from login page
+    // Redirect authenticated users away from login/register to dashboard
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
