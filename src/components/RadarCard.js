@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { Clock } from 'lucide-react';
 
 const heatConfig = {
@@ -22,40 +22,67 @@ function formatFollowUp(dateStr) {
   return `${absD} ngày nữa`;
 }
 
-export default function RadarCard({ customer, onClick, onSnooze, animClass = '' }) {
+export default function RadarCard({ customer, onClick, onSnooze }) {
   const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
 
-  const [startX, setStartX] = useState(null);
-  const [deltaX, setDeltaX] = useState(0);
-  const dragging = startX !== null;
+  const cardRef = useRef(null);
+  const dragState = useRef({ startX: null, currentX: 0 });
 
-  const handleStart = (clientX) => setStartX(clientX);
+  const handleStart = (clientX) => {
+    dragState.current.startX = clientX;
+    dragState.current.currentX = 0;
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'none';
+      cardRef.current.style.cursor = 'grabbing';
+    }
+  };
   const handleMove = (clientX) => {
-    if (startX === null) return;
-    const d = clientX - startX;
-    setDeltaX(d); // Allow both left and right swipe
+    if (dragState.current.startX === null) return;
+    const deltaX = clientX - dragState.current.startX;
+    dragState.current.currentX = deltaX;
+    if (cardRef.current) {
+      // Direct DOM manipulation for 60fps
+      cardRef.current.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.03}deg)`;
+      cardRef.current.style.opacity = Math.abs(deltaX) > 50 ? 0.5 : 1;
+    }
   };
   const handleEnd = () => {
-    if (deltaX < -80) {
-      if (onSnooze) onSnooze(customer);
-    } else if (deltaX > 80) {
-      onClick?.(customer); // Using onClick to open the action modal for RadarCard
-    } else if (deltaX === 0) {
-      // If no drag, treat as click
-      onClick?.(customer);
+    if (dragState.current.startX === null) return;
+    const deltaX = dragState.current.currentX;
+    dragState.current.startX = null;
+    dragState.current.currentX = 0;
+    
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      cardRef.current.style.cursor = 'pointer';
+      
+      if (deltaX < -80) {
+        cardRef.current.style.transform = `translateX(-150%) rotate(-15deg)`;
+        cardRef.current.style.opacity = '0';
+        setTimeout(() => {
+          if (onSnooze) onSnooze(customer);
+        }, 150);
+      } else if (deltaX > 80) {
+        cardRef.current.style.transform = `translateX(150%) rotate(15deg)`;
+        cardRef.current.style.opacity = '0';
+        setTimeout(() => {
+          onClick?.(customer);
+        }, 150);
+      } else {
+        cardRef.current.style.transform = '';
+        cardRef.current.style.opacity = '1';
+        if (deltaX === 0) {
+          onClick?.(customer);
+        }
+      }
     }
-    setStartX(null);
-    setDeltaX(0);
   };
 
   return (
     <div
-      className={`glass rounded-2xl p-4 select-none ${animClass} ${dragging ? 'cursor-grabbing' : 'cursor-pointer'} transition-all`}
-      style={{
-        transform: deltaX !== 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.03}deg)` : undefined,
-        opacity: Math.abs(deltaX) > 50 ? 0.5 : 1,
-        transition: dragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease',
-      }}
+      ref={cardRef}
+      className={`glass rounded-2xl p-4 select-none cursor-pointer transition-all`}
+      style={{ touchAction: 'pan-y' }}
       // Touch events
       onTouchStart={(e) => handleStart(e.touches[0].clientX)}
       onTouchMove={(e) => handleMove(e.touches[0].clientX)}
@@ -64,7 +91,7 @@ export default function RadarCard({ customer, onClick, onSnooze, animClass = '' 
       onMouseDown={(e) => handleStart(e.clientX)}
       onMouseMove={(e) => handleMove(e.clientX)}
       onMouseUp={handleEnd}
-      onMouseLeave={() => { if (dragging) handleEnd() }}
+      onMouseLeave={() => handleEnd()}
     >
       <div className="flex items-center gap-3 mb-3 pointer-events-none">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-sm font-bold shrink-0">

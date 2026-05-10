@@ -273,13 +273,14 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 px-1">
                   ⚡ Ưu tiên số 1
                 </p>
-                <FocusCard
-                  key={focusCustomer.id}
-                  customer={focusCustomer}
-                  onAction={handleAction}
-                  onSnooze={handleSnooze}
-                  animClass={exitingId === focusCustomer.id ? "animate-fade-out-left" : "animate-fade-in-up"}
-                />
+                <div className={exitingId === focusCustomer.id ? "animate-fade-out-left" : "animate-fade-in-up"}>
+                  <FocusCard
+                    key={focusCustomer.id}
+                    customer={focusCustomer}
+                    onAction={handleAction}
+                    onSnooze={handleSnooze}
+                  />
+                </div>
               </div>
             )}
 
@@ -290,13 +291,13 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-4">
                   {radarCustomers.map((c) => (
-                    <RadarCard
-                      key={c.id}
-                      customer={c}
-                      onClick={(customer) => setSelectedRadarCustomer(customer)}
-                      onSnooze={handleSnooze}
-                      animClass={exitingId === c.id ? "animate-fade-out-left" : "animate-fade-in-up"}
-                    />
+                    <div key={c.id} className={exitingId === c.id ? "animate-fade-out-left" : "animate-fade-in-up"}>
+                      <RadarCard
+                        customer={c}
+                        onClick={(customer) => setSelectedRadarCustomer(customer)}
+                        onSnooze={handleSnooze}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>

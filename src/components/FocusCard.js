@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { Phone, Flame, ThermometerSun, Snowflake, Lightbulb, ClipboardList, PenLine, ArrowLeft } from 'lucide-react';
 
 const heatConfig = {
@@ -35,39 +35,62 @@ function formatFollowUp(dateStr) {
   return `${absD} ngày nữa`;
 }
 
-export default function FocusCard({ customer, onAction, onSnooze, animClass = '' }) {
+export default function FocusCard({ customer, onAction, onSnooze }) {
   const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
   const stage = stageLabels[customer.journeyStage] || customer.journeyStage;
   const dot = statusDot[customer.status] || 'bg-slate-400';
 
-  const [startX, setStartX] = useState(null);
-  const [deltaX, setDeltaX] = useState(0);
-  const dragging = startX !== null;
+  const cardRef = useRef(null);
+  const dragState = useRef({ startX: null, currentX: 0 });
 
-  const handleStart = (clientX) => setStartX(clientX);
+  const handleStart = (clientX) => {
+    dragState.current.startX = clientX;
+    dragState.current.currentX = 0;
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'none';
+      cardRef.current.style.cursor = 'grabbing';
+    }
+  };
   const handleMove = (clientX) => {
-    if (startX === null) return;
-    const d = clientX - startX;
-    setDeltaX(d); // Allow both left and right swipe
+    if (dragState.current.startX === null) return;
+    const deltaX = clientX - dragState.current.startX;
+    dragState.current.currentX = deltaX;
+    if (cardRef.current) {
+      // Direct DOM manipulation for 60fps
+      cardRef.current.style.transform = `translateX(${deltaX}px) rotate(${deltaX * 0.06}deg) scale(${1 - Math.abs(deltaX) * 0.0005})`;
+      cardRef.current.style.opacity = Math.abs(deltaX) > 80 ? 0.5 : 1;
+    }
   };
   const handleEnd = () => {
-    if (deltaX < -100) {
-      onSnooze?.(customer);
-    } else if (deltaX > 100) {
-      onAction?.(customer);
+    if (dragState.current.startX === null) return;
+    const deltaX = dragState.current.currentX;
+    dragState.current.startX = null;
+    dragState.current.currentX = 0;
+    
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
+      cardRef.current.style.cursor = 'grab';
+      
+      if (deltaX < -100) {
+        cardRef.current.style.transform = `translateX(-150%) rotate(-15deg)`;
+        cardRef.current.style.opacity = '0';
+        setTimeout(() => onSnooze?.(customer), 150);
+      } else if (deltaX > 100) {
+        cardRef.current.style.transform = `translateX(150%) rotate(15deg)`;
+        cardRef.current.style.opacity = '0';
+        setTimeout(() => onAction?.(customer), 150);
+      } else {
+        cardRef.current.style.transform = '';
+        cardRef.current.style.opacity = '1';
+      }
     }
-    setStartX(null);
-    setDeltaX(0);
   };
 
   return (
     <div
-      className={`glass rounded-3xl overflow-hidden select-none ${animClass} ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-      style={{
-        transform: deltaX !== 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.06}deg) scale(${1 - Math.abs(deltaX) * 0.0005})` : undefined,
-        opacity: Math.abs(deltaX) > 80 ? 0.5 : 1,
-        transition: dragging ? 'none' : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease',
-      }}
+      ref={cardRef}
+      className={`glass rounded-3xl overflow-hidden select-none cursor-grab`}
+      style={{ touchAction: 'pan-y' }}
       // Touch events
       onTouchStart={(e) => handleStart(e.touches[0].clientX)}
       onTouchMove={(e) => handleMove(e.touches[0].clientX)}
@@ -76,7 +99,7 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
       onMouseDown={(e) => handleStart(e.clientX)}
       onMouseMove={(e) => handleMove(e.clientX)}
       onMouseUp={handleEnd}
-      onMouseLeave={() => { if (dragging) handleEnd() }}
+      onMouseLeave={() => handleEnd()}
     >
       {/* Top: Avatar + Name + Heat Badge */}
       <div className="p-5 pb-3">
