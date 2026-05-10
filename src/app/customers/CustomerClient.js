@@ -560,13 +560,7 @@ export default function CustomerClient({ initialCustomers }) {
                       >
                         <Plus className="w-4 h-4" />
                       </button>
-                    </div>
                   </div>
-
-                  {/* Edit Button at Bottom */}
-                  <button onClick={startEdit} className="w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 rounded-xl font-bold text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 active:scale-95 transition-all flex items-center justify-center gap-2 pb-safe">
-                    <Edit3 className="w-4 h-4" /> Chỉnh sửa thông tin
-                  </button>
                 </div>
               ) : modalTab === 'history' ? (
                 /* ===== HISTORY TAB ===== */
