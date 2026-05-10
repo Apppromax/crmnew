@@ -1,81 +1,56 @@
 # UI Design System
 **Dự án:** SalesPush CRM MVP
 
-## Triết lý thiết kế
-- **Mobile-first**: Tối ưu cho thao tác 1 tay (thumb-zone).
-- **Glassmorphism nhẹ**: Nền bán trong suốt + blur, tạo chiều sâu.
-- **10-Second Rule**: Mọi thao tác chăm sóc khách hàng phải hoàn thành trong 10 giây.
+## Khung Công Nghệ (UI Foundation)
+- **Framework**: React / Next.js
+- **Styling**: TailwindCSS v4
+- **Component Library**: [shadcn/ui](https://ui.shadcn.com/)
+- **Theme**: Biến CSS tùy chỉnh (`globals.css`) tích hợp sẵn với hệ thống màu của shadcn.
 
-## Color Palette
+## Triết lý thiết kế
+- **Mobile-first**: Tối ưu cho thao tác 1 tay (thumb-zone). Các nút CTA to, khoảng cách chạm (touch target) tối thiểu 44px.
+- **Glassmorphism**: Sử dụng class `glass` (nền bán trong suốt + backdrop-blur) để tạo chiều sâu và cảm giác hiện đại, cao cấp.
+- **10-Second Rule**: Mọi thao tác chăm sóc khách hàng phải hoàn thành trong 10 giây (Sử dụng Swipe Actions, Bottom Sheets).
+- **Accessibility (a11y)**: Sử dụng cấu trúc Radix UI (bên dưới shadcn) để hỗ trợ screen reader và keyboard navigation.
+
+## Color Palette (Tokens)
+Hệ thống màu tự động thay đổi theo Light/Dark Mode thông qua CSS Variables.
 ```css
-@theme {
-  --color-primary-50: #eff6ff;   /* Background nhẹ */
-  --color-primary-100: #dbeafe;  /* Hover state */
-  --color-primary-400: #60a5fa;  /* Secondary */
-  --color-primary-500: #3b82f6;  /* Primary */
-  --color-primary-600: #2563eb;  /* Primary dark */
-  --color-primary-800: #1e40af;  /* Deep accent */
+:root {
+  --background: oklch(0.97 0.01 250);
+  --foreground: oklch(0.15 0.02 250);
+  --primary: oklch(0.55 0.25 255); /* Indigo/Blue gradient core */
+  /* ... */
 }
 ```
-- **Background**: `#f0f5ff` (very light blue)
-- **Card**: `rgba(255, 255, 255, 0.82)` + `backdrop-blur(20px)`
-- **Text Primary**: `#1e293b` (slate-800)
-- **Text Secondary**: `#64748b` (slate-500)
+- **Primary**: Được sử dụng cho các hành động chính (Button mặc định, Ring focus).
+- **Secondary**: Dành cho hành động phụ, button phụ.
+- **Muted**: Dành cho text bổ sung, border mờ.
+- **Destructive**: Dành cho thao tác nguy hiểm (Xoá, Hủy).
 
-## Heat Level Badges
-| Level | Emoji | BG | Text |
-|---|---|---|---|
-| Hot (Rất cao) | 🔥 | `bg-red-50` | `text-red-600` |
-| Warm (Cao) | 🌡️ | `bg-amber-50` | `text-amber-600` |
-| Cold (Trung bình) | ❄️ | `bg-slate-100` | `text-slate-500` |
+## Design System Showcase Page
+Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/design-system`** (Khởi động app và truy cập đường dẫn này).
 
-## Status Dots
-| Status | Color |
-|---|---|
-| New | `bg-blue-500` |
-| Active | `bg-emerald-500` |
-| Waiting | `bg-amber-500` |
-| Dormant | `bg-slate-400` |
-| Closed | `bg-teal-500` |
-| Lost | `bg-red-500` |
+## Danh Sách Các Core Components (shadcn)
+1. **Button** (`src/components/ui/button.jsx`): Nút bấm với các variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`.
+2. **Badge** (`src/components/ui/badge.jsx`): Nhãn trạng thái (New, Active, Hot, Warm).
+3. **Card** (`src/components/ui/card.jsx`): Vùng chứa thông tin. Kết hợp class `glass` để tạo hiệu ứng mờ ảo.
+4. **Input & Select**: Component nhập liệu chuẩn, tự động xử lý trạng thái focus, error, disabled.
+5. **Dialog & Sheet**:
+   - `Dialog`: Dùng cho Modal pop-up xuất hiện ở giữa màn hình (Ví dụ: Xác nhận xoá).
+   - `Sheet`: Dùng cho Bottom Sheet vuốt từ dưới lên (Thiết kế ưu tiên cho Mobile, ví dụ: CompletionSheet).
 
-## Components
-
-### 1. FocusCard (`src/components/FocusCard.js`)
-- Thẻ lớn, `rounded-3xl`, glass effect
-- Avatar gradient, Heat badge, Phone tappable
-- 💡 Lý do chăm + 📋 Bước tiếp theo
-- Bottom row: Trạng thái | Hành trình | Thời gian
-- CTA button gradient primary
-- Swipe left → snooze (touchmove)
-
-### 2. RadarCard (`src/components/RadarCard.js`)
-- Thẻ nhỏ, `rounded-2xl`, glass effect
-- Avatar, Name, Phone (truncated)
-- Heat badge + Time countdown
-- Click → mở CompletionSheet
-
-### 3. CompletionSheet (`src/components/CompletionSheet.js`)
-- Bottom Sheet slide-up animation
-- Textarea + Mic button (placeholder)
-- Quick Date Chips (Chiều nay, Sáng mai, 3 ngày, Tuần sau)
-- Swipe-to-complete slider (drag thumb → 80% = complete)
-
-### 4. BottomNav (`src/components/BottomNav.js`)
-- 4 tabs: Hôm nay / Khách hàng / Lịch hẹn / Cá nhân
-- Active dot indicator
-- Fixed bottom, backdrop-blur
-
-### 5. InboxZero (`src/components/InboxZero.js`)
-- 🎉 Celebration animation
-- Hiện khi queue rỗng
+## Custom Business Components (Kế thừa từ Core)
+1. **FocusCard**: Thẻ ưu tiên cỡ lớn, kết hợp `Card` + `Badge` + Glassmorphism.
+2. **RadarCard**: Thẻ ưu tiên cỡ nhỏ.
+3. **CompletionSheet**: Mở rộng từ `Sheet` (Bottom) kết hợp thao tác Swipe-to-complete.
 
 ## Animations
-| Name | Keyframes | Duration |
+| Tên Class | Hiệu ứng | Thời gian |
 |---|---|---|
-| `slideUp` | Y 100% → 0 | 0.4s |
-| `fadeInUp` | Y 20px, 0 opacity → 0, 1 | 0.5s |
-| `fadeOutLeft` | X 0 → -120% | 0.35s |
-| `fadeInRight` | X 40px → 0 | 0.4s |
-| `celebration` | Scale 0.8 → 1.05 → 1 | 0.6s |
-| `shimmer` | X -100% → 100% (swipe track) | 2.5s infinite |
+| `animate-slide-up` | Trượt từ dưới lên | 0.4s |
+| `animate-fade-in-up` | Trượt từ dưới lên + Mờ dần rõ | 0.5s |
+| `animate-fade-out-left`| Trượt trái + Biến mất | 0.35s |
+| `animate-fade-in-right`| Trượt từ phải vào | 0.4s |
+| `animate-celebration` | Phóng to nhỏ ăn mừng | 0.6s |
+| `animate-pulse` | Chớp nháy nhẹ (Tailwind mặc định)| |
