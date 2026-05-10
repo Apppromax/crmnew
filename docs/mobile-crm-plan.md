@@ -68,7 +68,7 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 4: Trang Lịch hẹn**: Xây dựng trang `/schedule` — Calendar view lịch follow-up.
 
 ### Phase 5: Bàn giao
-- [ ] Deploy lên Vercel.
+- [x] Deploy lên Vercel thành công và sửa lỗi Next.js 16 Proxy.
 
 ### Phase 7: SaaS Multi-tenant & Admin features
 - [x] **Step 1: Authentication**: Tích hợp Supabase Auth (Đăng nhập, Đăng ký). Thiết lập RLS (Row-Level Security) để bảo mật cấp Database.
