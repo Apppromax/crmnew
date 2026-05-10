@@ -80,3 +80,23 @@ export async function updateDefaultSnoozeHours(hours) {
   });
   return { success: true };
 }
+
+export async function requestTopUp(amount, bankRef) {
+  const userId = await requireUser();
+  
+  if (!amount || amount < 10000) {
+    throw new Error("Số tiền nạp tối thiểu là 10,000đ");
+  }
+
+  const transaction = await prisma.transaction.create({
+    data: {
+      userId,
+      amount,
+      type: "TOPUP",
+      note: `Yêu cầu nạp tiền: ${bankRef || "Chuyển khoản"}`,
+      status: "PENDING",
+    },
+  });
+
+  return { success: true, transactionId: transaction.id };
+}

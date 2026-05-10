@@ -67,3 +67,67 @@ export async function topUpUser(userId, amount, note) {
 
   return { success: true, newBalance: result.balance };
 }
+
+export async function getPendingTopUps() {
+  await requireAdmin();
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      type: "TOPUP",
+      status: "PENDING"
+    },
+    include: {
+      profile: {
+        select: { email: true, fullName: true }
+      }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  return transactions.map(t => ({
+    ...t,
+    createdAt: t.createdAt.toISOString()
+  }));
+}
+
+export async function approveTopUp(transactionId) {
+  const adminId = await requireAdmin();
+
+  const result = await prisma.$transaction(async (tx) => {
+    const transaction = await tx.transaction.findUnique({ where: { id: transactionId } });
+    if (!transaction || transaction.status !== "PENDING") {
+      throw new Error("Transaction not found or already processed");
+    }
+
+    // Update transaction status
+    await tx.transaction.update({
+      where: { id: transactionId },
+      data: { status: "COMPLETED", note: transaction.note + ` (Duyệt bởi Admin ${adminId})` }
+    });
+
+    // Add balance to user
+    const profile = await tx.profile.findUnique({ where: { id: transaction.userId } });
+    await tx.profile.update({
+      where: { id: transaction.userId },
+      data: { balance: profile.balance + transaction.amount }
+    });
+
+    return true;
+  });
+
+  return { success: result };
+}
+
+export async function rejectTopUp(transactionId, reason) {
+  await requireAdmin();
+
+  await prisma.transaction.update({
+    where: { id: transactionId },
+    data: { 
+      status: "REJECTED",
+      note: reason ? `Từ chối: ${reason}` : "Admin từ chối nạp tiền"
+    }
+  });
+
+  return { success: true };
+}

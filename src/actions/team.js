@@ -207,7 +207,12 @@ export async function getTeamCustomers(teamId) {
   }
 
   const customers = await prisma.customer.findMany({
-    where: { teamId },
+    where: {
+      OR: [
+        { teamId },
+        { userId: userId, teamId: null } // Lấy cả khách cá nhân của Leader chưa đưa vào Team
+      ]
+    },
     include: {
       profile: {
         select: { email: true }
@@ -270,9 +275,14 @@ export async function getTeamStats(teamId) {
     throw new Error("Unauthorized access to team stats");
   }
 
-  // 1. Lấy toàn bộ khách của team
+  // 1. Lấy toàn bộ khách của team (Bao gồm cả khách cá nhân của Leader chưa phân bổ)
   const customers = await prisma.customer.findMany({
-    where: { teamId },
+    where: {
+      OR: [
+        { teamId },
+        { userId: userId, teamId: null }
+      ]
+    },
     select: { status: true, heatLevel: true, userId: true }
   });
 

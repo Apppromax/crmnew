@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getAllUsers, topUpUser } from "@/actions/admin";
-import { ShieldAlert, ChevronLeft } from "lucide-react";
+import { getAllUsers, topUpUser, getPendingTopUps, approveTopUp, rejectTopUp } from "@/actions/admin";
+import { ShieldAlert, ChevronLeft, Users, Banknote, CheckCircle, XCircle } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
   const [users, setUsers] = useState([]);
+  const [pendingTopUps, setPendingTopUps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("users"); // "users" | "topups"
 
   // Top-up Modal state
   const [topupUserId, setTopupUserId] = useState(null);
@@ -18,8 +20,13 @@ export default function AdminPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const data = await getAllUsers();
-      setUsers(data);
+      setLoading(true);
+      const [usersData, topUpsData] = await Promise.all([
+        getAllUsers(),
+        getPendingTopUps()
+      ]);
+      setUsers(usersData);
+      setPendingTopUps(topUpsData);
     } catch (err) {
       setError(err.message || "Bạn không có quyền truy cập trang này.");
     } finally {
@@ -31,7 +38,7 @@ export default function AdminPage() {
     loadData();
   }, [loadData]);
 
-  const handleTopup = async (e) => {
+  const handleManualTopup = async (e) => {
     e.preventDefault();
     if (!topupUserId || !amount || isNaN(amount)) return;
 
@@ -40,11 +47,32 @@ export default function AdminPage() {
       await topUpUser(topupUserId, parseInt(amount), "Admin nạp Credits thủ công");
       setTopupUserId(null);
       setAmount("");
-      await loadData(); // Reload to see new balances
+      await loadData();
     } catch (err) {
       alert("Lỗi khi nạp tiền: " + err.message);
     } finally {
       setIsToppingUp(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    if (!confirm("Xác nhận duyệt khoản nạp tiền này?")) return;
+    try {
+      await approveTopUp(id);
+      await loadData();
+    } catch (err) {
+      alert("Lỗi: " + err.message);
+    }
+  };
+
+  const handleReject = async (id) => {
+    const reason = prompt("Lý do từ chối (có thể để trống):");
+    if (reason === null) return; // cancelled
+    try {
+      await rejectTopUp(id, reason);
+      await loadData();
+    } catch (err) {
+      alert("Lỗi: " + err.message);
     }
   };
 
@@ -66,24 +94,38 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex items-center gap-4">
-        <button onClick={() => router.push('/')} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
+        <button onClick={() => router.push('/profile')} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
           <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
       </header>
 
-      <main className="px-4 pt-4">
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Quản lý người dùng ({users.length})</h2>
+      {/* TABS */}
+      <div className="px-4 mt-4">
+        <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all ${activeTab === "users" ? "bg-white dark:bg-slate-700 shadow text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            <Users className="w-4 h-4" /> Users
+          </button>
+          <button
+            onClick={() => setActiveTab("topups")}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all ${activeTab === "topups" ? "bg-white dark:bg-slate-700 shadow text-emerald-600 dark:text-emerald-400" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            <Banknote className="w-4 h-4" /> Yêu cầu Nạp ({pendingTopUps.length})
+          </button>
         </div>
+      </div>
 
+      <main className="px-4 pt-6">
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse bg-white dark:bg-slate-900 rounded-xl h-24 w-full" />
             ))}
           </div>
-        ) : (
+        ) : activeTab === "users" ? (
           <div className="space-y-3">
             {users.map(u => (
               <div key={u.id} className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
@@ -118,6 +160,42 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        ) : (
+          <div className="space-y-3">
+            {pendingTopUps.length === 0 ? (
+              <div className="text-center p-8 text-slate-500">
+                Không có yêu cầu nạp tiền nào chờ duyệt.
+              </div>
+            ) : (
+              pendingTopUps.map(t => (
+                <div key={t.id} className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-emerald-100 dark:border-emerald-900/30">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="text-sm text-slate-500">{t.profile?.email || 'Unknown User'}</div>
+                      <div className="font-bold text-slate-800 dark:text-white">{t.profile?.fullName || 'No Name'}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+                        +{new Intl.NumberFormat('vi-VN').format(t.amount)} <span className="text-xs text-slate-400 font-normal">CR</span>
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">{new Date(t.createdAt).toLocaleString('vi-VN')}</div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400 mb-4 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg">
+                    <span className="font-semibold">Ghi chú:</span> {t.note}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleReject(t.id)} className="flex-1 py-2 flex items-center justify-center gap-2 bg-red-50 text-red-600 rounded-lg font-bold text-sm hover:bg-red-100">
+                      <XCircle className="w-4 h-4" /> Từ chối
+                    </button>
+                    <button onClick={() => handleApprove(t.id)} className="flex-1 py-2 flex items-center justify-center gap-2 bg-emerald-600 text-white rounded-lg font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-600/20">
+                      <CheckCircle className="w-4 h-4" /> Duyệt
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </main>
 
@@ -125,8 +203,8 @@ export default function AdminPage() {
       {topupUserId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Nạp Credits</h3>
-            <form onSubmit={handleTopup}>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Nạp Credits Thủ Công</h3>
+            <form onSubmit={handleManualTopup}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Số lượng (1 CR = 1 VNĐ)
@@ -157,7 +235,7 @@ export default function AdminPage() {
                   className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl"
                 >
                   {isToppingUp ? "Đang xử lý..." : "Xác nhận"}
-Bottom              </button>
+                </button>
               </div>
             </form>
           </div>

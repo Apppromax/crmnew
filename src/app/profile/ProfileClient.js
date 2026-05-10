@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours } from "@/actions/user";
+import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours, requestTopUp } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy } from "lucide-react";
 
 export default function ProfileClient({ initialProfile }) {
   const router = useRouter();
@@ -21,6 +21,13 @@ export default function ProfileClient({ initialProfile }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile?.fullName || "");
   const [isSavingInfo, setIsSavingInfo] = useState(false);
+
+  // Top Up State
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState("");
+  const [bankRef, setBankRef] = useState("");
+  const [isRequestingTopUp, setIsRequestingTopUp] = useState(false);
+  const [topUpSuccess, setTopUpSuccess] = useState(false);
 
   // Settings State (persisted in localStorage + DB)
   const [snoozeHours, setSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
@@ -109,6 +116,29 @@ export default function ProfileClient({ initialProfile }) {
     }
   };
 
+  const handleRequestTopUp = async (e) => {
+    e.preventDefault();
+    if (!topUpAmount || isNaN(topUpAmount) || topUpAmount < 10000) {
+      alert("Số tiền nạp tối thiểu là 10,000đ");
+      return;
+    }
+    setIsRequestingTopUp(true);
+    try {
+      await requestTopUp(parseInt(topUpAmount), bankRef);
+      setTopUpSuccess(true);
+      setTimeout(() => {
+        setShowTopUpModal(false);
+        setTopUpSuccess(false);
+        setTopUpAmount("");
+        setBankRef("");
+      }, 3000);
+    } catch (err) {
+      alert("Lỗi: " + err.message);
+    } finally {
+      setIsRequestingTopUp(false);
+    }
+  };
+
   const saveSettings = async () => {
     setSettingsSaved("");
     try {
@@ -166,6 +196,12 @@ export default function ProfileClient({ initialProfile }) {
                   <p className="text-xs text-indigo-100 uppercase tracking-wider mb-1">Số dư hiện tại</p>
                   <p className="text-4xl font-black tracking-tight">{new Intl.NumberFormat('vi-VN').format(profile.balance)} <span className="text-lg font-bold opacity-80">CR</span></p>
                 </div>
+                <button 
+                  onClick={() => setShowTopUpModal(true)}
+                  className="bg-white text-indigo-600 px-4 py-2 rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-50 transition-colors flex items-center gap-1.5 active:scale-95"
+                >
+                  <Wallet className="w-4 h-4" /> Nạp tiền
+                </button>
               </div>
             </div>
 
@@ -403,6 +439,101 @@ export default function ProfileClient({ initialProfile }) {
                 {isSavingInfo ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Up Request Modal */}
+      {showTopUpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Wallet className="w-6 h-6 text-indigo-500" /> Nạp Credits
+              </h2>
+              <button onClick={() => setShowTopUpModal(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:bg-slate-200">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {topUpSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ShieldCheck className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Đã gửi yêu cầu!</h3>
+                <p className="text-slate-500 text-sm">Yêu cầu nạp tiền của bạn đã được gửi. Admin sẽ duyệt và cộng tiền vào tài khoản của bạn trong vòng vài phút.</p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                  <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-3">Thông tin chuyển khoản:</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-slate-500">Ngân hàng:</span>
+                      <span className="text-sm font-bold dark:text-white">Vietcombank (VCB)</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-slate-500">Chủ tài khoản:</span>
+                      <span className="text-sm font-bold dark:text-white">NGUYEN VAN A</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg mt-2">
+                      <span className="text-xs text-slate-500">Số tài khoản:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-black text-indigo-600 dark:text-indigo-400">10123456789</span>
+                        <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400" onClick={() => navigator.clipboard.writeText("10123456789")}>
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleRequestTopUp} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Số tiền bạn đã chuyển</label>
+                    <div className="relative">
+                      <input 
+                        type="number" 
+                        required
+                        min="10000"
+                        step="10000"
+                        value={topUpAmount}
+                        onChange={(e) => setTopUpAmount(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-lg text-slate-900 dark:text-white pr-12"
+                        placeholder="Ví dụ: 100000"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">đ</div>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">1,000đ = 1,000 CR</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Mã tham chiếu / Nội dung CK</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={bankRef}
+                      onChange={(e) => setBankRef(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white text-sm"
+                      placeholder="VD: Email của bạn hoặc mã giao dịch"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={isRequestingTopUp}
+                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2"
+                  >
+                    {isRequestingTopUp ? "Đang gửi yêu cầu..." : (
+                      <>
+                        Xác nhận đã chuyển tiền <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       )}
