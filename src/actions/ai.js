@@ -49,11 +49,18 @@ Các trường cần trích xuất:
   }
 }
 
+import { createClient } from "@/lib/supabase/server";
+
 export async function createCustomerFromAI({ parsedData, rawNote }) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
     // Determine status & journey
     const customer = await prisma.customer.create({
       data: {
+        userId: user.id,
         name: parsedData.name || "Khách chưa rõ tên",
         phone: parsedData.phone || "Chưa có SĐT",
         status: "Active", // Vừa thêm vào thì active luôn để hiện lên queue

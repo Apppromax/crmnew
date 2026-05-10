@@ -1,12 +1,22 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireUser() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+  return user.id;
+}
 
 export async function getSmartQueue() {
+  const userId = await requireUser();
   const now = new Date();
 
   const customers = await prisma.customer.findMany({
     where: {
+      userId,
       status: { notIn: ["Closed", "Lost"] },
       OR: [
         { snoozedUntil: null },
@@ -40,7 +50,9 @@ export async function getSmartQueue() {
 }
 
 export async function getAllCustomers() {
+  const userId = await requireUser();
   const customers = await prisma.customer.findMany({
+    where: { userId },
     orderBy: { createdAt: "desc" },
   });
 
@@ -55,7 +67,12 @@ export async function getAllCustomers() {
 }
 
 export async function completeCustomerAction({ customerId, note, nextFollowUp }) {
+  const userId = await requireUser();
   const now = new Date();
+
+  // Validate ownership
+  const existing = await prisma.customer.findFirst({ where: { id: customerId, userId } });
+  if (!existing) throw new Error("Not found or unauthorized");
 
   // Create interaction
   await prisma.interaction.create({
@@ -90,6 +107,10 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
 }
 
 export async function snoozeCustomer(customerId, hours = 4) {
+  const userId = await requireUser();
+  const existing = await prisma.customer.findFirst({ where: { id: customerId, userId } });
+  if (!existing) throw new Error("Not found or unauthorized");
+
   const snoozedUntil = new Date(Date.now() + hours * 3600000);
 
   await prisma.customer.update({
@@ -101,8 +122,11 @@ export async function snoozeCustomer(customerId, hours = 4) {
 }
 
 export async function createCustomer({ name, phone, note }) {
+  const userId = await requireUser();
+
   const customer = await prisma.customer.create({
     data: {
+      userId,
       name,
       phone,
       status: "New",
@@ -125,19 +149,22 @@ export async function createCustomer({ name, phone, note }) {
 }
 
 export async function getCustomerCount() {
+  const userId = await requireUser();
   const total = await prisma.customer.count({
-    where: { status: { notIn: ["Closed", "Lost"] } },
+    where: { userId, status: { notIn: ["Closed", "Lost"] } },
   });
-  const hot = await prisma.customer.count({ where: { heatLevel: "Hot" } });
-  const warm = await prisma.customer.count({ where: { heatLevel: "Warm" } });
+  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Hot" } });
+  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Warm" } });
 
   return { total, hot, warm };
 }
 
 export async function getOverdueCustomers() {
+  const userId = await requireUser();
   const now = new Date();
   const customers = await prisma.customer.findMany({
     where: {
+      userId,
       status: { notIn: ["Closed", "Lost"] },
       nextFollowUp: { lt: now },
     },
@@ -155,9 +182,11 @@ export async function getOverdueCustomers() {
 }
 
 export async function getUpcomingSchedule() {
+  const userId = await requireUser();
   const now = new Date();
   const customers = await prisma.customer.findMany({
     where: {
+      userId,
       status: { notIn: ["Closed", "Lost"] },
       nextFollowUp: { gte: now },
     },

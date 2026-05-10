@@ -220,7 +220,8 @@ export default function Home() {
       <BottomNav activeTab="home" onTabChange={(tab) => {
         if (tab === 'home') router.push('/');
         else if (tab === 'customers') router.push('/customers');
-        else setActiveTab(tab);
+        else if (tab === 'schedule') router.push('/schedule');
+        else if (tab === 'profile') router.push('/profile');
       }} />
 
       <CompletionSheet

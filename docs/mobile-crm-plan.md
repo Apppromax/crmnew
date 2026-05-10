@@ -70,9 +70,9 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 ### Phase 5: Bàn giao
 - [ ] Deploy lên Vercel.
 
-### Phase 7: SaaS Multi-tenant & Admin features (Mục tiêu sau MVP)
-- [ ] **Step 1: Authentication**: Tích hợp Supabase Auth (Đăng nhập, Đăng ký). Thiết lập RLS (Row-Level Security) để bảo mật cấp Database.
-- [ ] **Step 2: Database Multi-tenant**: Bổ sung trường `userId` vào các bảng (`Customer`, `Interaction`, `Note`) để mỗi tài khoản tự quản lý khách của mình.
-- [ ] **Step 3: Admin Dashboard**: Xây dựng trang `/admin` (dành riêng cho role admin) để quản lý danh sách User.
-- [ ] **Step 4: Hệ thống Nạp tiền (Thủ công)**: Tạo bảng `Wallet` và `Transaction`. Admin nhận tiền chuyển khoản và bấm cộng Credits vào ví User.
-- [ ] **Step 5: Mua tài khoản Pro**: Logic cho phép User dùng Credits để mua gói Pro (mở khóa số lượng khách hàng, tính năng AI...).
+### Phase 7: SaaS Multi-tenant & Admin features
+- [x] **Step 1: Authentication**: Tích hợp Supabase Auth (Đăng nhập, Đăng ký). Thiết lập RLS (Row-Level Security) để bảo mật cấp Database.
+- [x] **Step 2: Database Multi-tenant**: Bổ sung trường `userId` vào các bảng (`Customer`, `Interaction`, `Note`) để mỗi tài khoản tự quản lý khách của mình.
+- [x] **Step 3: Admin Dashboard**: Xây dựng trang `/admin` (dành riêng cho role admin) để quản lý danh sách User.
+- [x] **Step 4: Hệ thống Nạp tiền (Thủ công)**: Tạo bảng `Wallet` và `Transaction`. Admin nhận tiền chuyển khoản và bấm cộng Credits vào ví User.
+- [x] **Step 5: Mua tài khoản Pro**: Logic cho phép User dùng Credits để mua gói Pro (mở khóa số lượng khách hàng, tính năng AI...).

@@ -6,8 +6,29 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Bảng Profile để mở rộng thông tin User từ Supabase Auth
+model Profile {
+  id        String   @id // Sẽ map với id của auth.users bên Supabase
+  email     String   @unique
+  role      String   @default("user") // "user" | "admin"
+  balance   Int      @default(0) // Số dư Credits
+  isPro     Boolean  @default(false)
+  proUntil  DateTime? @map("pro_until")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  customers    Customer[]
+  transactions Transaction[]
+
+  @@map("profiles")
+}
+
 model Customer {
   id        String   @id @default(uuid())
+  
+  // Liên kết với Profile (người sở hữu)
+  userId    String?  @map("user_id")
+  profile   Profile? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   name      String
   phone     String
 
@@ -68,4 +89,19 @@ model Note {
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("notes")
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  profile   Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount    Int
+  type      String   // "TOPUP" | "SPEND"
+  note      String?
+  status    String   @default("COMPLETED")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("transactions")
 }
