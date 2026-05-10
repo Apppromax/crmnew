@@ -217,12 +217,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <BottomNav activeTab="home" onTabChange={(tab) => {
-        if (tab === 'home') router.push('/');
-        else if (tab === 'customers') router.push('/customers');
-        else if (tab === 'schedule') router.push('/schedule');
-        else if (tab === 'profile') router.push('/profile');
-      }} />
+      <BottomNav activeTab="home" />
 
       <CompletionSheet
         isOpen={!!sheetCustomer}

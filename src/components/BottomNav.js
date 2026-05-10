@@ -1,10 +1,12 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 
 const tabs = [
   {
     id: 'home',
+    href: '/',
     label: 'Hôm nay',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,6 +16,7 @@ const tabs = [
   },
   {
     id: 'customers',
+    href: '/customers',
     label: 'Khách hàng',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,6 +26,7 @@ const tabs = [
   },
   {
     id: 'schedule',
+    href: '/schedule',
     label: 'Lịch hẹn',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,6 +36,7 @@ const tabs = [
   },
   {
     id: 'profile',
+    href: '/profile',
     label: 'Cá nhân',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,20 +46,20 @@ const tabs = [
   },
 ];
 
-export default function BottomNav({ activeTab = 'home', onTabChange }) {
+export default function BottomNav({ activeTab = 'home' }) {
   return (
     <nav className="fixed bottom-0 inset-x-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-800 pb-safe z-40">
       <div className="flex justify-around items-center px-2 py-2">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
-            <button
+            <Link
               key={tab.id}
-              onClick={() => onTabChange?.(tab.id)}
+              href={tab.href}
               className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                 isActive
                   ? 'text-primary-600 dark:text-primary-400'
-                  : 'text-slate-400 dark:text-slate-500 active:text-slate-600'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
               }`}
             >
               {tab.icon}
@@ -64,7 +69,7 @@ export default function BottomNav({ activeTab = 'home', onTabChange }) {
               {isActive && (
                 <div className="w-1 h-1 rounded-full bg-primary-500 mt-0.5" />
               )}
-            </button>
+            </Link>
           );
         })}
       </div>
