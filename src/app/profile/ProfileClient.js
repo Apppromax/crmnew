@@ -70,14 +70,17 @@ export default function ProfileClient({ initialProfile }) {
   const changeBg = (newBg) => {
     setBgPattern(newBg);
     localStorage.setItem("bgPattern", newBg);
-    if (newBg === "none") {
-      document.body.style.backgroundImage = "none";
-    } else if (newBg === "dots") {
-      document.body.style.backgroundImage = "radial-gradient(circle, #cbd5e1 1px, transparent 1px)";
-      document.body.style.backgroundSize = "20px 20px";
-    } else if (newBg === "grid") {
-      document.body.style.backgroundImage = "linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)";
-      document.body.style.backgroundSize = "20px 20px";
+    
+    // Clear old inline styles if any
+    document.body.style.backgroundImage = "";
+    document.body.style.backgroundSize = "";
+    
+    // Remove existing background classes
+    document.body.classList.remove("bg-dots", "bg-grid", "bg-building-1", "bg-building-2", "bg-building-3");
+    
+    // Add new background class if not none
+    if (newBg !== "none") {
+      document.body.classList.add(`bg-${newBg}`);
     }
   };
 
@@ -343,15 +346,26 @@ export default function ProfileClient({ initialProfile }) {
                 {/* Pattern Selector */}
                 <div>
                   <p className="text-xs font-bold text-slate-500 uppercase mb-2">Hình nền (Pattern)</p>
-                  <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button onClick={() => changeBg('none')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'none' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                  <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-2">
+                    <button onClick={() => changeBg('none')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'none' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                       Trơn
                     </button>
-                    <button onClick={() => changeBg('dots')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'dots' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                    <button onClick={() => changeBg('dots')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'dots' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                       Dấu chấm
                     </button>
-                    <button onClick={() => changeBg('grid')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'grid' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                    <button onClick={() => changeBg('grid')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'grid' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
                       Lưới
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button onClick={() => changeBg('building-1')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-1' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                      Cao ốc
+                    </button>
+                    <button onClick={() => changeBg('building-2')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-2' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                      Biệt thự
+                    </button>
+                    <button onClick={() => changeBg('building-3')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'building-3' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-600'}`}>
+                      Kiến trúc
                     </button>
                   </div>
                 </div>

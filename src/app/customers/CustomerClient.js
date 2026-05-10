@@ -560,6 +560,7 @@ export default function CustomerClient({ initialCustomers }) {
                       >
                         <Plus className="w-4 h-4" />
                       </button>
+                    </div>
                   </div>
                 </div>
               ) : modalTab === 'history' ? (
