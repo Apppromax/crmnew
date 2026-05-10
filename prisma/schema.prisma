@@ -1,0 +1,71 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+
+  status    String   @default("New") // New | Active | Waiting | Dormant | Closed | Lost
+
+  // AI-Parsed Fields
+  budget    String?
+  demand    String?
+  area      String?
+  timeline  String?
+  finance   String?
+
+  // Clarity Score
+  clarityScore Int    @default(0) @map("clarity_score")
+  heatLevel    String @default("Cold") @map("heat_level") // Cold | Warm | Hot
+
+  // Scheduling
+  nextFollowUp  DateTime? @map("next_follow_up")
+  lastContactAt DateTime? @map("last_contact_at")
+  snoozedUntil  DateTime? @map("snoozed_until")
+
+  // Journey
+  journeyStage String @default("Lead") @map("journey_stage")
+
+  // Relations
+  interactions Interaction[]
+  notes        Note[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
+model Interaction {
+  id         String   @id @default(uuid())
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  type       String
+  summary    String?
+  outcome    String?
+
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("interactions")
+}
+
+model Note {
+  id         String   @id @default(uuid())
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  rawText    String   @map("raw_text")
+  parsed     Boolean  @default(false)
+  parsedData Json?    @map("parsed_data")
+
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("notes")
+}
