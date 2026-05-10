@@ -49,6 +49,10 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 3. **CompletionSheet**: Mở rộng từ `Sheet` (Bottom) kết hợp thao tác Swipe-to-complete.
 4. **ScrollChipSelect**: Nút tùy chọn dạng thanh vuốt ngang (Horizontal Chips). Tối ưu hóa tuyệt đối cho mobile thay vì dùng thẻ `<select>` gốc của HTML gây giật/chắn màn hình. Có tích hợp logic màu sắc riêng cho HeatLevel.
 5. **Horizontal Weekly Calendar**: Giao diện Lịch dạng vuốt ngang theo từng ngày, tiết kiệm không gian chiều dọc trên mobile, kết hợp hệ thống dot indicator (dấu chấm nhắc lịch).
+6. **TagManager** *(mới)*: Component quản lý tag tùy chỉnh trong modal chi tiết khách hàng. Hiển thị tag chips kèm nút xóa (X) và input thêm tag mới (Enter hoặc nút +). Tự động deduplicate. Tags cũng hiển thị trên list cards (max 3, với `+N` overflow).
+7. **DashboardStatsPanel** *(mới)*: Panel KPI mở rộng trên Dashboard với 4 cards glass (Quá hạn, Hẹn hôm nay, Chốt tháng, Tổng active) + biểu đồ phễu bán hàng (Sales Funnel) dạng horizontal bar chart, 6 giai đoạn với mã màu riêng.
+8. **InteractionTimeline** *(mới)*: Tab "Lịch sử" trong modal khách hàng, merge data từ bảng `Interaction` và `Note`, hiển thị dạng timeline dọc với icon phân biệt (note/interaction) và dòng kết nối.
+9. **ScheduleActionModal** *(mới)*: Bottom sheet xuất hiện khi click lịch hẹn, hiển thị thông tin khách + nút Gọi/Zalo/Xem chi tiết.
 
 ## Animations
 | Tên Class | Hiệu ứng | Thời gian |

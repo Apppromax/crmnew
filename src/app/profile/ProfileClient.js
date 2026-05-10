@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, Image as ImageIcon, X, Palette } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck } from "lucide-react";
 
 export default function ProfileClient({ initialProfile }) {
   const router = useRouter();
@@ -20,15 +20,27 @@ export default function ProfileClient({ initialProfile }) {
   // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile?.fullName || "");
-  const [editSnoozeHours, setEditSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
   const [isSavingInfo, setIsSavingInfo] = useState(false);
 
+  // Settings State (persisted in localStorage + DB)
+  const [snoozeHours, setSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
+  const [followUpDays, setFollowUpDays] = useState(3);
+  const [queueSize, setQueueSize] = useState(10);
+  const [confirmSnooze, setConfirmSnooze] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState("");
+
   useEffect(() => {
-    // Load preferences
     const savedTheme = localStorage.getItem("theme") || "system";
     const savedBg = localStorage.getItem("bgPattern") || "none";
+    const savedFollowUp = localStorage.getItem("defaultFollowUpDays");
+    const savedQueue = localStorage.getItem("queueSize");
+    const savedConfirm = localStorage.getItem("confirmSnooze");
+
     setTheme(savedTheme);
     setBgPattern(savedBg);
+    if (savedFollowUp) setFollowUpDays(Number(savedFollowUp));
+    if (savedQueue) setQueueSize(Number(savedQueue));
+    if (savedConfirm) setConfirmSnooze(savedConfirm === "true");
   }, []);
 
   const changeTheme = (newTheme) => {
@@ -51,7 +63,6 @@ export default function ProfileClient({ initialProfile }) {
   const changeBg = (newBg) => {
     setBgPattern(newBg);
     localStorage.setItem("bgPattern", newBg);
-    // Áp dụng BG lên body (vì trong layout ko gài logic)
     if (newBg === "none") {
       document.body.style.backgroundImage = "none";
     } else if (newBg === "dots") {
@@ -89,8 +100,7 @@ export default function ProfileClient({ initialProfile }) {
     setIsSavingInfo(true);
     try {
       await updateProfileInfo({ fullName: editName });
-      await updateDefaultSnoozeHours(Number(editSnoozeHours));
-      setProfile(p => ({ ...p, fullName: editName, defaultSnoozeHours: Number(editSnoozeHours) }));
+      setProfile(p => ({ ...p, fullName: editName }));
       setIsEditing(false);
     } catch (err) {
       setError("Lỗi cập nhật thông tin.");
@@ -98,6 +108,25 @@ export default function ProfileClient({ initialProfile }) {
       setIsSavingInfo(false);
     }
   };
+
+  const saveSettings = async () => {
+    setSettingsSaved("");
+    try {
+      await updateDefaultSnoozeHours(Number(snoozeHours));
+      localStorage.setItem("defaultFollowUpDays", String(followUpDays));
+      localStorage.setItem("queueSize", String(queueSize));
+      localStorage.setItem("confirmSnooze", String(confirmSnooze));
+      setProfile(p => ({ ...p, defaultSnoozeHours: Number(snoozeHours) }));
+      setSettingsSaved("✓ Đã lưu cài đặt");
+      setTimeout(() => setSettingsSaved(""), 2500);
+    } catch (err) {
+      setSettingsSaved("Lỗi khi lưu!");
+    }
+  };
+
+  const SNOOZE_PRESETS = [1, 2, 4, 8, 12, 24, 48];
+  const QUEUE_PRESETS = [5, 10, 15, 20];
+  const FOLLOWUP_PRESETS = [1, 3, 5, 7, 14];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950/80 pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
@@ -146,7 +175,113 @@ export default function ProfileClient({ initialProfile }) {
               </div>
             )}
 
-            {/* Settings UI Section */}
+            {/* ===== SETTINGS SECTION ===== */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-5 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary-500" /> Cài đặt sử dụng
+              </h3>
+              
+              <div className="space-y-6">
+                {/* Snooze Time */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Timer className="w-4 h-4 text-amber-500" />
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Thời gian Tạm gác mặc định</p>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Khi bạn gác 1 khách, mặc định sẽ gác bao lâu</p>
+                  <div className="flex flex-wrap gap-2">
+                    {SNOOZE_PRESETS.map(h => (
+                      <button
+                        key={h}
+                        onClick={() => setSnoozeHours(h)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                          snoozeHours === h
+                            ? "bg-primary-600 text-white shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        }`}
+                      >
+                        {h < 24 ? `${h}h` : `${h / 24}d`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Default Follow-up Days */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bell className="w-4 h-4 text-blue-500" />
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Follow-up mặc định</p>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Khi hoàn thành chăm sóc, mặc định hẹn lại sau bao nhiêu ngày</p>
+                  <div className="flex flex-wrap gap-2">
+                    {FOLLOWUP_PRESETS.map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setFollowUpDays(d)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                          followUpDays === d
+                            ? "bg-primary-600 text-white shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        }`}
+                      >
+                        {d} ngày
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Queue Size */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <ListOrdered className="w-4 h-4 text-emerald-500" />
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Số khách trong Smart Queue</p>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Hiển thị bao nhiêu thẻ khách trên trang chính</p>
+                  <div className="flex flex-wrap gap-2">
+                    {QUEUE_PRESETS.map(s => (
+                      <button
+                        key={s}
+                        onClick={() => setQueueSize(s)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                          queueSize === s
+                            ? "bg-primary-600 text-white shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        }`}
+                      >
+                        {s} khách
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Confirm Before Snooze */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-orange-500" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Xác nhận trước khi gác</p>
+                      <p className="text-xs text-slate-400">Hỏi lại khi bạn vuốt gác khách</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setConfirmSnooze(!confirmSnooze)}
+                    className={`relative w-12 h-7 rounded-full transition-colors ${confirmSnooze ? "bg-primary-600" : "bg-slate-300 dark:bg-slate-700"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-sm transition-transform ${confirmSnooze ? "translate-x-5" : ""}`} />
+                  </button>
+                </div>
+
+                {/* Save Button */}
+                <button onClick={saveSettings} className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95">
+                  Lưu cài đặt
+                </button>
+                {settingsSaved && (
+                  <p className={`text-center text-sm font-bold ${settingsSaved.startsWith("✓") ? "text-emerald-600" : "text-red-500"}`}>{settingsSaved}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Theme UI Section */}
             <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
               <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
                 <Palette className="w-5 h-5 text-primary-500" /> Tùy chỉnh Giao diện
@@ -237,12 +372,12 @@ export default function ProfileClient({ initialProfile }) {
         ) : null}
       </main>
 
-      {/* Edit Profile Modal */}
+      {/* Edit Profile Modal - Only Name */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Sửa thông tin</h2>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Sửa hồ sơ</h2>
               <button onClick={() => setIsEditing(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
                 <X className="w-5 h-5" />
               </button>
@@ -257,19 +392,6 @@ export default function ProfileClient({ initialProfile }) {
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
                   placeholder="Nhập tên của bạn..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Thời gian Tạm gác mặc định (Giờ)</label>
-                <input 
-                  type="number" 
-                  min="1"
-                  max="168"
-                  value={editSnoozeHours}
-                  onChange={(e) => setEditSnoozeHours(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
-                  placeholder="Ví dụ: 4"
                 />
               </div>
 

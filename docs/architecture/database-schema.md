@@ -13,7 +13,7 @@ datasource: {
 }
 ```
 
-### Schema (7 bảng chính)
+### Schema (9 bảng chính)
 
 ```prisma
 model Profile {
@@ -63,6 +63,9 @@ model Customer {
   lastContactAt  DateTime? @map("last_contact_at")
   snoozedUntil   DateTime? @map("snoozed_until")
   
+  // Tags
+  tags           String[]  @default([])
+
   journeyStage   String    @default("Lead") @map("journey_stage")
 
   interactions   Interaction[]
@@ -141,6 +144,25 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@map("team_members")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  body      String
+  type      String   @default("INFO") // "INFO" | "ALERT" | "REMINDER" | "TEAM"
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("notifications")
+}
+
+model AiReport {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("ai_reports")
 }
 ```
 

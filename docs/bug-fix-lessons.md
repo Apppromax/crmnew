@@ -145,3 +145,22 @@
 - **Fix**: Tách thành 2 file: `page.js` (Server Component, fetch data) + `*Client.js` (Client Component, nhận `initialData` qua props). Pattern giống trang `/customers` và `/` đã làm trước đó.
 - **Rule**: Mọi trang hiển thị danh sách từ DB phải dùng pattern **Server Component fetch → Client Component render**. Tuyệt đối không dùng `useEffect` để fetch data ban đầu nếu có thể fetch ở server.
 
+---
+
+## 🔵 Phase 14-15 Audit & Feature Enhancement (2026-05-10)
+
+### Vấn đề 11: Glass effect dark mode dùng media query thay vì class selector
+- **Lỗi**: Glass card không follow manual theme toggle.
+- **Nguyên nhân**: CSS dùng `@media (prefers-color-scheme: dark)` thay vì `.dark` class selector.
+- **Fix**: Thay bằng `.dark .glass { ... }`.
+- **Rule**: Khi dùng manual theme toggle, LUÔN dùng `.dark` class selector, không dùng media query.
+
+### Vấn đề 12: Dead code và Dead props
+- **StatusModal.js**: Component tồn tại nhưng không import ở đâu → Xóa.
+- **ScheduleClient**: Truyền `onTabChange` cho BottomNav nhưng BottomNav đã dùng `<Link>` → Xóa props thừa.
+- **Rule**: Khi refactor component, kiểm tra toàn bộ consumers để xóa dead code/props.
+
+### Vấn đề 13: JSX Ternary chain 3 nhánh
+- **Lỗi**: `Expected '</', got ':'` khi thêm nhánh thứ 3 vào ternary.
+- **Fix**: `condition1 ? A : condition2 ? B : condition3 ? C : null`.
+- **Rule**: Luôn plan cấu trúc ternary trước khi mở rộng. Kết thúc bằng `: null}`.

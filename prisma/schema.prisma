@@ -63,6 +63,9 @@ model Customer {
   lastContactAt DateTime? @map("last_contact_at")
   snoozedUntil  DateTime? @map("snoozed_until")
 
+  // Tags
+  tags         String[] @default([])
+
   // Journey
   journeyStage String @default("Lead") @map("journey_stage")
 

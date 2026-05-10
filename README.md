@@ -20,7 +20,12 @@ SalesPush là ứng dụng quản lý khách hàng (CRM) mobile-first, thiết k
 - **📊 Smart Sorting**: Thuật toán ưu tiên: Overdue → Score → Last Contact → Next Follow-up
 - **🧹 Tùy biến Queue & Snooze**: Khôi phục hàng chờ nhanh chóng, cài đặt thời gian Snooze mặc định theo từng tài khoản.
 - **📱 Responsive Layout**: Giao diện linh hoạt tự động chuyển đổi Bottom Nav (Mobile) sang Sidebar (Tablet/PC).
-- **📅 Cleanup & Schedule**: Giao diện chuyên biệt quản lý khách quá hạn và lịch hẹn tương lai.
+- **📅 Cleanup & Schedule**: Giao diện chuyên biệt quản lý khách quá hạn và lịch hẹn tương lai. Click lịch hẹn → modal hành động nhanh (Gọi/Zalo).
+- **✏️ Chỉnh sửa & Xóa Khách hàng**: Edit trực tiếp trong modal chi tiết + xóa vĩnh viễn với confirm dialog.
+- **🏷️ Hệ thống Tag tùy chỉnh**: Tạo và gắn tag cho từng khách hàng. Lọc theo tag trên danh sách. Thêm/xóa tag trực tiếp trong modal.
+- **📊 Dashboard Mở rộng**: 4 KPI cards (Quá hạn, Hẹn hôm nay, Chốt tháng, Tổng active) + Phễu bán hàng (Sales Funnel) trực quan.
+- **📞 Lịch sử tương tác**: Tab "Lịch sử" trong modal khách hàng, hiển thị timeline ghi chú + tương tác.
+- **⚙️ Cài đặt sử dụng**: Section riêng trong Profile cho Snooze presets, Follow-up mặc định, Queue size, Xác nhận trước khi gác.
 
 ## 🛠 Tech Stack
 
@@ -80,7 +85,8 @@ src/
 │   ├── ai.js            # Gọi Google Gemini AI
 │   ├── admin.js         # API nạp tiền, lấy user
 │   ├── user.js          # API mua gói Pro
-│   └── customers.js     # CRUD Khách hàng (Lọc theo userId)
+│   ├── customers.js     # CRUD Khách hàng + Tags + Dashboard Stats
+│   └── notifications.js # Smart Alerts & Notification System
 ├── lib/
 │   ├── prisma.js        # Prisma Client singleton
 │   └── supabase/        # SSR Client cho Auth
@@ -100,6 +106,8 @@ src/
 - ✅ Phase 11: UI Refinement & Mobile Experience (Scrollable Chips, Horizontal Calendar Strip, Android Padding Fix)
 - ✅ Phase 12: AI Engine & Smart Notifications (Dashboard Chiến lược AI, Bộ lọc thông minh, Tinder Swipe Animation, Background Settings)
 - ✅ Phase 13: Cross-platform & Queue Mechanics (Responsive Sidebar PC/iPad, Mouse Drag Tinder Swipe, Custom Snooze Config, Queue Restore)
+- ✅ Phase 14: Customer Management Enhancement (Edit/Delete Customer, Interaction History Timeline, Schedule Actions, Settings Restructure)
+- ✅ Phase 15: Tag System & Dashboard Extension (Custom Tags, Tag Filter, KPI Dashboard, Sales Funnel Chart, Bug Fixes)
 
 ## 📝 License
 

@@ -16,7 +16,7 @@ import {
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
-import { Bell, Plus, X } from "lucide-react";
+import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -54,7 +54,7 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 } }) {
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, dashboardStats }) {
   const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
   const [counts, setCounts] = useState(initialCounts);
   const [loading, setLoading] = useState(false);
@@ -226,19 +226,61 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-2 mt-4">
-          <div className="px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 text-xs font-semibold">
-            🔥 {counts.hot} nóng
-          </div>
-          <div className="px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold">
-            🌡️ {counts.warm} ấm
-          </div>
-          <div className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-500/10 text-slate-500 dark:text-slate-400 text-xs font-semibold">
-            Tổng: {counts.total} khách
-          </div>
+        {/* Stats Chips */}
+        <div className="flex gap-2 mt-4 overflow-x-auto hide-scrollbar">
+          <div className="px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 text-xs font-semibold shrink-0">🔥 {counts.hot} nóng</div>
+          <div className="px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold shrink-0">🌡️ {counts.warm} ấm</div>
+          <div className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-500/10 text-slate-500 dark:text-slate-400 text-xs font-semibold shrink-0">Tổng: {counts.total}</div>
         </div>
       </header>
+
+      {/* Extended Stats Panel */}
+      {dashboardStats && (
+        <div className="px-5 pt-5 max-w-lg md:max-w-4xl mx-auto w-full space-y-4">
+          {/* KPI Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="glass rounded-2xl p-3.5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-500/15 flex items-center justify-center"><AlertTriangle className="w-4 h-4 text-red-500" /></div>
+              <div><p className="text-[10px] font-bold uppercase text-slate-400">Quá hạn</p><p className="text-lg font-black text-slate-900 dark:text-white">{dashboardStats.overdue}</p></div>
+            </div>
+            <div className="glass rounded-2xl p-3.5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-500/15 flex items-center justify-center"><CalendarCheck className="w-4 h-4 text-blue-500" /></div>
+              <div><p className="text-[10px] font-bold uppercase text-slate-400">Hẹn hôm nay</p><p className="text-lg font-black text-slate-900 dark:text-white">{dashboardStats.todaySchedule}</p></div>
+            </div>
+            <div className="glass rounded-2xl p-3.5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center"><Trophy className="w-4 h-4 text-emerald-500" /></div>
+              <div><p className="text-[10px] font-bold uppercase text-slate-400">Chốt tháng</p><p className="text-lg font-black text-slate-900 dark:text-white">{dashboardStats.closedThisMonth}</p></div>
+            </div>
+            <div className="glass rounded-2xl p-3.5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-500/15 flex items-center justify-center"><TrendingUp className="w-4 h-4 text-primary-500" /></div>
+              <div><p className="text-[10px] font-bold uppercase text-slate-400">Tổng active</p><p className="text-lg font-black text-slate-900 dark:text-white">{dashboardStats.total}</p></div>
+            </div>
+          </div>
+
+          {/* Sales Funnel */}
+          {dashboardStats.funnel && (
+            <div className="glass rounded-2xl p-4">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">📊 Phễu bán hàng</p>
+              <div className="space-y-2">
+                {dashboardStats.funnel.map((item, idx) => {
+                  const maxCount = Math.max(...dashboardStats.funnel.map(f => f.count), 1);
+                  const pct = (item.count / maxCount) * 100;
+                  const colors = ['bg-slate-400', 'bg-blue-400', 'bg-cyan-400', 'bg-amber-400', 'bg-orange-400', 'bg-emerald-500'];
+                  return (
+                    <div key={item.stage} className="flex items-center gap-3">
+                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 w-24 shrink-0 truncate">{item.stage}</span>
+                      <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className={`h-full ${colors[idx] || 'bg-primary-500'} rounded-full transition-all duration-500`} style={{ width: `${Math.max(pct, 4)}%` }} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 w-6 text-right">{item.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Queue */}
       <main className="px-5 pt-5 max-w-lg md:max-w-4xl mx-auto w-full">

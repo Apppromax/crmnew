@@ -5,25 +5,24 @@ import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import { format, addDays, isSameDay, startOfDay } from "date-fns";
 import { vi } from "date-fns/locale";
+import { Phone, X, MapPin } from "lucide-react";
 
 export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const router = useRouter();
   const [schedule] = useState(initialSchedule || []);
   const [overdue] = useState(initialOverdue || []);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
+  const [selectedItem, setSelectedItem] = useState(null);
 
-  // Generate 14 days starting from today for the calendar strip
   const calendarDays = useMemo(() => {
     const today = startOfDay(new Date());
     return Array.from({ length: 14 }).map((_, i) => addDays(today, i));
   }, []);
 
-  // Filter schedules for the selected date
   const selectedDaySchedules = useMemo(() => {
     return schedule.filter(c => c.nextFollowUp && isSameDay(new Date(c.nextFollowUp), selectedDate));
   }, [schedule, selectedDate]);
 
-  // Check if a date has any schedules (for the dot indicator)
   const hasSchedule = useCallback((date) => {
     return schedule.some(c => c.nextFollowUp && isSameDay(new Date(c.nextFollowUp), date));
   }, [schedule]);
@@ -56,7 +55,6 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                   {isToday ? 'Hôm nay' : dayOfWeek}
                 </span>
                 <span className="text-lg font-bold">{dayOfMonth}</span>
-                {/* Dot indicator */}
                 <div className="h-1.5 flex items-center justify-center mt-1">
                   {hasEvent && (
                     <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-primary-500'}`} />
@@ -69,7 +67,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
       </header>
 
       <main className="px-5 pt-6 md:max-w-3xl md:mx-auto w-full">
-        {/* Overdue Section (only show if overdue exists) */}
+        {/* Overdue Section */}
         {overdue.length > 0 && isSameDay(selectedDate, startOfDay(new Date())) && (
           <div className="mb-8">
             <h2 className="text-sm font-bold text-red-500 mb-3 flex items-center gap-2">
@@ -78,7 +76,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
             </h2>
             <div className="space-y-3">
               {overdue.map(c => (
-                <div key={c.id} className="bg-red-50/50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-center justify-between">
+                <div key={c.id} onClick={() => setSelectedItem(c)} className="bg-red-50/50 dark:bg-red-950/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform">
                   <div>
                     <div className="font-bold text-slate-800 dark:text-white">{c.name}</div>
                     <div className="text-sm text-slate-500">{c.phone}</div>
@@ -107,14 +105,18 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
               <span className="text-2xl">🌴</span>
             </div>
             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Ngày trống</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Bạn không có lịch hẹn nào vào ngày này. Có thể nghỉ ngơi hoặc đi tìm kiếm khách hàng mới!</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Bạn không có lịch hẹn nào vào ngày này.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {selectedDaySchedules.map(c => {
               const timeStr = format(new Date(c.nextFollowUp), 'HH:mm');
               return (
-                <div key={c.id} className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between relative overflow-hidden">
+                <div 
+                  key={c.id} 
+                  onClick={() => setSelectedItem(c)}
+                  className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+                >
                   <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-500" />
                   <div className="pl-2">
                     <div className="font-bold text-slate-800 dark:text-white text-lg">{c.name}</div>
@@ -137,12 +139,62 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
         )}
       </main>
 
-      <BottomNav activeTab="schedule" onTabChange={(tab) => {
-        if (tab === 'home') router.push('/');
-        else if (tab === 'customers') router.push('/customers');
-        else if (tab === 'schedule') router.push('/schedule');
-        else if (tab === 'cleanup') router.push('/cleanup');
-      }} />
+      {/* Quick Action Modal */}
+      {selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setSelectedItem(null)}>
+          <div 
+            className="w-full sm:w-[400px] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-full sm:zoom-in-95 duration-200 pb-safe"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Hành động nhanh</h2>
+              <button onClick={() => setSelectedItem(null)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-xl">
+                {selectedItem.name?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">{selectedItem.name}</h3>
+                <p className="text-sm text-slate-500">{selectedItem.phone}</p>
+                {selectedItem.area && (
+                  <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3 h-3" /> {selectedItem.area}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {selectedItem.demand && (
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl mb-5 border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Nhu cầu</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{selectedItem.demand}</p>
+              </div>
+            )}
+
+            <div className="flex gap-3 mb-4">
+              <a href={`tel:${selectedItem.phone}`} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                <Phone className="w-4 h-4 fill-current" /> Gọi Điện
+              </a>
+              <a href={`https://zalo.me/${selectedItem.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                <span className="font-black text-sm">Zalo</span> Nhắn Tin
+              </a>
+            </div>
+
+            <button 
+              onClick={() => { setSelectedItem(null); router.push('/customers'); }}
+              className="w-full py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-700 dark:text-slate-300 hover:border-primary-500 hover:text-primary-600 active:scale-95 transition-all"
+            >
+              Xem chi tiết khách hàng
+            </button>
+          </div>
+        </div>
+      )}
+
+      <BottomNav activeTab="schedule" />
     </div>
   );
 }
