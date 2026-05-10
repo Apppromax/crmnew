@@ -341,6 +341,7 @@ export default function ProfileClient({ initialProfile }) {
                       Auto
                     </button>
                   </div>
+                </div>
                 {/* Pattern Selector */}
                 <div className="mt-4">
                   <p className="text-xs font-bold text-slate-500 uppercase mb-2">Hình nền minh họa (Góc phải)</p>
