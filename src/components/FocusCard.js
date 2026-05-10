@@ -199,7 +199,7 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
       <div className="text-center pb-3 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-2">
         <div className="flex items-center gap-1">
           <ArrowLeft className="w-3 h-3" />
-          <span>Tạm gác</span>
+          <span>Tạm hoãn</span>
         </div>
         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700"></span>
         <div className="flex items-center gap-1">
