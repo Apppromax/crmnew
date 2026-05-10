@@ -141,20 +141,20 @@ export default function AddCustomerPage() {
       <div className="flex glass p-1.5 rounded-2xl mb-6">
         <button
           onClick={() => setActiveMode("ai")}
-          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all ${
             activeMode === "ai" 
-              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
-              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-md" 
+              : "text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
           }`}
         >
           <Sparkles className="w-4 h-4" /> Dùng AI
         </button>
         <button
           onClick={() => setActiveMode("manual")}
-          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl transition-all ${
             activeMode === "manual" 
-              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" 
-              : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md" 
+              : "text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white"
           }`}
         >
           <Pen className="w-4 h-4" /> Thủ công
@@ -170,14 +170,14 @@ export default function AddCustomerPage() {
       {activeMode === "ai" && (
         <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
           <div className="glass rounded-3xl p-5 shadow-sm">
-            <label className="block text-sm font-medium text-slate-500 mb-3">
+            <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
               Nhập ghi chú hoặc paste tin nhắn (Zalo/FB):
             </label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               disabled={isParsing || isSaving}
-              className="w-full h-36 bg-white/50 dark:bg-slate-900/50 backdrop-blur text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 rounded-2xl p-4 resize-none border border-slate-200/60 dark:border-slate-800/60"
+              className="w-full h-36 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 rounded-2xl p-4 resize-none border border-slate-300 dark:border-slate-700 shadow-sm"
               placeholder="Ví dụ: Anh Khang 0901234567 muốn mua căn 2PN Q7 tài chính 3 tỷ, cần vay bank 50%..."
             />
             
@@ -271,7 +271,7 @@ export default function AddCustomerPage() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
                   Họ và tên *
                 </label>
                 <input
@@ -279,12 +279,12 @@ export default function AddCustomerPage() {
                   value={manualName}
                   onChange={(e) => setManualName(e.target.value)}
                   placeholder="Nguyễn Văn A"
-                  className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
                 />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
                   Số điện thoại *
                 </label>
                 <input
@@ -292,13 +292,13 @@ export default function AddCustomerPage() {
                   value={manualPhone}
                   onChange={(e) => setManualPhone(e.target.value)}
                   placeholder="0901234567"
-                  className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
                 />
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nguồn khách</label>
-                <select value={manualSource} onChange={e => setManualSource(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Nguồn khách</label>
+                <select value={manualSource} onChange={e => setManualSource(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn nguồn --</option>
                   <option value="Tự khai thác">Tự khai thác</option>
                   <option value="Facebook">Facebook</option>
@@ -311,8 +311,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phân khúc tài chính</label>
-                <select value={manualBudget} onChange={e => setManualBudget(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Phân khúc tài chính</label>
+                <select value={manualBudget} onChange={e => setManualBudget(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn tài chính --</option>
                   <option value="Dưới 2 tỷ">Dưới 2 tỷ</option>
                   <option value="2 - 3 tỷ">2 - 3 tỷ</option>
@@ -325,8 +325,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Loại hình quan tâm</label>
-                <select value={manualPropertyType} onChange={e => setManualPropertyType(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Loại hình quan tâm</label>
+                <select value={manualPropertyType} onChange={e => setManualPropertyType(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn loại hình --</option>
                   <option value="Căn hộ chung cư">Căn hộ chung cư</option>
                   <option value="Nhà phố/Liền kề">Nhà phố/Liền kề</option>
@@ -339,8 +339,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mục đích mua</label>
-                <select value={manualPurpose} onChange={e => setManualPurpose(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Mục đích mua</label>
+                <select value={manualPurpose} onChange={e => setManualPurpose(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn mục đích --</option>
                   <option value="Để ở">Mua để ở</option>
                   <option value="Đầu tư bán lại">Đầu tư bán lại</option>
@@ -351,8 +351,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Khu vực quan tâm</label>
-                <select value={manualArea} onChange={e => setManualArea(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Khu vực quan tâm</label>
+                <select value={manualArea} onChange={e => setManualArea(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn khu vực --</option>
                   <option value="Trung tâm thành phố">Trung tâm thành phố</option>
                   <option value="Vùng ven/Ngoại thành">Vùng ven/Ngoại thành</option>
@@ -363,8 +363,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Thời gian dự kiến mua</label>
-                <select value={manualTimeline} onChange={e => setManualTimeline(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Thời gian dự kiến mua</label>
+                <select value={manualTimeline} onChange={e => setManualTimeline(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm">
                   <option value="">-- Chọn thời gian --</option>
                   <option value="Mua ngay (trong tháng)">Mua ngay (trong tháng)</option>
                   <option value="1 - 3 tháng tới">1 - 3 tháng tới</option>
@@ -374,8 +374,8 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Độ nét (Mức độ ưu tiên)</label>
-                <select value={manualHeatLevel} onChange={e => setManualHeatLevel(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white font-bold">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">Độ nét (Mức độ ưu tiên)</label>
+                <select value={manualHeatLevel} onChange={e => setManualHeatLevel(e.target.value)} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white font-bold shadow-sm">
                   <option value="Cold" className="text-slate-500">Chưa nét (Cold) - Mới liên hệ / Tham khảo</option>
                   <option value="Warm" className="text-orange-500">Tiềm năng (Warm) - Đang cân nhắc / Đã hẹn gặp</option>
                   <option value="Hot" className="text-red-500">Nét căng (Hot) - Đã chốt nhu cầu / Chuẩn bị cọc</option>
@@ -383,14 +383,14 @@ export default function AddCustomerPage() {
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
                   Ghi chú tự do
                 </label>
                 <textarea
                   value={manualNote}
                   onChange={(e) => setManualNote(e.target.value)}
                   placeholder="Nhập bất kỳ ghi chú nào khác về khách hàng này..."
-                  className="w-full h-24 px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none text-slate-900 dark:text-white"
+                  className="w-full h-24 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
                 />
               </div>
 
