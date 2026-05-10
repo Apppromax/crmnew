@@ -13,7 +13,7 @@ import {
   snoozeCustomer,
   getCustomerCount,
 } from "@/actions/customers";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, X } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [counts, setCounts] = useState({ total: 0, hot: 0, warm: 0 });
   const [loading, setLoading] = useState(true);
   const [sheetCustomer, setSheetCustomer] = useState(null);
+  const [selectedRadarCustomer, setSelectedRadarCustomer] = useState(null);
   const [exitingId, setExitingId] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [isPending, startTransition] = useTransition();
@@ -210,7 +211,7 @@ export default function Dashboard() {
                     <RadarCard
                       key={c.id}
                       customer={c}
-                      onClick={handleAction}
+                      onClick={(customer) => setSelectedRadarCustomer(customer)}
                       animClass={exitingId === c.id ? "animate-fade-out-left" : ""}
                     />
                   ))}
@@ -239,6 +240,35 @@ export default function Dashboard() {
         onComplete={handleComplete}
         onClose={() => setSheetCustomer(null)}
       />
+
+      {/* Radar Details Modal */}
+      {selectedRadarCustomer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm"
+            onClick={() => setSelectedRadarCustomer(null)}
+          />
+          <div className="relative w-full max-w-sm animate-slide-up">
+            <FocusCard 
+              customer={selectedRadarCustomer}
+              onAction={(c) => {
+                setSelectedRadarCustomer(null);
+                handleAction(c);
+              }}
+              onSnooze={(c) => {
+                setSelectedRadarCustomer(null);
+                handleSnooze(c);
+              }}
+            />
+            <button 
+              onClick={() => setSelectedRadarCustomer(null)}
+              className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center shadow-lg border-2 border-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

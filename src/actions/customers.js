@@ -22,6 +22,14 @@ export async function getSmartQueue() {
         { snoozedUntil: null },
         { snoozedUntil: { lte: now } },
       ],
+      AND: [
+        {
+          OR: [
+            { nextFollowUp: null },
+            { nextFollowUp: { lte: now } }
+          ]
+        }
+      ]
     },
     orderBy: [
       { clarityScore: "desc" },
