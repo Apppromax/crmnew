@@ -1,0 +1,10 @@
+# AI Context for SalesPush CRM MVP
+
+Dự án này là một ứng dụng CRM thiết kế chuẩn Mobile-first, sử dụng Next.js (App Router) và Supabase.
+Mục tiêu là tối giản hóa việc quản lý trạng thái khách hàng để thúc đẩy sales hành động.
+
+## Core Directives for LLMs:
+1. LUÔN LUÔN đọc file `docs/PRD.md` để hiểu yêu cầu trước khi đề xuất hoặc code tính năng mới.
+2. LUÔN LUÔN đọc thư mục `docs/architecture/` trước khi code backend hoặc sửa UI để không đi chệch khỏi Design System hiện tại.
+3. Khi viết code, áp dụng nguyên tắc Clean Code và sử dụng **Tailwind CSS v4** (utility-first). Không lạm dụng custom CSS nếu không thực sự cần thiết.
+4. Mọi lỗi gặp phải và giải pháp PHẢI được ghi chép lại vào `docs/bug-fix-lessons.md` để các session sau AI không giẫm lên vết xe đổ.
