@@ -128,7 +128,7 @@ export default function Dashboard() {
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               {queue.length > 0
-                ? \`\${queue.length} khách hàng cần chăm sóc\`
+                ? `${queue.length} khách hàng cần chăm sóc`
                 : "Không có khách cần xử lý"}
             </p>
           </div>
