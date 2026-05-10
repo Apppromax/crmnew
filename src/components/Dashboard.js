@@ -93,12 +93,20 @@ export default function Dashboard() {
       setSheetCustomer(null);
       setExitingId(data.customerId);
 
+      // Optimistically remove from queue after animation finishes
+      setTimeout(() => {
+        setQueue((prev) => prev.filter((c) => c.id !== data.customerId));
+        setExitingId(null);
+        loadQueue(); // Fetch silently in background
+      }, 350);
+
       startTransition(async () => {
-        await completeCustomerAction(data);
-        setTimeout(async () => {
-          setExitingId(null);
-          await loadQueue();
-        }, 350);
+        try {
+          await completeCustomerAction(data);
+        } catch (e) {
+          console.error("Action failed", e);
+          loadQueue(); // Revert on failure
+        }
       });
     },
     [loadQueue]
@@ -108,12 +116,20 @@ export default function Dashboard() {
     (customer) => {
       setExitingId(customer.id);
 
+      // Optimistically remove from queue after animation finishes
+      setTimeout(() => {
+        setQueue((prev) => prev.filter((c) => c.id !== customer.id));
+        setExitingId(null);
+        loadQueue(); // Fetch silently in background
+      }, 350);
+
       startTransition(async () => {
-        await snoozeCustomer(customer.id, 4);
-        setTimeout(async () => {
-          setExitingId(null);
-          await loadQueue();
-        }, 350);
+        try {
+          await snoozeCustomer(customer.id, 4);
+        } catch (e) {
+          console.error("Snooze failed", e);
+          loadQueue(); // Revert on failure
+        }
       });
     },
     [loadQueue]
@@ -193,6 +209,7 @@ export default function Dashboard() {
                   ⚡ Ưu tiên số 1
                 </p>
                 <FocusCard
+                  key={focusCustomer.id}
                   customer={focusCustomer}
                   onAction={handleAction}
                   onSnooze={handleSnooze}
@@ -212,7 +229,7 @@ export default function Dashboard() {
                       key={c.id}
                       customer={c}
                       onClick={(customer) => setSelectedRadarCustomer(customer)}
-                      animClass={exitingId === c.id ? "animate-fade-out-left" : ""}
+                      animClass={exitingId === c.id ? "animate-fade-out-left" : "animate-fade-in-up"}
                     />
                   ))}
                 </div>

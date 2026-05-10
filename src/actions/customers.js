@@ -48,7 +48,7 @@ export async function getSmartQueue() {
     return b.clarityScore - a.clarityScore;
   });
 
-  return sorted.slice(0, 3).map((c) => ({
+  return sorted.slice(0, 10).map((c) => ({
     ...c,
     nextFollowUp: c.nextFollowUp?.toISOString() || null,
     lastContactAt: c.lastContactAt?.toISOString() || null,
