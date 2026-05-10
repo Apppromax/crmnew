@@ -1,0 +1,140 @@
+"use client";
+
+import React, { useState } from 'react';
+
+const heatConfig = {
+  Hot:  { emoji: '🔥', label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  Warm: { emoji: '🌡️', label: 'Cao',     bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  Cold: { emoji: '❄️', label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
+};
+
+const stageLabels = {
+  Lead: 'Mới', Contacted: 'Đã liên hệ', Viewed: 'Đã xem nhà',
+  Negotiating: 'Đang thương lượng', Deposited: 'Đã đặt cọc', Closed: 'Chốt',
+};
+
+const statusDot = {
+  New: 'bg-blue-500', Active: 'bg-emerald-500', Waiting: 'bg-amber-500',
+  Dormant: 'bg-slate-400', Closed: 'bg-teal-500', Lost: 'bg-red-500',
+};
+
+function formatFollowUp(dateStr) {
+  if (!dateStr) return 'Chưa hẹn';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = date - now;
+  const absH = Math.abs(Math.round(diffMs / 3600000));
+  const absD = Math.abs(Math.round(diffMs / 86400000));
+  if (diffMs < 0) return absD >= 1 ? `Lỡ ${absD} ngày` : `Lỡ ${absH}h`;
+  if (absH < 1) return 'Sắp tới';
+  if (absH < 24) {
+    const t = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return `${t} hôm nay`;
+  }
+  return `${absD} ngày nữa`;
+}
+
+export default function FocusCard({ customer, onAction, onSnooze, animClass = '' }) {
+  const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
+  const stage = stageLabels[customer.journeyStage] || customer.journeyStage;
+  const dot = statusDot[customer.status] || 'bg-slate-400';
+
+  const [touchX, setTouchX] = useState(null);
+  const [deltaX, setDeltaX] = useState(0);
+  const dragging = touchX !== null;
+
+  const onTouchStart = (e) => setTouchX(e.touches[0].clientX);
+  const onTouchMove = (e) => {
+    if (touchX === null) return;
+    const d = e.touches[0].clientX - touchX;
+    if (d < 0) setDeltaX(d);
+  };
+  const onTouchEnd = () => {
+    if (deltaX < -100) onSnooze?.(customer);
+    setTouchX(null);
+    setDeltaX(0);
+  };
+
+  return (
+    <div
+      className={`glass rounded-3xl overflow-hidden ${animClass}`}
+      style={{
+        transform: deltaX < 0 ? `translateX(${deltaX}px)` : undefined,
+        opacity: deltaX < -80 ? 0.5 : 1,
+        transition: dragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease',
+      }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Top: Avatar + Name + Heat Badge */}
+      <div className="p-5 pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shrink-0 shadow-lg shadow-primary-500/20">
+              {customer.name?.charAt(0)}
+            </div>
+            <div>
+              <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight">{customer.name}</h3>
+              <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                {customer.phone}
+              </a>
+            </div>
+          </div>
+          <div className={`px-2.5 py-1 text-xs font-bold rounded-full border ${heat.bg} ${heat.text} ${heat.border} flex items-center gap-1`}>
+            <span>{heat.emoji}</span> {heat.label}
+          </div>
+        </div>
+      </div>
+
+      {/* Reason + Next Step */}
+      <div className="px-5 pb-3 space-y-2.5">
+        <div className="flex items-start gap-2 text-sm">
+          <span className="text-base leading-none mt-0.5">💡</span>
+          <p className="text-slate-600 dark:text-slate-300 leading-snug">{customer.reason}</p>
+        </div>
+        <div className="flex items-start gap-2 text-sm">
+          <span className="text-base leading-none mt-0.5">📋</span>
+          <p className="text-primary-600 dark:text-primary-400 font-semibold leading-snug">{customer.nextStep}</p>
+        </div>
+      </div>
+
+      {/* Bottom Info Row: Status | Journey Stage | Time */}
+      <div className="border-t border-slate-100 dark:border-slate-700/50 px-5 py-3 flex items-center justify-between">
+        <div className="text-center flex-1">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Trạng thái</p>
+          <div className="flex items-center justify-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${dot}`} />
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{customer.status}</span>
+          </div>
+        </div>
+        <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
+        <div className="text-center flex-1">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Hành trình</p>
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{stage}</span>
+        </div>
+        <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
+        <div className="text-center flex-1">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Thời gian</p>
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{formatFollowUp(customer.nextFollowUp)}</span>
+        </div>
+      </div>
+
+      {/* Action Button */}
+      <div className="px-5 pb-5 pt-2">
+        <button
+          onClick={() => onAction?.(customer)}
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform"
+        >
+          ✍️ Chăm sóc ngay
+        </button>
+      </div>
+
+      {/* Swipe Hint */}
+      <div className="text-center pb-3 -mt-1">
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">← Vuốt trái để tạm gác</span>
+      </div>
+    </div>
+  );
+}
