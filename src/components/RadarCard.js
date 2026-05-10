@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Clock } from 'lucide-react';
 
 const heatConfig = {
   Hot:  { emoji: '🔥', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' },
@@ -44,9 +45,7 @@ export default function RadarCard({ customer, onClick, animClass = '' }) {
           <span>{heat.emoji}</span> {customer.heatLevel}
         </div>
         <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <Clock className="w-3 h-3" />
           <span className="font-medium">{formatFollowUp(customer.nextFollowUp)}</span>
         </div>
       </div>

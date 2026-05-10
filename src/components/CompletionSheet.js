@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { X, Mic, Check } from 'lucide-react';
 
 function getQuickDates() {
   const now = new Date();
@@ -128,9 +129,7 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -145,10 +144,7 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
               className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 transition-all"
             />
             <button className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-transform" title="Thu âm">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              </svg>
+              <Mic className="w-4 h-4" />
             </button>
           </div>
 
@@ -196,9 +192,7 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
                 onTouchStart={handleThumbTouchStart}
                 onClick={handleClickComplete}
               >
-                <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                </svg>
+                <Check className="w-6 h-6 text-primary-500" strokeWidth={2.5} />
               </div>
             )}
           </div>

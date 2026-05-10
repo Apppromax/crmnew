@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getAllCustomers } from "@/actions/customers";
 import BottomNav from "@/components/BottomNav";
+import { Search, Plus } from "lucide-react";
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -47,9 +48,7 @@ export default function CustomersPage() {
         {/* Search Bar */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search className="h-5 w-5 text-slate-400" />
           </div>
           <input
             type="text"
@@ -113,9 +112,7 @@ export default function CustomersPage() {
           onClick={() => router.push("/add")}
           className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-xl shadow-primary-500/30 flex items-center justify-center active:scale-90 transition-transform"
         >
-          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus className="w-7 h-7" strokeWidth={2.5} />
         </button>
       </div>
 

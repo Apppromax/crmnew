@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getAllUsers, topUpUser } from "@/actions/admin";
+import { ShieldAlert, ChevronLeft } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -51,8 +52,8 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center">
         <div>
-          <div className="text-red-500 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <div className="text-red-500 mb-4 flex justify-center">
+            <ShieldAlert className="w-16 h-16 mx-auto" />
           </div>
           <h1 className="text-xl font-bold text-slate-800 mb-2">Truy cập bị từ chối</h1>
           <p className="text-slate-500">{error}</p>
@@ -66,7 +67,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex items-center gap-4">
         <button onClick={() => router.push('/')} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
-          <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
+          <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
       </header>

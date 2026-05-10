@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getOverdueCustomers, completeCustomerAction } from "@/actions/customers";
+import { ChevronLeft } from "lucide-react";
 
 export default function CleanupPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function CleanupPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex items-center gap-4">
         <button onClick={() => router.push('/')} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
-          <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
+          <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Dọn dẹp Khách Quá Hạn</h1>
       </header>

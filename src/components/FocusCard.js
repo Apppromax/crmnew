@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Phone, Flame, ThermometerSun, Snowflake, Lightbulb, ClipboardList, PenLine, ArrowLeft } from 'lucide-react';
 
 const heatConfig = {
-  Hot:  { emoji: '🔥', label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
-  Warm: { emoji: '🌡️', label: 'Cao',     bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
-  Cold: { emoji: '❄️', label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
+  Hot:  { icon: Flame, label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  Warm: { icon: ThermometerSun, label: 'Cao',     bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  Cold: { icon: Snowflake, label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
 };
 
 const stageLabels = {
@@ -77,13 +78,14 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
             <div>
               <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight">{customer.name}</h3>
               <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                <Phone className="w-3.5 h-3.5" />
                 {customer.phone}
               </a>
             </div>
           </div>
-          <div className={`px-2.5 py-1 text-xs font-bold rounded-full border ${heat.bg} ${heat.text} ${heat.border} flex items-center gap-1`}>
-            <span>{heat.emoji}</span> {heat.label}
+          <div className={`px-2.5 py-1 text-xs font-bold rounded-full border ${heat.bg} ${heat.text} ${heat.border} flex items-center gap-1.5`}>
+            {heat.icon && <heat.icon className="w-3.5 h-3.5" />} 
+            <span>{heat.label}</span>
           </div>
         </div>
       </div>
@@ -91,11 +93,11 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
       {/* Reason + Next Step */}
       <div className="px-5 pb-3 space-y-2.5">
         <div className="flex items-start gap-2 text-sm">
-          <span className="text-base leading-none mt-0.5">💡</span>
+          <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-slate-600 dark:text-slate-300 leading-snug">{customer.reason}</p>
         </div>
         <div className="flex items-start gap-2 text-sm">
-          <span className="text-base leading-none mt-0.5">📋</span>
+          <ClipboardList className="w-4 h-4 text-primary-500 shrink-0 mt-0.5" />
           <p className="text-primary-600 dark:text-primary-400 font-semibold leading-snug">{customer.nextStep}</p>
         </div>
       </div>
@@ -125,15 +127,17 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
       <div className="px-5 pb-5 pt-2">
         <button
           onClick={() => onAction?.(customer)}
-          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
         >
-          ✍️ Chăm sóc ngay
+          <PenLine className="w-4 h-4" />
+          Chăm sóc ngay
         </button>
       </div>
 
       {/* Swipe Hint */}
-      <div className="text-center pb-3 -mt-1">
-        <span className="text-[10px] text-slate-400 dark:text-slate-500">← Vuốt trái để tạm gác</span>
+      <div className="text-center pb-3 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-1">
+        <ArrowLeft className="w-3 h-3" />
+        <span>Vuốt trái để tạm gác</span>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseNoteWithAI, createCustomerFromAI } from "@/actions/ai";
 import { createCustomer } from "@/actions/customers";
+import { X, Sparkles, Pen, Loader2 } from "lucide-react";
 
 export default function AddCustomerPage() {
   const router = useRouter();
@@ -82,42 +83,57 @@ export default function AddCustomerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 pb-24">
-      <header className="flex items-center justify-between py-4 mb-2">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Thêm khách hàng
-        </h1>
-        <button 
-          onClick={() => router.push("/")}
-          className="p-2 bg-slate-200/50 dark:bg-slate-800 rounded-full active:scale-95 transition-transform"
-        >
-          <svg className="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </header>
+    <div className="min-h-screen relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans pb-24">
+      {/* City Skyline Background */}
+      <div 
+        className="absolute top-0 right-0 w-full max-w-lg h-[400px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"
+        style={{
+          backgroundImage: "url('/bg-city.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          maskImage: 'linear-gradient(to bottom, black 10%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, black 10%, transparent 100%)'
+        }}
+      />
+      
+      {/* Soft Wave Gradients */}
+      <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[400px] rounded-full bg-blue-200/50 dark:bg-blue-900/20 blur-[100px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-[5%] right-[-10%] w-[60%] h-[500px] rounded-full bg-blue-300/30 dark:bg-blue-800/20 blur-[120px] pointer-events-none z-0"></div>
+
+      <div className="relative z-10 px-5 pt-safe pt-6">
+        <header className="flex items-center justify-between py-2 mb-4">
+          <h1 className="text-3xl font-black text-slate-800 dark:text-white">
+            Thêm khách hàng
+          </h1>
+          <button 
+            onClick={() => router.push("/")}
+            className="w-10 h-10 flex items-center justify-center bg-white/50 dark:bg-slate-800/50 backdrop-blur-md rounded-full shadow-sm active:scale-95 transition-transform"
+          >
+            <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          </button>
+        </header>
 
       {/* Mode Switcher */}
-      <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl mb-6">
+      <div className="flex glass p-1.5 rounded-2xl mb-6">
         <button
           onClick={() => setActiveMode("ai")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
             activeMode === "ai" 
-              ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm" 
+              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
-          ✨ Dùng AI
+          <Sparkles className="w-4 h-4" /> Dùng AI
         </button>
         <button
           onClick={() => setActiveMode("manual")}
-          className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
+          className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all ${
             activeMode === "manual" 
-              ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm" 
+              ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm" 
               : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           }`}
         >
-          ✍️ Thủ công
+          <Pen className="w-4 h-4" /> Thủ công
         </button>
       </div>
 
@@ -129,15 +145,15 @@ export default function AddCustomerPage() {
 
       {activeMode === "ai" && (
         <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800">
-            <label className="block text-sm font-medium text-slate-500 mb-2">
+          <div className="glass rounded-3xl p-5 shadow-sm">
+            <label className="block text-sm font-medium text-slate-500 mb-3">
               Nhập ghi chú hoặc paste tin nhắn (Zalo/FB):
             </label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               disabled={isParsing || isSaving}
-              className="w-full h-32 bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none resize-none"
+              className="w-full h-36 bg-white/50 dark:bg-slate-900/50 backdrop-blur text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 rounded-2xl p-4 resize-none border border-slate-200/60 dark:border-slate-800/60"
               placeholder="Ví dụ: Anh Khang 0901234567 muốn mua căn 2PN Q7 tài chính 3 tỷ, cần vay bank 50%..."
             />
             
@@ -145,62 +161,62 @@ export default function AddCustomerPage() {
               <button
                 onClick={handleParse}
                 disabled={isParsing || !note.trim()}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
+                className="mt-5 w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 disabled:opacity-50 text-white font-bold rounded-2xl shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98]"
               >
                 {isParsing ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
                     Đang phân tích...
                   </>
                 ) : (
-                  <>✨ Phân tích bằng AI</>
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Phân tích bằng AI
+                  </>
                 )}
               </button>
             )}
           </div>
 
           {parsedData && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-indigo-200 dark:border-indigo-900/30 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-900 dark:text-white">Kết quả phân tích</h3>
+            <div className="glass rounded-3xl p-5 shadow-sm border border-primary-200/50 dark:border-primary-900/30 animate-in fade-in slide-in-from-bottom-4 duration-500 mt-4">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Kết quả phân tích</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium px-2 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-md">
+                  <span className="text-xs font-bold px-2.5 py-1 bg-primary-100/80 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300 rounded-lg">
                     Độ nét: {parsedData.clarityScore}/100
                   </span>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-md ${
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
                     parsedData.heatLevel === 'Hot' ? 'bg-red-100 text-red-700' :
-                    parsedData.heatLevel === 'Warm' ? 'bg-orange-100 text-orange-700' :
-                    'bg-blue-100 text-blue-700'
+                    parsedData.heatLevel === 'Warm' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
                   }`}>
                     {parsedData.heatLevel}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
+              <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
                 <div className="col-span-2">
-                  <span className="block text-slate-500 text-xs mb-1">Họ tên & SĐT</span>
-                  <p className="font-medium text-slate-900 dark:text-white">
+                  <span className="block text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Họ tên & SĐT</span>
+                  <p className="font-semibold text-base text-slate-900 dark:text-white">
                     {parsedData.name || "—"} • {parsedData.phone || "—"}
                   </p>
                 </div>
                 <div>
-                  <span className="block text-slate-500 text-xs mb-1">Nhu cầu</span>
+                  <span className="block text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Nhu cầu</span>
                   <p className="font-medium text-slate-900 dark:text-white">{parsedData.demand || "—"}</p>
                 </div>
                 <div>
-                  <span className="block text-slate-500 text-xs mb-1">Tài chính</span>
+                  <span className="block text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Tài chính</span>
                   <p className="font-medium text-slate-900 dark:text-white">{parsedData.budget || "—"}</p>
                 </div>
                 <div>
-                  <span className="block text-slate-500 text-xs mb-1">Khu vực</span>
+                  <span className="block text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Khu vực</span>
                   <p className="font-medium text-slate-900 dark:text-white">{parsedData.area || "—"}</p>
                 </div>
                 <div>
-                  <span className="block text-slate-500 text-xs mb-1">Thời gian mua</span>
+                  <span className="block text-slate-500 text-xs font-medium mb-1 uppercase tracking-wide">Thời gian mua</span>
                   <p className="font-medium text-slate-900 dark:text-white">{parsedData.timeline || "—"}</p>
                 </div>
               </div>
@@ -208,7 +224,7 @@ export default function AddCustomerPage() {
               <button
                 onClick={handleSaveAI}
                 disabled={isSaving}
-                className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-semibold rounded-xl transition-all active:scale-[0.98]"
+                className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-bold rounded-2xl transition-all active:scale-[0.98] shadow-md"
               >
                 {isSaving ? "Đang lưu..." : "Lưu Khách Hàng"}
               </button>
@@ -216,7 +232,7 @@ export default function AddCustomerPage() {
               <button
                 onClick={() => setParsedData(null)}
                 disabled={isSaving}
-                className="w-full mt-2 py-3 bg-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium rounded-xl transition-all"
+                className="w-full mt-3 py-3.5 bg-white/50 dark:bg-slate-800/50 backdrop-blur text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white font-bold rounded-2xl transition-all border border-slate-200/50 dark:border-slate-700/50"
               >
                 Sửa lại ghi chú
               </button>
@@ -227,7 +243,7 @@ export default function AddCustomerPage() {
 
       {activeMode === "manual" && (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="glass rounded-3xl p-5 shadow-sm space-y-4">
             
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -238,7 +254,7 @@ export default function AddCustomerPage() {
                 value={manualName}
                 onChange={(e) => setManualName(e.target.value)}
                 placeholder="Nguyễn Văn A"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
               />
             </div>
 
@@ -251,7 +267,7 @@ export default function AddCustomerPage() {
                 value={manualPhone}
                 onChange={(e) => setManualPhone(e.target.value)}
                 placeholder="0901234567"
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
               />
             </div>
 
@@ -263,20 +279,21 @@ export default function AddCustomerPage() {
                 value={manualNote}
                 onChange={(e) => setManualNote(e.target.value)}
                 placeholder="Nhu cầu, tài chính, khu vực quan tâm..."
-                className="w-full h-24 px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full h-28 px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none text-slate-900 dark:text-white"
               />
             </div>
 
             <button
               onClick={handleSaveManual}
               disabled={isSaving || !manualName.trim() || !manualPhone.trim()}
-              className="mt-6 w-full py-3 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-all active:scale-[0.98]"
+              className="mt-6 w-full py-3.5 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 disabled:opacity-50 text-white font-bold rounded-2xl shadow-lg shadow-primary-500/25 transition-all active:scale-[0.98]"
             >
               {isSaving ? "Đang lưu..." : "Lưu khách hàng"}
             </button>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

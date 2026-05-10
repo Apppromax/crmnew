@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Zap, ArrowRight, ClipboardList, Clock } from "lucide-react";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -26,9 +27,7 @@ export default function LandingPage() {
         <header className="py-6 flex justify-between items-center animate-fade-in-up">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+              <Zap className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-black tracking-tight text-white">SalesPush</span>
           </div>
@@ -62,9 +61,7 @@ export default function LandingPage() {
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-indigo-100 to-purple-100 opacity-0 group-hover:opacity-100 transition-opacity" />
               <span className="relative z-10">Bắt đầu miễn phí</span>
-              <svg className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
             </Link>
             
             <a 
@@ -80,33 +77,34 @@ export default function LandingPage() {
         <section id="features" className="py-20 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-8 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
           {[
             {
-              icon: "M13 10V3L4 14h7v7l9-11h-7z",
+              icon: Zap,
               title: "Smart Card Ưu Tiên",
               desc: "Thuật toán thông minh tự động đưa khách hàng tiềm năng nhất lên đầu danh sách của bạn mỗi ngày."
             },
             {
-              icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
+              icon: ClipboardList,
               title: "Quản Lý Đơn Giản",
               desc: "Thao tác vuốt, chạm mượt mà. Không còn cảm giác nặng nề của những phần mềm CRM truyền thống."
             },
             {
-              icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+              icon: Clock,
               title: "Không Bao Giờ Lỡ Hẹn",
               desc: "Hệ thống nhắc nhở tự động giúp bạn luôn theo sát tiến trình của khách hàng mọi lúc, mọi nơi."
             }
-          ].map((feature, i) => (
-            <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/10 transition-colors group">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/10">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={feature.icon} />
-                </svg>
+          ].map((feature, i) => {
+            const Icon = feature.icon;
+            return (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm hover:bg-white/10 transition-colors group">
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/10">
+                  <Icon className="w-7 h-7" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
+                <p className="text-slate-400 leading-relaxed font-medium">
+                  {feature.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
-              <p className="text-slate-400 leading-relaxed font-medium">
-                {feature.desc}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </section>
 
         {/* Footer */}
