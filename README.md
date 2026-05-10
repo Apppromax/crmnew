@@ -92,6 +92,7 @@ src/
 - ✅ Phase 7: UI/UX Refactor (shadcn, Glassmorphism, Prefetch Navigation)
 - ✅ Phase 8: Deploy Vercel thành công
 - ✅ Phase 9: Team Mode Module (SaaS B2B, Phân bổ Lead, Thống kê Team)
+- ✅ Phase 10: Performance Optimization & Manual Flow (RevalidatePath, Smart Queue Fix, Manual Add Form)
 
 ## 📝 License
 
