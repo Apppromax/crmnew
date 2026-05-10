@@ -124,7 +124,7 @@ export default function AddCustomerPage() {
       <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[400px] rounded-full bg-blue-200/50 dark:bg-blue-900/20 blur-[100px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[5%] right-[-10%] w-[60%] h-[500px] rounded-full bg-blue-300/30 dark:bg-blue-800/20 blur-[120px] pointer-events-none z-0"></div>
 
-      <div className="relative z-10 px-5 pt-safe pt-6">
+      <div className="relative z-10 px-5 pt-[max(1.5rem,env(safe-area-inset-top))]">
         <header className="flex items-center justify-between py-2 mb-4">
           <h1 className="text-3xl font-black text-slate-800 dark:text-white">
             Thêm khách hàng

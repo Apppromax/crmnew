@@ -94,8 +94,8 @@ body {
 }
 
 /* Safe areas */
-.pt-safe { padding-top: env(safe-area-inset-top, 0); }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
+.pt-safe { padding-top: max(1.5rem, env(safe-area-inset-top)); }
+.pb-safe { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
 
 /* Swipe track shimmer */
 .swipe-track {

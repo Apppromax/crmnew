@@ -155,7 +155,7 @@ export default function Dashboard() {
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="pt-safe px-6 pt-8 pb-4">
+        <header className="px-6 pt-[max(2rem,env(safe-area-inset-top))] pb-4">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-black text-slate-800 dark:text-white">
