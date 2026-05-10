@@ -8,15 +8,21 @@ import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, File
 export default function CustomerClient({ initialCustomers }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterHeat, setFilterHeat] = useState("All");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const filteredCustomers = initialCustomers.filter((c) => {
     const term = search.toLowerCase();
-    return (
+    const matchSearch = 
       (c.name && c.name.toLowerCase().includes(term)) ||
       (c.phone && c.phone.includes(term)) ||
-      (c.demand && c.demand.toLowerCase().includes(term))
-    );
+      (c.demand && c.demand.toLowerCase().includes(term));
+      
+    const matchStatus = filterStatus === "All" || c.status === filterStatus;
+    const matchHeat = filterHeat === "All" || c.heatLevel === filterHeat;
+    
+    return matchSearch && matchStatus && matchHeat;
   });
 
   const formatDate = (isoString) => {
@@ -47,11 +53,38 @@ export default function CustomerClient({ initialCustomers }) {
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-colors text-slate-900 dark:text-slate-100"
+            className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl leading-5 bg-slate-50 dark:bg-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors text-slate-900 dark:text-slate-100"
             placeholder="Tìm theo tên, SĐT, nhu cầu..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
+        
+        {/* Filters */}
+        <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+          <select 
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 outline-none focus:border-primary-500"
+          >
+            <option value="All">Tất cả trạng thái</option>
+            <option value="New">Mới (New)</option>
+            <option value="Active">Đang chăm (Active)</option>
+            <option value="Waiting">Chờ (Waiting)</option>
+            <option value="Dormant">Ngủ đông (Dormant)</option>
+            <option value="Closed">Đã chốt (Closed)</option>
+            <option value="Lost">Rớt (Lost)</option>
+          </select>
+          <select 
+            value={filterHeat}
+            onChange={(e) => setFilterHeat(e.target.value)}
+            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 outline-none focus:border-primary-500"
+          >
+            <option value="All">Mọi mức độ</option>
+            <option value="Hot">Khách Nóng (Hot)</option>
+            <option value="Warm">Khách Ấm (Warm)</option>
+            <option value="Cold">Khách Lạnh (Cold)</option>
+          </select>
         </div>
       </header>
 

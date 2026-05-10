@@ -60,9 +60,9 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
     <div
       className={`glass rounded-3xl overflow-hidden ${animClass}`}
       style={{
-        transform: deltaX < 0 ? `translateX(${deltaX}px)` : undefined,
+        transform: deltaX < 0 ? `translateX(${deltaX}px) rotate(${deltaX * 0.06}deg) scale(${1 - Math.abs(deltaX) * 0.0005})` : undefined,
         opacity: deltaX < -80 ? 0.5 : 1,
-        transition: dragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease',
+        transition: dragging ? 'none' : 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease',
       }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}

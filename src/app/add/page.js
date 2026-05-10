@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseNoteWithAI, createCustomerFromAI } from "@/actions/ai";
 import { createCustomer } from "@/actions/customers";
-import { X, Sparkles, Pen, Loader2 } from "lucide-react";
+import { X, Sparkles, Pen, Loader2, Check } from "lucide-react";
 
 const SOURCE_OPTIONS = ["Tự khai thác", "Facebook", "Zalo", "Tiktok", "Khách giới thiệu", "Hotline / Website", "Khác"];
 const BUDGET_OPTIONS = ["Dưới 2 tỷ", "2 - 3 tỷ", "3 - 5 tỷ", "5 - 10 tỷ", "10 - 20 tỷ", "Trên 20 tỷ", "Chưa xác định"];
@@ -84,6 +84,7 @@ export default function AddCustomerPage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleParse = async () => {
     if (!note.trim()) {
@@ -116,12 +117,13 @@ export default function AddCustomerPage() {
       const res = await createCustomerFromAI({ parsedData, rawNote: note });
       if (res.error) {
         setError(res.error);
+        setIsSaving(false);
       } else {
-        router.push("/");
+        setSaveSuccess(true);
+        setTimeout(() => router.push("/"), 2000);
       }
     } catch (err) {
       setError("Lỗi lưu dữ liệu.");
-    } finally {
       setIsSaving(false);
     }
   };
@@ -151,16 +153,26 @@ export default function AddCustomerPage() {
         heatLevel: manualHeatLevel,
         demand: manualPropertyType
       });
-      router.push("/");
+      setSaveSuccess(true);
+      setTimeout(() => router.push("/"), 2000);
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
-    } finally {
       setIsSaving(false);
     }
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans pb-24">
+      {saveSuccess && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-500 text-white animate-in zoom-in duration-300">
+          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 animate-bounce shadow-2xl">
+            <Check className="w-12 h-12 text-emerald-500" strokeWidth={4} />
+          </div>
+          <h2 className="text-3xl font-black mb-2">Đã lưu thành công!</h2>
+          <p className="text-emerald-100 font-medium">Đang tự động chuyển về trang chủ...</p>
+        </div>
+      )}
+
       {/* City Skyline Background */}
       <div 
         className="absolute top-0 right-0 w-full max-w-lg h-[400px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"

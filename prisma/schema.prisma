@@ -10,6 +10,8 @@ generator client {
 model Profile {
   id        String   @id // Sẽ map với id của auth.users bên Supabase
   email     String   @unique
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
   role      String   @default("user") // "user" | "admin"
   balance   Int      @default(0) // Số dư Credits
   isPro     Boolean  @default(false)

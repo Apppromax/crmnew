@@ -1,17 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { upgradeToPro } from "@/actions/user";
+import { upgradeToPro, updateProfileInfo } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, Image as ImageIcon, X, Palette } from "lucide-react";
 
 export default function ProfileClient({ initialProfile }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Theme & BG State
+  const [theme, setTheme] = useState("system");
+  const [bgPattern, setBgPattern] = useState("none");
+
+  // Edit Profile State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(profile?.fullName || "");
+  const [isSavingInfo, setIsSavingInfo] = useState(false);
+
+  useEffect(() => {
+    // Load preferences
+    const savedTheme = localStorage.getItem("theme") || "system";
+    const savedBg = localStorage.getItem("bgPattern") || "none";
+    setTheme(savedTheme);
+    setBgPattern(savedBg);
+  }, []);
+
+  const changeTheme = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    const root = document.documentElement;
+    if (newTheme === "dark") {
+      root.classList.add("dark");
+    } else if (newTheme === "light") {
+      root.classList.remove("dark");
+    } else {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    }
+  };
+
+  const changeBg = (newBg) => {
+    setBgPattern(newBg);
+    localStorage.setItem("bgPattern", newBg);
+    // Áp dụng BG lên body (vì trong layout ko gài logic)
+    if (newBg === "none") {
+      document.body.style.backgroundImage = "none";
+    } else if (newBg === "dots") {
+      document.body.style.backgroundImage = "radial-gradient(circle, #cbd5e1 1px, transparent 1px)";
+      document.body.style.backgroundSize = "20px 20px";
+    } else if (newBg === "grid") {
+      document.body.style.backgroundImage = "linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)";
+      document.body.style.backgroundSize = "20px 20px";
+    }
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -35,16 +84,29 @@ export default function ProfileClient({ initialProfile }) {
     }
   };
 
+  const handleSaveInfo = async () => {
+    setIsSavingInfo(true);
+    try {
+      await updateProfileInfo({ fullName: editName });
+      setProfile(p => ({ ...p, fullName: editName }));
+      setIsEditing(false);
+    } catch (err) {
+      setError("Lỗi cập nhật thông tin.");
+    } finally {
+      setIsSavingInfo(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 font-sans">
-      <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex justify-between items-center">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950/80 pb-24 font-sans relative">
+      <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10 flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Cá nhân</h1>
         <button onClick={handleLogout} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
           <LogOut className="w-5 h-5" />
         </button>
       </header>
 
-      <main className="px-4 pt-6 space-y-6">
+      <main className="px-4 pt-6 space-y-6 relative z-0">
         {profile ? (
           <>
             {/* User Card */}
@@ -52,10 +114,14 @@ export default function ProfileClient({ initialProfile }) {
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full blur-xl -ml-5 -mb-5"></div>
               
-              <div className="relative z-10 flex justify-between items-start mb-8">
+              <div className="relative z-10 flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-sm font-semibold text-indigo-100 uppercase tracking-widest mb-1">Tài khoản</h2>
-                  <p className="font-bold text-lg truncate max-w-[200px]">{profile.email}</p>
+                  <h2 className="text-sm font-semibold text-indigo-100 uppercase tracking-widest mb-1 flex items-center gap-2">
+                    Hồ sơ 
+                    <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
+                  </h2>
+                  <p className="font-bold text-2xl truncate">{profile.fullName || "Sales Master"}</p>
+                  <p className="text-sm opacity-80 mt-0.5">{profile.email}</p>
                 </div>
                 {profile.isPro && (
                   <span className="flex items-center gap-1 bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
@@ -77,6 +143,47 @@ export default function ProfileClient({ initialProfile }) {
                 {error}
               </div>
             )}
+
+            {/* Settings UI Section */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
+                <Palette className="w-5 h-5 text-primary-500" /> Tùy chỉnh Giao diện
+              </h3>
+              
+              <div className="space-y-4">
+                {/* Theme Selector */}
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Chế độ sáng tối</p>
+                  <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button onClick={() => changeTheme('light')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${theme === 'light' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700' : 'text-slate-500'}`}>
+                      <Sun className="w-4 h-4" /> Sáng
+                    </button>
+                    <button onClick={() => changeTheme('dark')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${theme === 'dark' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                      <Moon className="w-4 h-4" /> Tối
+                    </button>
+                    <button onClick={() => changeTheme('system')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${theme === 'system' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                      Auto
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pattern Selector */}
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Hình nền (Pattern)</p>
+                  <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button onClick={() => changeBg('none')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'none' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                      Trơn
+                    </button>
+                    <button onClick={() => changeBg('dots')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'dots' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                      Dấu chấm
+                    </button>
+                    <button onClick={() => changeBg('grid')} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold transition-colors ${bgPattern === 'grid' ? 'bg-white text-primary-600 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500'}`}>
+                      Lưới
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Upgrade Section */}
             <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
@@ -127,6 +234,41 @@ export default function ProfileClient({ initialProfile }) {
           </>
         ) : null}
       </main>
+
+      {/* Edit Profile Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Sửa thông tin</h2>
+              <button onClick={() => setIsEditing(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tên hiển thị</label>
+                <input 
+                  type="text" 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
+                  placeholder="Nhập tên của bạn..."
+                />
+              </div>
+
+              <button 
+                onClick={handleSaveInfo}
+                disabled={isSavingInfo}
+                className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95"
+              >
+                {isSavingInfo ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav activeTab="profile" />
     </div>

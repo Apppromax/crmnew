@@ -62,3 +62,12 @@ export async function upgradeToPro(months = 1) {
 
   return { success: true, proUntil: result.proUntil };
 }
+
+export async function updateProfileInfo({ fullName }) {
+  const userId = await requireUser();
+  await prisma.profile.update({
+    where: { id: userId },
+    data: { fullName }
+  });
+  return { success: true };
+}
