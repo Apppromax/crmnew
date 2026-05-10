@@ -59,7 +59,7 @@ export default function AiClient({ initialReports, customerCounts, dashboardStat
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
+    <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-primary-500" />

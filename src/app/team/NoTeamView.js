@@ -48,7 +48,7 @@ export default function NoTeamView() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
+    <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
       {/* Hero Section */}
       <div className="relative bg-slate-900 overflow-hidden px-6 pt-[max(3rem,env(safe-area-inset-top))] pb-12 rounded-b-[2.5rem] shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl"></div>
@@ -131,7 +131,7 @@ export default function NoTeamView() {
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
                     placeholder="Vd: Sói Già Bất Động Sản"
-                    className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-3.5 font-bold focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white placeholder:font-normal"
+                    className="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 rounded-xl p-3.5 font-bold focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white placeholder:font-normal"
                   />
                 </div>
 
@@ -159,7 +159,7 @@ export default function NoTeamView() {
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                     placeholder="VD: X7A9K2"
                     maxLength={6}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 font-black text-center text-2xl tracking-[0.25em] uppercase focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white"
+                    className="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 font-black text-center text-2xl tracking-[0.25em] uppercase focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white"
                   />
                 </div>
 

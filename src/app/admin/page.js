@@ -92,7 +92,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+    <div className="min-h-screen bg-transparent pb-24">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex items-center gap-4">
         <button onClick={() => router.push('/profile')} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full">
           <ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />

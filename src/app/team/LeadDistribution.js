@@ -69,7 +69,7 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
                     disabled={isPending && assigningId === customer.id}
                     value={customer.userId || ""}
                     onChange={(e) => handleAssign(customer.id, e.target.value)}
-                    className="appearance-none bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-white rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all min-w-[220px] cursor-pointer disabled:opacity-50"
+                    className="appearance-none bg-transparent/50 border border-slate-200 dark:border-slate-700 font-bold text-slate-800 dark:text-white rounded-xl py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all min-w-[220px] cursor-pointer disabled:opacity-50"
                   >
                     <option value="" disabled>-- Chọn người phụ trách --</option>
                     {members.map(m => (

@@ -63,7 +63,7 @@ export default function NotificationSheet({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm">
       <div 
-        className="w-full sm:w-[400px] h-full bg-slate-50 dark:bg-slate-950 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
+        className="w-full sm:w-[400px] h-full bg-transparent flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
       >
         <div className="pt-safe px-5 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
           <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">

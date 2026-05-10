@@ -167,19 +167,22 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   );
 
   const handleRestoreQueue = useCallback(() => {
+    setLoading(true);
+    setQueue([]);
     startTransition(async () => {
       try {
         await clearAllSnoozes();
         dismissedIds.current.clear(); // Clear local dismissals so restored items can show
-        loadQueue();
+        await loadQueue();
       } catch (e) {
         console.error("Restore failed", e);
+        setLoading(false);
       }
     });
   }, [loadQueue]);
 
   return (
-    <div className="min-h-screen pb-24 md:pb-0 md:pl-64 relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans transition-all duration-300">
+    <div className="min-h-screen pb-24 md:pb-0 md:pl-64 relative overflow-hidden bg-transparent font-sans transition-all duration-300">
       {/* City Skyline Background */}
       <div 
         className="absolute top-0 right-0 w-full max-w-2xl h-[500px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"

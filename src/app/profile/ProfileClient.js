@@ -162,7 +162,7 @@ export default function ProfileClient({ initialProfile }) {
   const FOLLOWUP_PRESETS = [1, 3, 5, 7, 14];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950/80 pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
+    <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10 flex justify-between items-center">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Cá nhân</h1>
         <button onClick={handleLogout} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors">

@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TeamLayout({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen bg-transparent font-sans text-slate-900 dark:text-slate-100">
       {/* Simple Header */}
       <header className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between">
         <div className="flex items-center gap-3">

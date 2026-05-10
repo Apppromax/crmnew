@@ -158,7 +158,7 @@ export default function CustomerClient({ initialCustomers }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 transition-all duration-300">
+    <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 transition-all duration-300">
       {/* Header */}
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
