@@ -84,3 +84,4 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 4: Prefetch Navigation**: Chuyển BottomNav từ `router.push` sang `<Link>` để loại bỏ hoàn toàn độ trễ khi chuyển tab (instant navigation).
 - [x] **Step 5: Unauthenticated Landing Page**: Trang chủ bắt mắt cho user chưa đăng nhập với các nút điều hướng.
 - [x] **Step 6: Thêm khách thủ công**: Tính năng Add Manual không dùng AI cho phép thao tác nhanh.
+- [x] **Step 7: Chuẩn hóa Design System (Lucide)**: Thay thế toàn bộ thẻ SVG thô và Emoji thành bộ icon chuyên nghiệp của `lucide-react` để đồng bộ hoàn toàn UI.

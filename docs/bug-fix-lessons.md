@@ -63,3 +63,14 @@
     }
     ```
 - **Rule**: Nếu Vercel vẫn giữ behaviour (hành vi) của code cũ sau khi deploy, hãy lập tức kiểm tra **Build Logs** của Vercel xem tiến trình build mới có bị Fail và fallback hay không. Không bao giờ assume rằng code đã lên Production nếu chưa pass `eslint` / `build`.
+
+### Vấn đề: Vercel sập 500 do thiếu biến môi trường và lỗi redirect vòng lặp ở trang chủ
+- **Lỗi 1**: `500 INTERNAL_SERVER_ERROR - MIDDLEWARE_INVOCATION_FAILED`.
+- **Lỗi 2**: Người dùng truy cập trang chủ (`/`) bị ép redirect về `/login` dù đáng lẽ phải xem được Landing Page.
+- **Nguyên nhân**:
+  1. Thiếu biến `NEXT_PUBLIC_SUPABASE_ANON_KEY` và `URL` trong cấu hình Environment Variables của Vercel khiến `createServerClient` trong Middleware quăng lỗi undefined.
+  2. Middleware cũ bảo vệ route `/` và bắt buộc redirect `/login` nếu `user` là null, khiến người dùng chưa đăng nhập không thể xem Landing Page.
+- **Fix**:
+  - Gán giá trị fallback trực tiếp bằng string cho Supabase URL và Key trong `client.js`, `server.js` và `middleware.js`. Các biến `NEXT_PUBLIC_` an toàn để lộ trên frontend nên có thể hardcode fallback giúp ứng dụng không bao giờ bị crash trên Vercel dù quên cấu hình env.
+  - Cập nhật logic `middleware.js` thêm route `/` vào danh sách `isPublicRoute` để cho phép truy cập Landing Page mà không bị ép đăng nhập.
+- **Rule**: Luôn thiết lập fallback an toàn cho các biến số Public quan trọng, và cẩn trọng khi định nghĩa `isAuthRoute` trong middleware.
