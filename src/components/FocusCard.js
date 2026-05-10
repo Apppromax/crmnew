@@ -124,13 +124,21 @@ export default function FocusCard({ customer, onAction, onSnooze, animClass = ''
       </div>
 
       {/* Action Button */}
-      <div className="px-5 pb-5 pt-2">
+      <div className="px-5 pb-5 pt-2 space-y-2.5">
+        <div className="flex gap-2">
+          <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} onClick={(e) => e.stopPropagation()} className="flex-1 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all">
+            <Phone className="w-4 h-4 fill-current" /> Gọi
+          </a>
+          <a href={`https://zalo.me/${customer.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all">
+            <span className="font-black text-sm">Zalo</span>
+          </a>
+        </div>
         <button
           onClick={() => onAction?.(customer)}
           className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
         >
           <PenLine className="w-4 h-4" />
-          Chăm sóc ngay
+          Cập nhật trạng thái
         </button>
       </div>
 

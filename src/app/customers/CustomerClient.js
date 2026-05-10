@@ -127,6 +127,16 @@ export default function CustomerClient({ initialCustomers }) {
                 </div>
               </div>
 
+              {/* Quick Actions */}
+              <div className="flex gap-3 pt-2">
+                <a href={`tel:${selectedCustomer.phone}`} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                  <Phone className="w-4 h-4 fill-current" /> Gọi Điện
+                </a>
+                <a href={`https://zalo.me/${selectedCustomer.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                  <span className="font-black text-sm">Zalo</span> Nhắn Tin
+                </a>
+              </div>
+
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-xs text-slate-400 flex items-center gap-1"><Activity className="w-3.5 h-3.5"/> Trạng thái</p>
