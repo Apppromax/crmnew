@@ -12,6 +12,7 @@ SalesPush là ứng dụng quản lý khách hàng (CRM) mobile-first, thiết k
 - **🤖 AI Data Entry (Gemini 2.5 Flash)**: Paste nguyên đoạn chat của khách vào, AI tự động tách Tên, SĐT, Nhu cầu, Tài chính và chấm "Độ nét".
 - **🔒 SaaS Multi-tenant**: Đăng nhập qua Supabase Auth. Dữ liệu của từng Sale được cô lập hoàn toàn.
 - **💎 Ví & Gói Pro**: Quản trị viên (Admin) nạp Credits cho User. User dùng Credits nâng cấp gói Pro.
+- **👥 Team Mode (B2B)**: Không gian làm việc nhóm trả phí. Leader mua gói, quản lý thành viên, điều phối Lead và xem báo cáo hiệu suất chung.
 - **⚡ 10-Second Completion**: Bottom sheet ghi chú nhanh + chọn lịch hẹn + swipe hoàn thành
 - **🔥 Heat System**: Phân loại khách Hot/Warm/Cold theo Clarity Score (0-100)
 - **📊 Smart Sorting**: Thuật toán ưu tiên: Overdue → Score → Last Contact → Next Follow-up
@@ -90,6 +91,7 @@ src/
 - ✅ Phase 6: AI Data Entry, Kho khách, Schedule, Cleanup
 - ✅ Phase 7: UI/UX Refactor (shadcn, Glassmorphism, Prefetch Navigation)
 - ✅ Phase 8: Deploy Vercel thành công
+- ✅ Phase 9: Team Mode Module (SaaS B2B, Phân bổ Lead, Thống kê Team)
 
 ## 📝 License
 

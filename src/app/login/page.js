@@ -34,8 +34,8 @@ export default function LoginPage() {
           password,
         });
         if (signInError) throw signInError;
-        
-        await fetch("/api/auth/sync", { method: "POST" });
+        // Chạy ngầm sync để không làm nghẽn quá trình đăng nhập
+        fetch("/api/auth/sync", { method: "POST" }).catch(console.error);
         
         router.push("/");
         router.refresh();

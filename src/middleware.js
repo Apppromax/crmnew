@@ -27,10 +27,11 @@ export async function middleware(request) {
     }
   )
 
-  // refresh session if expired
+  // Lấy session từ cookie (nhanh hơn getUser rất nhiều vì không gọi API)
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
 
   // Define public routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')

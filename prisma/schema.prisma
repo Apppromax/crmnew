@@ -19,6 +19,10 @@ model Profile {
   customers    Customer[]
   transactions Transaction[]
 
+  // Team Relations
+  ownedTeam      Team?
+  teamMembership TeamMember?
+
   @@map("profiles")
 }
 
@@ -28,6 +32,10 @@ model Customer {
   // Liên kết với Profile (người sở hữu)
   userId    String?  @map("user_id")
   profile   Profile? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Liên kết với Team (để chia lead)
+  teamId    String?  @map("team_id")
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
   name      String
   phone     String
@@ -104,4 +112,49 @@ model Transaction {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("transactions")
+}
+
+// ----------------------------------------------------------------------------
+// TEAM MODE MODULE (B2B SaaS)
+// ----------------------------------------------------------------------------
+
+model Team {
+  id         String   @id @default(uuid())
+  name       String
+  inviteCode String   @unique @map("invite_code")
+  
+  // Người tạo team (Leader)
+  ownerId    String   @unique @map("owner_id")
+  owner      Profile  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Subscription & Limits
+  isActive   Boolean  @default(false) @map("is_active")
+  validUntil DateTime? @map("valid_until")
+  maxMembers Int      @default(5) @map("max_members")
+  
+  members    TeamMember[]
+  customers  Customer[]
+  
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  
+  teamId    String   @map("team_id")
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  // Mỗi user chỉ có thể tham gia 1 team
+  userId    String   @unique @map("user_id")
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   @default("MEMBER") // "LEADER" | "MEMBER"
+  
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  @@unique([teamId, userId])
+  @@map("team_members")
 }

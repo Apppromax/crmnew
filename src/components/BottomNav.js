@@ -41,6 +41,7 @@ export default function BottomNav({ activeTab = 'home' }) {
             <Link
               key={tab.id}
               href={tab.href}
+              prefetch={true}
               className={`flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-200 ${
                 isActive
                   ? 'text-primary-600 dark:text-primary-400'

@@ -13,7 +13,7 @@ datasource: {
 }
 ```
 
-### Schema (5 bảng chính)
+### Schema (7 bảng chính)
 
 ```prisma
 model Profile {
@@ -25,8 +25,11 @@ model Profile {
   proUntil  DateTime? @map("pro_until")
   createdAt DateTime @default(now()) @map("created_at")
 
-  customers    Customer[]
-  transactions Transaction[]
+  customers       Customer[]
+  transactions    Transaction[]
+  
+  ownedTeam       Team?
+  teamMembership  TeamMember?
 
   @@map("profiles")
 }
@@ -35,6 +38,9 @@ model Customer {
   id             String    @id @default(uuid())
   userId         String?   @map("user_id")
   profile        Profile?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  teamId         String?   @map("team_id")
+  team           Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
   
   name           String
   phone          String
@@ -98,6 +104,42 @@ model Transaction {
   status    String   @default("COMPLETED")
   createdAt DateTime @default(now()) @map("created_at")
   @@map("transactions")
+}
+
+model Team {
+  id         String   @id @default(uuid())
+  name       String
+  inviteCode String   @unique @map("invite_code")
+  
+  ownerId    String   @unique @map("owner_id")
+  owner      Profile  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  isActive   Boolean  @default(false) @map("is_active")
+  validUntil DateTime? @map("valid_until")
+  maxMembers Int      @default(5) @map("max_members")
+  
+  members    TeamMember[]
+  customers  Customer[]
+  
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  userId    String   @unique @map("user_id")
+  user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   @default("MEMBER") // "LEADER" | "MEMBER"
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  @@unique([teamId, userId])
+  @@map("team_members")
 }
 ```
 

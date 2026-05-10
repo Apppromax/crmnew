@@ -115,6 +115,15 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {/* Team Module Link */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-2">Đội Nhóm (B2B) 👥</h3>
+              <p className="text-slate-500 text-sm mb-4">Làm việc nhóm, quản lý và phân bổ khách hàng với tính năng Team Mode.</p>
+              <button onClick={() => router.push('/team')} className="w-full py-3 border-2 border-slate-900 dark:border-white hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-slate-900 text-slate-900 dark:text-white font-black uppercase tracking-wider rounded-xl transition-all">
+                Truy cập Không Gian Team
+              </button>
+            </div>
+
             {/* Admin Link */}
             {profile.role === 'admin' && (
               <button onClick={() => router.push('/admin')} className="w-full py-4 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-2xl flex justify-center items-center gap-2 shadow-lg shadow-slate-900/20 active:scale-[0.98] transition-transform">
