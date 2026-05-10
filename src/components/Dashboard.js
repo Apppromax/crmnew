@@ -16,7 +16,7 @@ import {
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
-import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy } from "lucide-react";
+import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -195,22 +195,21 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                   ? `${queue.length} khách hàng cần chăm sóc`
                   : "Không có khách cần xử lý"}
               </p>
-              <button 
-                onClick={handleRestoreQueue}
-                className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 transition-colors"
-                title="Khôi phục toàn bộ thẻ đang tạm gác"
-              >
-                Khôi phục
-              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleRestoreQueue}
+              title="Khôi phục thẻ đang gác"
+              className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
+            >
+              <RotateCcw className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+            </button>
             <button 
               onClick={() => router.push("/add")}
-              className="h-11 px-4 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform hover:bg-primary-700 font-bold text-sm"
+              className="w-11 h-11 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center active:scale-95 transition-transform hover:bg-primary-700"
             >
               <Plus className="w-5 h-5" />
-              <span className="hidden sm:inline">Thêm khách</span>
             </button>
             <button 
               onClick={() => setIsNotifOpen(true)}
