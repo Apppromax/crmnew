@@ -104,8 +104,9 @@ export default async function TeamDashboard({ context }) {
                   </span>
                 </div>
               </div>
-            </div>
-
+            ))}
+          </div>
+        </div>
             {/* LEAD DISTRIBUTION (MỘT NỬA MÀN HÌNH NẾU ĐỦ RỘNG) */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
