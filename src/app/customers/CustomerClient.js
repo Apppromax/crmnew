@@ -202,7 +202,7 @@ export default function CustomerClient({ initialCustomers }) {
             <option value="Waiting">Chờ (Waiting)</option>
             <option value="Dormant">Ngủ đông (Dormant)</option>
             <option value="Closed">Đã chốt (Closed)</option>
-            <option value="Lost">Rớt (Lost)</option>
+            <option value="Lost">Thất bại (Lost)</option>
           </select>
           <select 
             value={filterHeat}
@@ -278,7 +278,7 @@ export default function CustomerClient({ initialCustomers }) {
                   </span>
                   {c.snoozedUntil && new Date(c.snoozedUntil) > new Date() && (
                     <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20">
-                      Đang gác
+                      Đang tạm hoãn
                     </span>
                   )}
                 </div>
@@ -390,7 +390,7 @@ export default function CustomerClient({ initialCustomers }) {
                         </p>
                         {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
                           <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 whitespace-nowrap">
-                            Gác đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            Tạm hoãn đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
                           </span>
                         )}
                       </div>
