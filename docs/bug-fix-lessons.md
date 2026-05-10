@@ -114,3 +114,15 @@
 - **Nguyên nhân**: Các thao tác thay đổi DB (Mutation) từ Server Actions thực hiện thành công nhưng Next.js App Router bị kẹt bộ nhớ đệm (Router Cache) do thẻ Link đã `prefetch`. Do đó `router.push('/')` render lại bản cache cũ.
 - **Fix**: Gọi hàm `revalidatePath('/')` và `revalidatePath('/customers')` ở dòng cuối cùng trong TẤT CẢ các Server Actions có chỉnh sửa dữ liệu (`createCustomer`, `completeCustomerAction`, `snoozeCustomer`).
 - **Rule**: Next.js 13+ App Router: Bất cứ Server Action nào có thay đổi CSDL thì bắt buộc phải kết thúc bằng `revalidatePath()` nếu muốn giao diện tự cập nhật mượt mà.
+
+### Vấn đề 6: Khoảng cách Padding Top bị tụt về 0 trên thiết bị Android
+- **Lỗi**: Header của các trang (Dashboard, Add) bị dính chặt lên sát mép trên của trình duyệt, không có khoảng cách.
+- **Nguyên nhân**: Sử dụng class `.pt-safe` cấu hình `padding-top: env(safe-area-inset-top, 0);`. Trên các thiết bị Android hoặc Zalo Browser không có "tai thỏ", hàm này trả về 0, ghi đè luôn các padding-top mặc định khác (như `pt-8`) do thứ tự nạp CSS.
+- **Fix**: Sử dụng hàm `max()` trong CSS để đảm bảo một khoảng cách tối thiểu: `padding-top: max(2rem, env(safe-area-inset-top));`.
+- **Rule**: Tuyệt đối không dùng `env()` trực tiếp cho margin/padding nếu không bọc trong `max()`.
+
+### Vấn đề 7: Dropdown `<select>` quá cơ bản và khó bấm trên điện thoại
+- **Lỗi**: Form thêm khách hàng dài với nhiều ô `<select>` làm trải nghiệm lướt và chọn bị gián đoạn (phải cuộn popup của trình duyệt).
+- **Nguyên nhân**: `<select>` HTML mặc định không tối ưu cho "1-tap experience".
+- **Fix**: Thay thế bằng Component `ScrollChipSelect` - một dải các nút dạng Pills (Chips) cho phép người dùng vuốt ngang và chọn ngay với 1 thao tác chạm. Các option quan trọng như "Độ nét" được thiết kế màu sắc (Xanh/Cam/Đỏ) để nhận diện nhanh.
+- **Rule**: Hạn chế dùng native `<select>` trên các ứng dụng định hướng Mobile. Thay vào đó hãy dùng Horizontal Chips hoặc BottomSheet Pickers.

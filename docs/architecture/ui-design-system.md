@@ -44,6 +44,8 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 1. **FocusCard**: Thẻ ưu tiên cỡ lớn, kết hợp `Card` + `Badge` + Glassmorphism.
 2. **RadarCard**: Thẻ ưu tiên cỡ nhỏ.
 3. **CompletionSheet**: Mở rộng từ `Sheet` (Bottom) kết hợp thao tác Swipe-to-complete.
+4. **ScrollChipSelect**: Nút tùy chọn dạng thanh vuốt ngang (Horizontal Chips). Tối ưu hóa tuyệt đối cho mobile thay vì dùng thẻ `<select>` gốc của HTML gây giật/chắn màn hình. Có tích hợp logic màu sắc riêng cho HeatLevel.
+5. **Horizontal Weekly Calendar**: Giao diện Lịch dạng vuốt ngang theo từng ngày, tiết kiệm không gian chiều dọc trên mobile, kết hợp hệ thống dot indicator (dấu chấm nhắc lịch).
 
 ## Animations
 | Tên Class | Hiệu ứng | Thời gian |

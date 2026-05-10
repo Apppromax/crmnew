@@ -93,6 +93,7 @@ src/
 - ✅ Phase 8: Deploy Vercel thành công
 - ✅ Phase 9: Team Mode Module (SaaS B2B, Phân bổ Lead, Thống kê Team)
 - ✅ Phase 10: Performance Optimization & Manual Flow (RevalidatePath, Smart Queue Fix, Manual Add Form)
+- ✅ Phase 11: UI Refinement & Mobile Experience (Scrollable Chips, Horizontal Calendar Strip, Android Padding Fix)
 
 ## 📝 License
 
