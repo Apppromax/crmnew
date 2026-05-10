@@ -23,6 +23,7 @@ model Profile {
   balance   Int      @default(0) // Số dư Credits
   isPro     Boolean  @default(false)
   proUntil  DateTime? @map("pro_until")
+  defaultSnoozeHours Int @default(4) @map("default_snooze_hours")
   createdAt DateTime @default(now()) @map("created_at")
 
   customers       Customer[]

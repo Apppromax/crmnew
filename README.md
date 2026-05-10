@@ -15,10 +15,12 @@ SalesPush là ứng dụng quản lý khách hàng (CRM) mobile-first, thiết k
 - **🔒 SaaS Multi-tenant**: Đăng nhập qua Supabase Auth. Dữ liệu của từng Sale được cô lập hoàn toàn.
 - **💎 Ví & Gói Pro**: Quản trị viên (Admin) nạp Credits cho User. User dùng Credits nâng cấp gói Pro.
 - **👥 Team Mode (B2B)**: Không gian làm việc nhóm trả phí. Leader mua gói, quản lý thành viên, điều phối Lead và xem báo cáo hiệu suất chung.
-- **⚡ Tinder Swipe & 10-Second Completion**: Vuốt chạm tương tác vật lý cực mượt, Bottom sheet ghi chú nhanh.
+- **⚡ Tinder Swipe & 10-Second Completion**: Vuốt chạm tương tác vật lý cực mượt (Vuốt trái: Tạm gác, Vuốt phải: Cập nhật). Hỗ trợ cả Touch trên Mobile và Mouse Drag trên PC.
 - **🔥 Heat System**: Phân loại khách Hot/Warm/Cold theo Clarity Score (0-100)
 - **📊 Smart Sorting**: Thuật toán ưu tiên: Overdue → Score → Last Contact → Next Follow-up
-- **🧹 Cleanup & Schedule**: Giao diện chuyên biệt quản lý khách quá hạn và lịch hẹn tương lai.
+- **🧹 Tùy biến Queue & Snooze**: Khôi phục hàng chờ nhanh chóng, cài đặt thời gian Snooze mặc định theo từng tài khoản.
+- **📱 Responsive Layout**: Giao diện linh hoạt tự động chuyển đổi Bottom Nav (Mobile) sang Sidebar (Tablet/PC).
+- **📅 Cleanup & Schedule**: Giao diện chuyên biệt quản lý khách quá hạn và lịch hẹn tương lai.
 
 ## 🛠 Tech Stack
 
@@ -97,6 +99,7 @@ src/
 - ✅ Phase 10: Performance Optimization & Manual Flow (RevalidatePath, Smart Queue Fix, Manual Add Form)
 - ✅ Phase 11: UI Refinement & Mobile Experience (Scrollable Chips, Horizontal Calendar Strip, Android Padding Fix)
 - ✅ Phase 12: AI Engine & Smart Notifications (Dashboard Chiến lược AI, Bộ lọc thông minh, Tinder Swipe Animation, Background Settings)
+- ✅ Phase 13: Cross-platform & Queue Mechanics (Responsive Sidebar PC/iPad, Mouse Drag Tinder Swipe, Custom Snooze Config, Queue Restore)
 
 ## 📝 License
 
