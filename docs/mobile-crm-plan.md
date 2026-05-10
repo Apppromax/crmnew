@@ -85,3 +85,13 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 5: Unauthenticated Landing Page**: Trang chủ bắt mắt cho user chưa đăng nhập với các nút điều hướng.
 - [x] **Step 6: Thêm khách thủ công**: Tính năng Add Manual không dùng AI cho phép thao tác nhanh.
 - [x] **Step 7: Chuẩn hóa Design System (Lucide)**: Thay thế toàn bộ thẻ SVG thô và Emoji thành bộ icon chuyên nghiệp của `lucide-react` để đồng bộ hoàn toàn UI.
+
+### Phase 9: Cross-platform & Queue Mechanics (✅ Hoàn thành)
+- [x] **Step 1: Responsive Layout Desktop/iPad**: Chuyển đổi BottomNav thành Sidebar bên trái cho màn hình rộng (`md:` breakpoint). Grid layout 2-3 cột cho các danh sách.
+- [x] **Step 2: Tinder Swipe trên PC (Mouse Drag)**: Mở rộng tương tác vuốt thẻ từ Touch sang Mouse Events (`onMouseDown/Move/Up`) cho FocusCard và RadarCard. Hỗ trợ vuốt 2 chiều: trái (Snooze) và phải (Cập nhật).
+- [x] **Step 3: Cá nhân hóa Snooze**: Thêm trường `defaultSnoozeHours` vào model `Profile`. Tạo UI cài đặt trong trang Cá nhân để mỗi user tự chọn thời gian tạm gác.
+- [x] **Step 4: Khôi phục Queue**: Server Action `clearAllSnoozes` + nút "Khôi phục" trên Dashboard để reset toàn bộ khách đang gác.
+- [x] **Step 5: Hiển thị trạng thái Snooze**: Badge "Đang gác" với thời gian cụ thể hiển thị trên danh sách Khách hàng và Modal chi tiết.
+- [x] **Step 6: SSR Optimization**: Chuyển trang Lịch hẹn (`/schedule`) và Dọn dẹp (`/cleanup`) từ client-side fetch (`useEffect`) sang Server Component pre-fetch để loại bỏ client waterfall, tải trang nhanh hơn.
+- [x] **Step 7: Background Seamless Blend**: Sửa mask-image nền thành phố từ `linear-gradient` sang `radial-gradient` để hòa tan mượt vào nền ở cạnh trái và dưới.
+

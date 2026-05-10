@@ -126,3 +126,22 @@
 - **Nguyên nhân**: `<select>` HTML mặc định không tối ưu cho "1-tap experience".
 - **Fix**: Thay thế bằng Component `ScrollChipSelect` - một dải các nút dạng Pills (Chips) cho phép người dùng vuốt ngang và chọn ngay với 1 thao tác chạm. Các option quan trọng như "Độ nét" được thiết kế màu sắc (Xanh/Cam/Đỏ) để nhận diện nhanh.
 - **Rule**: Hạn chế dùng native `<select>` trên các ứng dụng định hướng Mobile. Thay vào đó hãy dùng Horizontal Chips hoặc BottomSheet Pickers.
+
+### Vấn đề 8: Trang Vercel trắng xóa ("This page couldn't load") do thiếu import `useState` trong RadarCard
+- **Lỗi**: Truy cập trang chủ trên Vercel hiển thị trang trắng với thông báo "This page couldn't load". Local build (`npm run build`) lại thành công bình thường.
+- **Nguyên nhân**: Khi nâng cấp `RadarCard.js` để hỗ trợ vuốt chuột (Mouse Drag), đã thêm `const [startX, setStartX] = useState(null)` nhưng quên import `useState` từ React (`import React from 'react'` thay vì `import React, { useState } from 'react'`). Turbopack (dev mode) có thể auto-resolve nhưng Production build của Vercel thì không, gây crash toàn bộ trang.
+- **Fix**: Bổ sung `{ useState }` vào dòng import của `RadarCard.js`.
+- **Rule**: Khi thêm React Hook (`useState`, `useEffect`, `useCallback`...) vào bất kỳ component nào, **bắt buộc kiểm tra dòng import đầu file** ngay lập tức. Đây là lỗi cực kỳ nguy hiểm vì build local có thể pass nhưng production sẽ crash trắng trang.
+
+### Vấn đề 9: Hàm `formatDate` chưa khai báo trong CustomerClient.js
+- **Lỗi**: Modal chi tiết khách hàng crash khi mở khách đang bị Snooze.
+- **Nguyên nhân**: Sử dụng `{formatDate(selectedCustomer.snoozedUntil)}` trong JSX nhưng không khai báo hàm `formatDate` tại vị trí hiển thị Snooze (dù hàm này đã tồn tại ở phần khác của file, ngoài phạm vi render).
+- **Fix**: Thay thế bằng inline `new Date().toLocaleString('vi-VN', {...})`.
+- **Rule**: Khi copy-paste pattern hiển thị ngày tháng vào vị trí mới trong JSX, phải xác nhận hàm helper (`formatDate`) đã được khai báo trong cùng scope. Nếu không chắc chắn, dùng inline `toLocaleString()` cho an toàn.
+
+### Vấn đề 10: Trang Lịch hẹn và Dọn dẹp tải chậm do Client-side Waterfall
+- **Lỗi**: Chuyển sang tab Lịch hẹn hoặc Dọn dẹp thấy skeleton loading lâu (300-500ms+), đặc biệt trên mạng chậm.
+- **Nguyên nhân**: Cả 2 trang đều là `"use client"` thuần, dùng `useEffect` để gọi Server Actions sau khi component mount. Quy trình: Tải JS bundle → Mount → `useEffect` → Gọi API → Nhận data → Re-render. Đây là "Client Waterfall" — 2 round-trip liên tiếp.
+- **Fix**: Tách thành 2 file: `page.js` (Server Component, fetch data) + `*Client.js` (Client Component, nhận `initialData` qua props). Pattern giống trang `/customers` và `/` đã làm trước đó.
+- **Rule**: Mọi trang hiển thị danh sách từ DB phải dùng pattern **Server Component fetch → Client Component render**. Tuyệt đối không dùng `useEffect` để fetch data ban đầu nếu có thể fetch ở server.
+
