@@ -121,7 +121,7 @@ export async function snoozeCustomer(customerId, hours = 4) {
   return { success: true };
 }
 
-export async function createCustomer({ name, phone, note }) {
+export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand }) {
   const userId = await requireUser();
 
   const customer = await prisma.customer.create({
@@ -129,8 +129,12 @@ export async function createCustomer({ name, phone, note }) {
       userId,
       name,
       phone,
+      budget,
+      area,
+      timeline,
+      demand,
       status: "New",
-      heatLevel: "Cold",
+      heatLevel: heatLevel || "Cold",
       clarityScore: 0,
       journeyStage: "Lead",
     },

@@ -19,6 +19,15 @@ export default function AddCustomerPage() {
   const [manualName, setManualName] = useState("");
   const [manualPhone, setManualPhone] = useState("");
   const [manualNote, setManualNote] = useState("");
+  
+  // Custom Dropdown States
+  const [manualSource, setManualSource] = useState("");
+  const [manualBudget, setManualBudget] = useState("");
+  const [manualPropertyType, setManualPropertyType] = useState("");
+  const [manualPurpose, setManualPurpose] = useState("");
+  const [manualArea, setManualArea] = useState("");
+  const [manualTimeline, setManualTimeline] = useState("");
+  const [manualHeatLevel, setManualHeatLevel] = useState("Cold");
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -73,7 +82,22 @@ export default function AddCustomerPage() {
     setIsSaving(true);
     setError(null);
     try {
-      await createCustomer({ name: manualName, phone: manualPhone, note: manualNote });
+      const parts = [];
+      if (manualSource) parts.push(`Nguồn: ${manualSource}`);
+      if (manualPurpose) parts.push(`Mục đích: ${manualPurpose}`);
+      if (manualNote) parts.push(`Ghi chú: ${manualNote}`);
+      const fullNote = parts.join("\n");
+
+      await createCustomer({ 
+        name: manualName, 
+        phone: manualPhone, 
+        note: fullNote,
+        budget: manualBudget,
+        area: manualArea,
+        timeline: manualTimeline,
+        heatLevel: manualHeatLevel,
+        demand: manualPropertyType
+      });
       router.push("/");
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
@@ -245,42 +269,131 @@ export default function AddCustomerPage() {
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
           <div className="glass rounded-3xl p-5 shadow-sm space-y-4">
             
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Họ và tên *
-              </label>
-              <input
-                type="text"
-                value={manualName}
-                onChange={(e) => setManualName(e.target.value)}
-                placeholder="Nguyễn Văn A"
-                className="w-full px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Họ và tên *
+                </label>
+                <input
+                  type="text"
+                  value={manualName}
+                  onChange={(e) => setManualName(e.target.value)}
+                  placeholder="Nguyễn Văn A"
+                  className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Số điện thoại *
-              </label>
-              <input
-                type="tel"
-                value={manualPhone}
-                onChange={(e) => setManualPhone(e.target.value)}
-                placeholder="0901234567"
-                className="w-full px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
-              />
-            </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Số điện thoại *
+                </label>
+                <input
+                  type="tel"
+                  value={manualPhone}
+                  onChange={(e) => setManualPhone(e.target.value)}
+                  placeholder="0901234567"
+                  className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Ghi chú ban đầu
-              </label>
-              <textarea
-                value={manualNote}
-                onChange={(e) => setManualNote(e.target.value)}
-                placeholder="Nhu cầu, tài chính, khu vực quan tâm..."
-                className="w-full h-28 px-4 py-3.5 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none text-slate-900 dark:text-white"
-              />
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nguồn khách</label>
+                <select value={manualSource} onChange={e => setManualSource(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn nguồn --</option>
+                  <option value="Tự khai thác">Tự khai thác</option>
+                  <option value="Facebook">Facebook</option>
+                  <option value="Zalo">Zalo</option>
+                  <option value="Tiktok">Tiktok</option>
+                  <option value="Khách giới thiệu">Khách giới thiệu</option>
+                  <option value="Hotline/Web">Hotline / Website</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phân khúc tài chính</label>
+                <select value={manualBudget} onChange={e => setManualBudget(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn tài chính --</option>
+                  <option value="Dưới 2 tỷ">Dưới 2 tỷ</option>
+                  <option value="2 - 3 tỷ">2 - 3 tỷ</option>
+                  <option value="3 - 5 tỷ">3 - 5 tỷ</option>
+                  <option value="5 - 10 tỷ">5 - 10 tỷ</option>
+                  <option value="10 - 20 tỷ">10 - 20 tỷ</option>
+                  <option value="Trên 20 tỷ">Trên 20 tỷ</option>
+                  <option value="Chưa xác định">Chưa xác định</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Loại hình quan tâm</label>
+                <select value={manualPropertyType} onChange={e => setManualPropertyType(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn loại hình --</option>
+                  <option value="Căn hộ chung cư">Căn hộ chung cư</option>
+                  <option value="Nhà phố/Liền kề">Nhà phố/Liền kề</option>
+                  <option value="Biệt thự">Biệt thự</option>
+                  <option value="Đất nền">Đất nền</option>
+                  <option value="Shophouse/TMDV">Shophouse/TMDV</option>
+                  <option value="Văn phòng">Văn phòng</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mục đích mua</label>
+                <select value={manualPurpose} onChange={e => setManualPurpose(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn mục đích --</option>
+                  <option value="Để ở">Mua để ở</option>
+                  <option value="Đầu tư bán lại">Đầu tư bán lại</option>
+                  <option value="Đầu tư cho thuê">Đầu tư cho thuê</option>
+                  <option value="Giữ tiền">Giữ tiền</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Khu vực quan tâm</label>
+                <select value={manualArea} onChange={e => setManualArea(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn khu vực --</option>
+                  <option value="Trung tâm thành phố">Trung tâm thành phố</option>
+                  <option value="Vùng ven/Ngoại thành">Vùng ven/Ngoại thành</option>
+                  <option value="Tỉnh lân cận">Tỉnh lân cận</option>
+                  <option value="BĐS Nghỉ dưỡng">BĐS Nghỉ dưỡng</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Thời gian dự kiến mua</label>
+                <select value={manualTimeline} onChange={e => setManualTimeline(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white">
+                  <option value="">-- Chọn thời gian --</option>
+                  <option value="Mua ngay (trong tháng)">Mua ngay (trong tháng)</option>
+                  <option value="1 - 3 tháng tới">1 - 3 tháng tới</option>
+                  <option value="3 - 6 tháng tới">3 - 6 tháng tới</option>
+                  <option value="Tham khảo">Tham khảo (Chưa rõ)</option>
+                </select>
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Độ nét (Mức độ ưu tiên)</label>
+                <select value={manualHeatLevel} onChange={e => setManualHeatLevel(e.target.value)} className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 text-slate-900 dark:text-white font-bold">
+                  <option value="Cold" className="text-slate-500">Chưa nét (Cold) - Mới liên hệ / Tham khảo</option>
+                  <option value="Warm" className="text-orange-500">Tiềm năng (Warm) - Đang cân nhắc / Đã hẹn gặp</option>
+                  <option value="Hot" className="text-red-500">Nét căng (Hot) - Đã chốt nhu cầu / Chuẩn bị cọc</option>
+                </select>
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Ghi chú tự do
+                </label>
+                <textarea
+                  value={manualNote}
+                  onChange={(e) => setManualNote(e.target.value)}
+                  placeholder="Nhập bất kỳ ghi chú nào khác về khách hàng này..."
+                  className="w-full h-24 px-4 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur border border-slate-200/60 dark:border-slate-800/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none text-slate-900 dark:text-white"
+                />
+              </div>
+
             </div>
 
             <button
