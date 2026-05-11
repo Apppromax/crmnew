@@ -45,7 +45,7 @@ model Customer {
   
   name           String
   phone          String
-  status         String    @default("New")
+  status         String    @default("Mới")
   
   // AI-Parsed Fields
   budget         String?
@@ -56,7 +56,7 @@ model Customer {
   
   // Scoring
   clarityScore   Int       @default(0) @map("clarity_score")
-  heatLevel      String    @default("Cold") @map("heat_level")
+  heatLevel      String    @default("Đang tìm hiểu") @map("heat_level")
   
   // Scheduling
   nextFollowUp   DateTime? @map("next_follow_up")
@@ -66,7 +66,7 @@ model Customer {
   // Tags
   tags           String[]  @default([])
 
-  journeyStage   String    @default("Lead") @map("journey_stage")
+  journeyStage   String    @default("1. Phá băng và làm rõ nhu cầu") @map("journey_stage")
 
   interactions   Interaction[]
   notes          Note[]
@@ -164,6 +164,14 @@ model AiReport {
   createdAt DateTime @default(now()) @map("created_at")
   @@map("ai_reports")
 }
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("system_settings")
+}
 ```
 
 ## Cơ chế Bảo mật Dữ liệu (SaaS)
@@ -178,6 +186,6 @@ ORDER BY:
   2. clarity_score DESC → khách rõ nhất
   3. last_contact_at ASC → chưa chăm lâu nhất
   4. next_follow_up ASC → hẹn gần nhất
-WHERE: status NOT IN (Closed, Lost) AND (snoozed_until IS NULL OR < NOW) AND userId = CURRENT_USER
+WHERE: status NOT IN (Đã chốt, Mất khách) AND (snoozed_until IS NULL OR < NOW) AND userId = CURRENT_USER
 LIMIT 3
 ```

@@ -36,7 +36,7 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 
 ## Danh Sách Các Core Components (shadcn)
 1. **Button** (`src/components/ui/button.jsx`): Nút bấm với các variants: `default`, `secondary`, `destructive`, `outline`, `ghost`, `link`.
-2. **Badge** (`src/components/ui/badge.jsx`): Nhãn trạng thái (New, Active, Hot, Warm).
+2. **Badge** (`src/components/ui/badge.jsx`): Nhãn trạng thái (Mới, Đang chăm, Rất nét, Tiềm năng).
 3. **Card** (`src/components/ui/card.jsx`): Vùng chứa thông tin. Kết hợp class `glass` để tạo hiệu ứng mờ ảo.
 4. **Input & Select**: Component nhập liệu chuẩn, tự động xử lý trạng thái focus, error, disabled.
 5. **Dialog & Sheet**:
@@ -49,10 +49,11 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 3. **CompletionSheet**: Mở rộng từ `Sheet` (Bottom) kết hợp thao tác Swipe-to-complete.
 4. **ScrollChipSelect**: Nút tùy chọn dạng thanh vuốt ngang (Horizontal Chips). Tối ưu hóa tuyệt đối cho mobile thay vì dùng thẻ `<select>` gốc của HTML gây giật/chắn màn hình. Có tích hợp logic màu sắc riêng cho HeatLevel.
 5. **Horizontal Weekly Calendar**: Giao diện Lịch dạng vuốt ngang theo từng ngày, tiết kiệm không gian chiều dọc trên mobile, kết hợp hệ thống dot indicator (dấu chấm nhắc lịch).
-6. **TagManager** *(mới)*: Component quản lý tag tùy chỉnh trong modal chi tiết khách hàng. Hiển thị tag chips kèm nút xóa (X) và input thêm tag mới (Enter hoặc nút +). Tự động deduplicate. Tags cũng hiển thị trên list cards (max 3, với `+N` overflow).
-7. **DashboardStatsPanel** *(mới)*: Panel KPI mở rộng trên Dashboard với 4 cards glass (Quá hạn, Hẹn hôm nay, Chốt tháng, Tổng active) + biểu đồ phễu bán hàng (Sales Funnel) dạng horizontal bar chart, 6 giai đoạn với mã màu riêng.
-8. **InteractionTimeline** *(mới)*: Tab "Lịch sử" trong modal khách hàng, merge data từ bảng `Interaction` và `Note`, hiển thị dạng timeline dọc với icon phân biệt (note/interaction) và dòng kết nối.
-9. **ScheduleActionModal** *(mới)*: Bottom sheet xuất hiện khi click lịch hẹn, hiển thị thông tin khách + nút Gọi/Zalo/Xem chi tiết.
+6. **Project/Area Manager (Tags)**: Hệ thống "Dự án / Khu vực" mở rộng từ Tags trong modal chi tiết khách hàng và màn hình thêm thủ công. Cho phép Sale linh hoạt tạo category nhóm khách hàng, hiển thị dưới dạng badge có màu sắc riêng.
+7. **DashboardStatsPanel**: Panel KPI mở rộng trên Dashboard với 4 cards glass (Quá hạn, Hẹn hôm nay, Chốt tháng, Tổng active) + biểu đồ phễu bán hàng (Sales Funnel) dạng horizontal bar chart với tên bước tiếng Việt.
+8. **InteractionTimeline**: Tab "Lịch sử" trong modal khách hàng, merge data từ bảng `Interaction` và `Note`, hiển thị dạng timeline dọc với icon phân biệt (note/interaction) và dòng kết nối.
+9. **ScheduleActionModal**: Bottom sheet xuất hiện khi click lịch hẹn, hiển thị thông tin khách + nút Gọi/Zalo/Xem chi tiết.
+10. **JourneyProgressBar & Contextual Actions** *(mới)*: Thanh tiến trình hành trình khách hàng nằm ngang ở tab Thông tin. Tích hợp tính năng hiển thị Hint (Gợi ý đặc điểm) khi nhấn vào bước, cùng Droplist đề xuất hành động theo từng giai đoạn, giúp Sale dễ dàng chốt sale và tự động log lịch sử chăm sóc.
 
 ## Animations
 | Tên Class | Hiệu ứng | Thời gian |
