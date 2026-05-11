@@ -24,9 +24,10 @@ const TIMELINE_OPTIONS = [
   { value: "Tham khảo", label: "Tham khảo (Chưa rõ)" }
 ];
 const HEAT_LEVEL_OPTIONS = [
-  { value: "Cold", label: "❄️ Lạnh (Mới/Tham khảo)", colorClass: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", selectedClass: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-500" },
-  { value: "Warm", label: "🌡️ Ấm (Cân nhắc)", colorClass: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20", selectedClass: "bg-amber-500 text-white border-amber-600" },
-  { value: "Hot", label: "🔥 Nóng (Chuẩn bị chốt)", colorClass: "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20", selectedClass: "bg-red-500 text-white border-red-600" },
+  { value: "Rất nét", label: "🌟 Rất nét (Rõ ràng mọi thứ)", colorClass: "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20", selectedClass: "bg-red-500 text-white border-red-600" },
+  { value: "Tiềm năng", label: "🔥 Tiềm năng (Thiếu vài thông tin)", colorClass: "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20", selectedClass: "bg-orange-500 text-white border-orange-600" },
+  { value: "Đang tìm hiểu", label: "🌡️ Đang tìm hiểu (Còn mơ hồ)", colorClass: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20", selectedClass: "bg-amber-500 text-white border-amber-600" },
+  { value: "Mờ", label: "❄️ Mờ (Lead yếu/Chỉ xem)", colorClass: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", selectedClass: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-500" },
 ];
 
 const ScrollChipSelect = ({ label, value, onChange, options }) => {
@@ -80,7 +81,7 @@ export default function AddCustomerPage() {
   const [manualPurpose, setManualPurpose] = useState("");
   const [manualArea, setManualArea] = useState("");
   const [manualTimeline, setManualTimeline] = useState("");
-  const [manualHeatLevel, setManualHeatLevel] = useState("Cold");
+  const [manualHeatLevel, setManualHeatLevel] = useState("Đang tìm hiểu");
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -275,8 +276,9 @@ export default function AddCustomerPage() {
                     Độ nét: {parsedData.clarityScore}/100
                   </span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
-                    parsedData.heatLevel === 'Hot' ? 'bg-red-100 text-red-700' :
-                    parsedData.heatLevel === 'Warm' ? 'bg-amber-100 text-amber-700' :
+                    parsedData.heatLevel === 'Rất nét' ? 'bg-red-100 text-red-700' :
+                    parsedData.heatLevel === 'Tiềm năng' ? 'bg-orange-100 text-orange-700' :
+                    parsedData.heatLevel === 'Đang tìm hiểu' ? 'bg-amber-100 text-amber-700' :
                     'bg-slate-100 text-slate-700'
                   }`}>
                     {parsedData.heatLevel}

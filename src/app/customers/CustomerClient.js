@@ -6,9 +6,43 @@ import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomer
 import BottomNav from "@/components/BottomNav";
 import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag } from "lucide-react";
 
-const STATUS_OPTIONS = ["New", "Active", "Waiting", "Dormant", "Closed", "Lost"];
-const HEAT_OPTIONS = ["Hot", "Warm", "Cold"];
-const JOURNEY_OPTIONS = ["Lead", "Contacted", "Viewed", "Negotiating", "Deposited", "Closed"];
+const STATUS_OPTIONS = ["Mới", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
+const HEAT_OPTIONS = ["Rất nét", "Tiềm năng", "Đang tìm hiểu", "Mờ"];
+const JOURNEY_OPTIONS = [
+  "1. Phá băng và làm rõ nhu cầu",
+  "2. Tư vấn sản phẩm",
+  "3. Xây dựng lòng tin",
+  "4. Hẹn gặp/xem",
+  "5. Xử lý từ chối",
+  "6. Chốt giao dịch"
+];
+
+const JOURNEY_DETAILS = {
+  "1. Phá băng và làm rõ nhu cầu": {
+    hints: "• Khách rụt rè, chưa cung cấp đủ thông tin.\n• Khách hỏi giá xong im lặng, khách nói 'để xem đã'.",
+    actions: ["Gọi điện làm quen", "Gửi tin nhắn gợi mở nhu cầu", "Hỏi thêm về khu vực/tài chính", "Gửi 1-2 dự án mẫu để đo lường phản ứng"]
+  },
+  "2. Tư vấn sản phẩm": {
+    hints: "• Khách bắt đầu hỏi sâu về pháp lý, giá, chính sách.\n• So sánh với dự án khác, chê giá cao.",
+    actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"]
+  },
+  "3. Xây dựng lòng tin": {
+    hints: "• Khách đã ưng nhưng còn lưỡng lự về CĐT hoặc môi giới.\n• Khách muốn xin thêm chiết khấu, 'cần bàn với gia đình'.",
+    actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"]
+  },
+  "4. Hẹn gặp/xem": {
+    hints: null,
+    actions: ["Lên lịch hẹn xem nhà mẫu", "Gọi điện chốt lịch hẹn", "Gửi vị trí định vị/hướng dẫn đường đi", "Gợi ý đưa đón khách"]
+  },
+  "5. Xử lý từ chối": {
+    hints: "• Khách im lặng sau khi xem, báo 'không hợp hướng', 'xa quá'.\n• Sợ rủi ro pháp lý, ngân hàng không duyệt vay đủ.",
+    actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng"]
+  },
+  "6. Chốt giao dịch": {
+    hints: null,
+    actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback", "Xin lời giới thiệu khách hàng mới (Referral)"]
+  }
+};
 
 export default function CustomerClient({ initialCustomers }) {
   const router = useRouter();
@@ -22,6 +56,7 @@ export default function CustomerClient({ initialCustomers }) {
   const [saveMsg, setSaveMsg] = useState("");
   // New state
   const [modalTab, setModalTab] = useState("info"); // "info" | "history"
+  const [activeHintStage, setActiveHintStage] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -59,7 +94,7 @@ export default function CustomerClient({ initialCustomers }) {
       case "nameDesc":
         return (b.name || "").localeCompare(a.name || "");
       case "heat":
-        const heatWeight = { "Hot": 3, "Warm": 2, "Cold": 1 };
+        const heatWeight = { "Rất nét": 4, "Tiềm năng": 3, "Đang tìm hiểu": 2, "Mờ": 1 };
         return (heatWeight[b.heatLevel] || 0) - (heatWeight[a.heatLevel] || 0);
       case "recentActivity":
         return new Date(b.lastInteraction || b.updatedAt || 0) - new Date(a.lastInteraction || a.updatedAt || 0);
@@ -83,13 +118,13 @@ export default function CustomerClient({ initialCustomers }) {
     setEditData({
       name: selectedCustomer.name || "",
       phone: selectedCustomer.phone || "",
-      status: selectedCustomer.status || "New",
-      heatLevel: selectedCustomer.heatLevel || "Cold",
+      status: selectedCustomer.status || "Mới",
+      heatLevel: selectedCustomer.heatLevel || "Đang tìm hiểu",
       budget: selectedCustomer.budget || "",
       area: selectedCustomer.area || "",
       demand: selectedCustomer.demand || "",
       timeline: selectedCustomer.timeline || "",
-      journeyStage: selectedCustomer.journeyStage || "Lead",
+      journeyStage: selectedCustomer.journeyStage || "1. Phá băng và làm rõ nhu cầu",
     });
     setIsEditing(true);
     setSaveMsg("");
@@ -116,6 +151,7 @@ export default function CustomerClient({ initialCustomers }) {
     setIsEditing(false);
     setSaveMsg("");
     setModalTab("info");
+    setActiveHintStage(null);
     setTimeline([]);
     setShowDeleteConfirm(false);
     setCareNote("");
@@ -272,22 +308,15 @@ export default function CustomerClient({ initialCustomers }) {
             className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 outline-none focus:border-primary-500"
           >
             <option value="All">Tất cả trạng thái</option>
-            <option value="New">Mới (New)</option>
-            <option value="Active">Đang chăm (Active)</option>
-            <option value="Waiting">Chờ (Waiting)</option>
-            <option value="Dormant">Ngủ đông (Dormant)</option>
-            <option value="Closed">Đã chốt (Closed)</option>
-            <option value="Lost">Thất bại (Lost)</option>
+            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <select 
             value={filterHeat}
             onChange={(e) => setFilterHeat(e.target.value)}
             className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 outline-none focus:border-primary-500"
           >
-            <option value="All">Mọi mức độ</option>
-            <option value="Hot">Khách Nóng (Hot)</option>
-            <option value="Warm">Khách Ấm (Warm)</option>
-            <option value="Cold">Khách Lạnh (Cold)</option>
+            <option value="All">Mọi mức độ nét</option>
+            {HEAT_OPTIONS.map(h => <option key={h} value={h}>{h}</option>)}
           </select>
           {allTags.length > 0 && (
             <select
@@ -324,9 +353,10 @@ export default function CustomerClient({ initialCustomers }) {
                   <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                     {c.name}
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      c.heatLevel === 'Hot' ? 'bg-red-100 text-red-700' :
-                      c.heatLevel === 'Warm' ? 'bg-orange-100 text-orange-700' :
-                      'bg-blue-100 text-blue-700'
+                      c.heatLevel === 'Rất nét' ? 'bg-red-100 text-red-700' :
+                      c.heatLevel === 'Tiềm năng' ? 'bg-orange-100 text-orange-700' :
+                      c.heatLevel === 'Đang tìm hiểu' ? 'bg-amber-100 text-amber-700' :
+                      'bg-slate-100 text-slate-600'
                     }`}>
                       {c.heatLevel}
                     </span>
@@ -344,10 +374,12 @@ export default function CustomerClient({ initialCustomers }) {
                 </div>
                 <div className="text-right flex flex-col items-end gap-2">
                   <span className={`text-xs font-medium px-2 py-1 rounded-md ${
-                    c.status === 'New' ? 'bg-indigo-50 text-indigo-700' :
-                    c.status === 'Active' ? 'bg-emerald-50 text-emerald-700' :
-                    c.status === 'Waiting' ? 'bg-amber-50 text-amber-700' :
-                    'bg-slate-100 text-slate-600'
+                    c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
+                    c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
+                    c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
+                    c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
+                    c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
+                    'bg-red-50 text-red-600'
                   }`}>
                     {c.status}
                   </span>
@@ -488,16 +520,84 @@ export default function CustomerClient({ initialCustomers }) {
                   <div className="grid grid-cols-3 gap-2 mt-4">
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Trạng thái</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status}</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status || "Mới"}</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                      <p className="text-[10px] uppercase text-slate-400 mb-1">Độ nóng</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel}</p>
+                      <p className="text-[10px] uppercase text-slate-400 mb-1">Độ nét</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel || "Đang tìm hiểu"}</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Hành trình</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white truncate" title={selectedCustomer.journeyStage}>{selectedCustomer.journeyStage}</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white truncate" title={selectedCustomer.journeyStage}>{selectedCustomer.journeyStage ? selectedCustomer.journeyStage.split(". ")[1] || selectedCustomer.journeyStage : "Mới"}</p>
                     </div>
+                  </div>
+
+                  {/* Journey Component */}
+                  <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 mt-4 shadow-sm">
+                    <p className="text-sm font-bold mb-3 flex items-center justify-between text-slate-800 dark:text-white">
+                      Hành trình khách hàng
+                      <span className="text-xs font-bold text-primary-500 bg-primary-50 dark:bg-primary-500/10 px-2 py-0.5 rounded-md">
+                        {Math.max(0, JOURNEY_OPTIONS.indexOf(selectedCustomer.journeyStage || JOURNEY_OPTIONS[0])) + 1}/{JOURNEY_OPTIONS.length}
+                      </span>
+                    </p>
+                    <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
+                      {JOURNEY_OPTIONS.map((stage, idx) => {
+                        const currentIdx = Math.max(0, JOURNEY_OPTIONS.indexOf(selectedCustomer.journeyStage || JOURNEY_OPTIONS[0]));
+                        const isPast = idx < currentIdx;
+                        const isCurrent = idx === currentIdx;
+                        const hasHint = JOURNEY_DETAILS[stage]?.hints;
+                        return (
+                          <div 
+                            key={stage} 
+                            onClick={() => hasHint && setActiveHintStage(activeHintStage === stage ? null : stage)}
+                            className={`shrink-0 w-[100px] flex flex-col gap-1.5 ${hasHint ? 'cursor-pointer hover:opacity-80' : ''}`}
+                          >
+                            <div className={`w-full h-2 rounded-full transition-colors ${isPast ? 'bg-emerald-500' : isCurrent ? 'bg-primary-500' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
+                            <span className={`text-[10px] font-bold leading-tight ${isPast ? 'text-emerald-600 dark:text-emerald-400' : isCurrent ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`}>
+                              {stage.split('. ')[1]}
+                            </span>
+                            {hasHint && (
+                              <div className={`text-[9px] px-1 py-0.5 rounded w-max border ${activeHintStage === stage ? 'bg-primary-50 border-primary-200 text-primary-600 dark:bg-primary-900/30 dark:border-primary-800 dark:text-primary-400' : 'bg-slate-50 border-slate-200 text-slate-400 dark:bg-slate-800 dark:border-slate-700'} mt-auto transition-colors`}>
+                                Xem gợi ý
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {activeHintStage && JOURNEY_DETAILS[activeHintStage]?.hints && (
+                      <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-900/30 rounded-xl animate-in fade-in zoom-in-95 duration-200">
+                        <p className="text-xs font-bold text-amber-800 dark:text-amber-400 mb-1">Gợi ý: {activeHintStage.split('. ')[1]}</p>
+                        <p className="text-xs text-amber-700 dark:text-amber-300 whitespace-pre-wrap leading-relaxed">{JOURNEY_DETAILS[activeHintStage].hints}</p>
+                      </div>
+                    )}
+                    
+                    {JOURNEY_DETAILS[selectedCustomer.journeyStage || JOURNEY_OPTIONS[0]]?.actions?.length > 0 && (
+                      <div className="pt-3 border-t border-slate-100 dark:border-slate-800/50">
+                        <label className="block text-[10px] uppercase font-bold text-slate-400 mb-2 flex items-center gap-1">
+                          <Activity className="w-3 h-3" /> Hành động đề xuất tiếp theo
+                        </label>
+                        <div className="relative">
+                          <select 
+                            className="w-full text-sm p-3 pr-8 rounded-xl border border-primary-200 dark:border-primary-900/50 bg-primary-50/50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none shadow-sm"
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                setCareNote("Đã thực hiện: " + e.target.value);
+                                setModalTab('care');
+                                e.target.value = "";
+                              }
+                            }}
+                          >
+                            <option value="">-- Chọn một hành động để ghi nhận --</option>
+                            {JOURNEY_DETAILS[selectedCustomer.journeyStage || JOURNEY_OPTIONS[0]].actions.map(action => (
+                              <option key={action} value={action}>{action}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="w-4 h-4 text-primary-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl space-y-3.5 border border-slate-100 dark:border-slate-800 max-h-[40vh] overflow-y-auto custom-scrollbar">

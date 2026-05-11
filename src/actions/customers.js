@@ -18,7 +18,7 @@ export async function getSmartQueue() {
   const customers = await prisma.customer.findMany({
     where: {
       userId,
-      status: { notIn: ["Closed", "Lost"] },
+      status: { notIn: ["Đã chốt", "Mất khách"] },
       OR: [
         { snoozedUntil: null },
         { snoozedUntil: { lte: now } },
@@ -108,7 +108,7 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
     data: {
       lastContactAt: now,
       nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
-      status: nextFollowUp ? "Waiting" : "Active",
+      status: nextFollowUp ? "Đang chờ" : "Đang chăm",
     },
   });
 
@@ -165,10 +165,10 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       area,
       timeline,
       demand,
-      status: "New",
-      heatLevel: heatLevel || "Cold",
+      status: "Mới",
+      heatLevel: heatLevel || "Đang tìm hiểu",
       clarityScore: 0,
-      journeyStage: "Lead",
+      journeyStage: "1. Phá băng và làm rõ nhu cầu",
     },
   });
 
@@ -297,10 +297,10 @@ export async function getAllTags() {
 export async function getCustomerCount() {
   const userId = await requireUser();
   const total = await prisma.customer.count({
-    where: { userId, status: { notIn: ["Closed", "Lost"] } },
+    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } },
   });
-  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Hot" } });
-  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Warm" } });
+  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Rất nét" } });
+  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Tiềm năng" } });
   return { total, hot, warm };
 }
 
@@ -310,10 +310,10 @@ export async function getDashboardStats() {
 
   // Basic counts
   const [total, hot, warm, overdue] = await Promise.all([
-    prisma.customer.count({ where: { userId, status: { notIn: ["Closed", "Lost"] } } }),
-    prisma.customer.count({ where: { userId, heatLevel: "Hot", status: { notIn: ["Closed", "Lost"] } } }),
-    prisma.customer.count({ where: { userId, heatLevel: "Warm", status: { notIn: ["Closed", "Lost"] } } }),
-    prisma.customer.count({ where: { userId, status: { notIn: ["Closed", "Lost"] }, nextFollowUp: { lt: now } } }),
+    prisma.customer.count({ where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } } }),
+    prisma.customer.count({ where: { userId, heatLevel: "Rất nét", status: { notIn: ["Đã chốt", "Mất khách"] } } }),
+    prisma.customer.count({ where: { userId, heatLevel: "Tiềm năng", status: { notIn: ["Đã chốt", "Mất khách"] } } }),
+    prisma.customer.count({ where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { lt: now } } }),
   ]);
 
   // Today schedule
@@ -326,13 +326,13 @@ export async function getDashboardStats() {
   // Closed this month
   const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
   const closedThisMonth = await prisma.customer.count({
-    where: { userId, status: "Closed", updatedAt: { gte: monthStart } },
+    where: { userId, status: "Đã chốt", updatedAt: { gte: monthStart } },
   });
 
   // Journey funnel
-  const stages = ["Lead", "Contacted", "Viewed", "Negotiating", "Deposited", "Closed"];
+  const stages = ["1. Phá băng và làm rõ nhu cầu", "2. Tư vấn sản phẩm", "3. Xây dựng lòng tin", "4. Hẹn gặp/xem", "5. Xử lý từ chối", "6. Chốt giao dịch"];
   const funnelPromises = stages.map(s =>
-    prisma.customer.count({ where: { userId, journeyStage: s, status: { notIn: ["Lost"] } } })
+    prisma.customer.count({ where: { userId, journeyStage: s, status: { notIn: ["Mất khách"] } } })
   );
   const funnelCounts = await Promise.all(funnelPromises);
   const funnel = stages.map((s, i) => ({ stage: s, count: funnelCounts[i] }));
@@ -344,7 +344,7 @@ export async function getOverdueCustomers() {
   const userId = await requireUser();
   const now = new Date();
   const customers = await prisma.customer.findMany({
-    where: { userId, status: { notIn: ["Closed", "Lost"] }, nextFollowUp: { lt: now } },
+    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { lt: now } },
     orderBy: { nextFollowUp: "asc" },
   });
   return customers.map((c) => ({
@@ -361,7 +361,7 @@ export async function getUpcomingSchedule() {
   const userId = await requireUser();
   const now = new Date();
   const customers = await prisma.customer.findMany({
-    where: { userId, status: { notIn: ["Closed", "Lost"] }, nextFollowUp: { gte: now } },
+    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { gte: now } },
     orderBy: { nextFollowUp: "asc" },
   });
   return customers.map((c) => ({

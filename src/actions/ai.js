@@ -23,7 +23,7 @@ Các trường cần trích xuất:
 - area: Khu vực quan tâm (ví dụ: "Q7, Nhà Bè", null nếu không có)
 - timeline: Thời gian dự kiến mua (ví dụ: "Tháng sau", null nếu không có)
 - finance: Tình trạng tài chính (ví dụ: "Cần vay 50%", null nếu không có)
-- heatLevel: Phân loại mức độ nét ("Hot" | "Warm" | "Cold" - mặc định "Cold")
+- heatLevel: Phân loại mức độ nét ("Rất nét" | "Tiềm năng" | "Đang tìm hiểu" | "Mờ" - mặc định "Đang tìm hiểu")
 - clarityScore: Điểm rõ ràng thông tin (Từ 0 đến 100, dựa trên mức độ đầy đủ của các thông tin trên)
 - summary: Tóm tắt ngắn gọn ghi chú (1 câu)
 
@@ -63,15 +63,15 @@ export async function createCustomerFromAI({ parsedData, rawNote }) {
         userId: user.id,
         name: parsedData.name || "Khách chưa rõ tên",
         phone: parsedData.phone || "Chưa có SĐT",
-        status: "Active", // Vừa thêm vào thì active luôn để hiện lên queue
+        status: "Đang chăm", // Vừa thêm vào thì active luôn để hiện lên queue
         budget: parsedData.budget,
         demand: parsedData.demand,
         area: parsedData.area,
         timeline: parsedData.timeline,
         finance: parsedData.finance,
         clarityScore: parsedData.clarityScore || 10,
-        heatLevel: parsedData.heatLevel || "Cold",
-        journeyStage: "Lead",
+        heatLevel: parsedData.heatLevel || "Đang tìm hiểu",
+        journeyStage: "1. Phá băng và làm rõ nhu cầu",
       },
     });
 
@@ -129,7 +129,7 @@ export async function generateWeeklyStrategy() {
   const customers = await prisma.customer.findMany({
     where: { 
       userId: user.id,
-      status: { notIn: ["Closed", "Lost"] }
+      status: { notIn: ["Đã chốt", "Mất khách"] }
     },
     select: {
       name: true,
