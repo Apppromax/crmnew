@@ -76,6 +76,12 @@ model Customer {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([userId, status])
+  @@index([userId, nextFollowUp])
+  @@index([userId, lastContactAt])
+  @@index([userId, heatLevel])
+  @@index([userId, createdAt])
+  @@index([teamId])
   @@map("customers")
 }
 
@@ -90,6 +96,7 @@ model Interaction {
 
   createdAt  DateTime @default(now()) @map("created_at")
 
+  @@index([customerId, createdAt])
   @@map("interactions")
 }
 
@@ -104,6 +111,7 @@ model Note {
 
   createdAt  DateTime @default(now()) @map("created_at")
 
+  @@index([customerId, createdAt])
   @@map("notes")
 }
 
@@ -119,6 +127,7 @@ model Transaction {
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([userId, createdAt])
   @@map("transactions")
 }
 
@@ -176,6 +185,7 @@ model AiReport {
   
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([userId, createdAt])
   @@map("ai_reports")
 }
 
@@ -192,6 +202,7 @@ model Notification {
   
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([userId, isRead, createdAt])
   @@map("notifications")
 }
 

@@ -13,6 +13,14 @@ async function requireUser() {
 export async function getNotifications() {
   try {
     const userId = await requireUser();
+
+    // Auto-cleanup: xóa noti cũ hơn 5 ngày
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+    await prisma.notification.deleteMany({
+      where: { userId, createdAt: { lt: fiveDaysAgo } }
+    });
+
     const notifications = await prisma.notification.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
