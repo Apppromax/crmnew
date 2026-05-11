@@ -114,6 +114,7 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
 
   revalidatePath("/");
   revalidatePath("/customers");
+  revalidatePath("/schedule");
 
   return { success: true };
 }

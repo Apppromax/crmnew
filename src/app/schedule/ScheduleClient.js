@@ -101,12 +101,15 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleComplete = (item) => {
     startTransition(async () => {
       try {
         await completeCustomerAction({ customerId: item.id, note: "Đã liên hệ theo lịch trình" });
-        if (selectedItem?.id === item.id) setSelectedItem(null);
+        setSelectedItem(null);
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 2000);
         router.refresh();
       } catch (err) {
         alert(err.message);
@@ -156,6 +159,14 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
 
   return (
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
+      {/* Success Toast */}
+      {showSuccess && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[999] animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center gap-2 px-5 py-3 bg-emerald-500 text-white rounded-2xl shadow-xl shadow-emerald-500/30 font-bold text-sm">
+            <Check className="w-5 h-5" /> Đã hoàn thành lịch hẹn!
+          </div>
+        </div>
+      )}
       <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-20">
         <div className="flex justify-between items-center mb-4">
            <h1 className="text-3xl font-black text-slate-800 dark:text-white">Lịch hẹn</h1>
@@ -341,9 +352,18 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                   <button 
                     onClick={() => handleComplete(selectedItem)}
                     disabled={isPending}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
                   >
-                    <Check className="w-4 h-4" /> Đã xong lịch hẹn
+                    {isPending ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" /> Đã xong lịch hẹn
+                      </>
+                    )}
                   </button>
                   
                   <div className="relative group">
