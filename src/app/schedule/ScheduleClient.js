@@ -11,22 +11,23 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-mo
 
 // Helper for heat colors strictly matching FocusCard.js
 const heatConfig = {
-  "1 - Chốt Ngay": { icon: Flame, label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
-  "2 - Rất Nóng": { icon: Flame, label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
-  "3 - Nóng": { icon: ThermometerSun, label: 'Cao', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
-  "4 - Ấm": { icon: ThermometerSun, label: 'Cao', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
-  "5 - Lạnh": { icon: Snowflake, label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
-  "Hot": { icon: Flame, label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
-  "Warm": { icon: ThermometerSun, label: 'Cao', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
-  "Cold": { icon: Snowflake, label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
+  "1 - Chốt Ngay": { icon: Flame, label: 'Rất nét', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  "2 - Rất Nóng": { icon: Flame, label: 'Rất nét', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  "3 - Nóng": { icon: ThermometerSun, label: 'Tiềm năng', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  "4 - Ấm": { icon: ThermometerSun, label: 'Tiềm năng', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  "5 - Lạnh": { icon: Snowflake, label: 'Đang tìm hiểu', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
+  "Rất nét": { icon: Flame, label: 'Rất nét', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  "Tiềm năng": { icon: ThermometerSun, label: 'Tiềm năng', bg: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-200 dark:border-orange-500/20' },
+  "Đang tìm hiểu": { icon: ThermometerSun, label: 'Đang tìm hiểu', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  "Mờ": { icon: Snowflake, label: 'Mờ', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
 };
 
 const getHeatStyle = (level) => {
-  if (!level) return heatConfig["Cold"];
+  if (!level) return heatConfig["Đang tìm hiểu"];
   for (const key in heatConfig) {
     if (level.includes(key)) return heatConfig[key];
   }
-  return heatConfig["Cold"];
+  return heatConfig["Đang tìm hiểu"];
 };
 
 const SwipeableCard = ({ item, onClick, onComplete, onReschedule }) => {
@@ -303,7 +304,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                   </div>
                   <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
                   <div className="text-center flex-1">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Độ nóng</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Độ nét</p>
                     <span className={`text-xs font-semibold ${getHeatStyle(selectedItem.heatLevel).text}`}>{getHeatStyle(selectedItem.heatLevel).label}</span>
                   </div>
                   <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />

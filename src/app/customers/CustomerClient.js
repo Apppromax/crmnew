@@ -297,7 +297,7 @@ export default function CustomerClient({ initialCustomers }) {
             <option value="newest">Mới nhất</option>
             <option value="oldest">Cũ nhất</option>
             <option value="recentActivity">Tương tác gần đây</option>
-            <option value="heat">Khách nóng nhất</option>
+            <option value="heat">Rõ nét nhất</option>
             <option value="nameAsc">Tên A-Z</option>
             <option value="nameDesc">Tên Z-A</option>
           </select>
@@ -451,7 +451,7 @@ export default function CustomerClient({ initialCustomers }) {
                   
                   <div className="grid grid-cols-2 gap-3">
                     <SelectField label="Trạng thái" field="status" options={STATUS_OPTIONS} />
-                    <SelectField label="Độ nóng" field="heatLevel" options={HEAT_OPTIONS} />
+                    <SelectField label="Độ nét" field="heatLevel" options={HEAT_OPTIONS} />
                   </div>
                   
                   <SelectField label="Hành trình" field="journeyStage" options={JOURNEY_OPTIONS} />

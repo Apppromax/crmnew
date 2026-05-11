@@ -31,22 +31,22 @@ function enrichCustomer(c) {
   if (overdueDays > 0) {
     reason = `Lỡ hẹn ${overdueDays} ngày, cần liên hệ lại ngay`;
     nextStep = "Gọi xác nhận lại lịch hẹn";
-  } else if (c.journeyStage === "Negotiating") {
+  } else if (c.journeyStage === "5. Xử lý từ chối") {
     reason = "Đang thương lượng, cần chốt sớm";
     nextStep = "Gửi bảng giá ưu đãi";
-  } else if (c.journeyStage === "Viewed") {
+  } else if (c.journeyStage === "4. Hẹn gặp/xem") {
     reason = "Đã xem nhà, cần follow-up";
     nextStep = "Hỏi cảm nhận và đề xuất bước tiếp";
-  } else if (c.journeyStage === "Contacted") {
+  } else if (c.journeyStage === "2. Tư vấn sản phẩm") {
     reason = "Đã liên hệ, chưa hẹn xem nhà";
     nextStep = "Đặt lịch xem nhà";
-  } else if (c.heatLevel === "Hot") {
-    reason = "Khách nóng, thông tin rõ ràng";
+  } else if (c.heatLevel === "Rất nét") {
+    reason = "Khách rõ nét, thông tin đầy đủ";
     nextStep = "Gọi tư vấn chi tiết";
-  } else if (c.heatLevel === "Warm") {
-    reason = "Khách ấm, cần nuôi dưỡng";
+  } else if (c.heatLevel === "Tiềm năng") {
+    reason = "Khách tiềm năng, cần nuôi dưỡng";
     nextStep = "Nhắn tin follow-up";
-  } else if (c.heatLevel === "Cold") {
+  } else if (c.heatLevel === "Đang tìm hiểu" || c.heatLevel === "Mờ") {
     reason = "Thông tin còn mơ hồ, cần khai thác";
     nextStep = "Gọi tìm hiểu ngân sách";
   }

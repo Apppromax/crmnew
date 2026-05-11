@@ -49,15 +49,15 @@ export async function triggerSmartAlerts() {
   try {
     const userId = await requireUser();
     
-    // 1. Khách Nóng (Hot) mà quá 3 ngày chưa cập nhật
+    // 1. Khách Rất nét mà quá 3 ngày chưa cập nhật
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
     const forgottenHotLeads = await prisma.customer.findMany({
       where: {
         userId,
-        heatLevel: "Hot",
-        status: { notIn: ["Closed", "Lost"] },
+        heatLevel: "Rất nét",
+        status: { notIn: ["Đã chốt", "Mất khách"] },
         updatedAt: { lt: threeDaysAgo },
       }
     });
@@ -78,7 +78,7 @@ export async function triggerSmartAlerts() {
         await prisma.notification.create({
           data: {
             userId,
-            title: "🔥 Khách Nóng đang bị bỏ quên!",
+            title: "🔥 Khách Rất Nét đang bị bỏ quên!",
             body: `VIP ${lead.name} đã không có tương tác nào trong 3 ngày qua. Hãy nhấc máy gọi ngay!`,
             type: "ALERT",
           }

@@ -33,7 +33,7 @@ export default function TeamAnalytics({ stats, members }) {
               <TrendingUp className="w-4 h-4 text-blue-500" />
               <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">Đang Chăm</span>
             </div>
-            <p className="text-3xl md:text-4xl font-black text-slate-800 dark:text-white">{stats.statusCount.Active + stats.statusCount.Waiting}</p>
+            <p className="text-3xl md:text-4xl font-black text-slate-800 dark:text-white">{(stats.statusCount["Đang chăm"] || 0) + (stats.statusCount["Đang chờ"] || 0)}</p>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ export default function TeamAnalytics({ stats, members }) {
               <CheckCircle2 className="w-4 h-4" />
               <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">Đã Chốt</span>
             </div>
-            <p className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-400 dark:to-emerald-600">{stats.statusCount.Closed}</p>
+            <p className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-emerald-500 to-emerald-700 dark:from-emerald-400 dark:to-emerald-600">{stats.statusCount["Đã chốt"] || 0}</p>
           </div>
         </div>
 
@@ -53,9 +53,9 @@ export default function TeamAnalytics({ stats, members }) {
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2 text-amber-600 dark:text-amber-500">
               <Flame className="w-4 h-4" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">Khách Nóng</span>
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">Rất Nét</span>
             </div>
-            <p className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-amber-700 dark:from-amber-400 dark:to-amber-600">{stats.heatCount.Hot}</p>
+            <p className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-amber-500 to-amber-700 dark:from-amber-400 dark:to-amber-600">{stats.heatCount["Rất nét"] || 0}</p>
           </div>
         </div>
       </div>
@@ -67,31 +67,38 @@ export default function TeamAnalytics({ stats, members }) {
             <div className="p-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 text-red-500">
               <BarChart3 className="w-5 h-5" />
             </div>
-            Nhiệt Độ Khách
+            Độ Nét Khách Hàng
           </h3>
           <div className="space-y-4">
             <div className="flex items-center gap-3 group">
-              <span className="w-12 text-xs font-black tracking-wider text-red-500">HOT</span>
+              <span className="w-16 text-xs font-black tracking-wider text-red-500">Rất nét</span>
               <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                <div className="h-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-1000 ease-out relative" style={{ width: `${stats.totalLeads ? (stats.heatCount.Hot / stats.totalLeads) * 100 : 0}%` }}>
+                <div className="h-full bg-gradient-to-r from-red-400 to-red-600 transition-all duration-1000 ease-out relative" style={{ width: `${stats.totalLeads ? ((stats.heatCount["Rất nét"] || 0) / stats.totalLeads) * 100 : 0}%` }}>
                   <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                 </div>
               </div>
-              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount.Hot}</span>
+              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount["Rất nét"] || 0}</span>
             </div>
             <div className="flex items-center gap-3 group">
-              <span className="w-12 text-xs font-black tracking-wider text-amber-500">WARM</span>
+              <span className="w-16 text-xs font-black tracking-wider text-orange-500">Tiềm năng</span>
               <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-1000 ease-out" style={{ width: `${stats.totalLeads ? (stats.heatCount.Warm / stats.totalLeads) * 100 : 0}%` }} />
+                <div className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-1000 ease-out" style={{ width: `${stats.totalLeads ? ((stats.heatCount["Tiềm năng"] || 0) / stats.totalLeads) * 100 : 0}%` }} />
               </div>
-              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount.Warm}</span>
+              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount["Tiềm năng"] || 0}</span>
             </div>
             <div className="flex items-center gap-3 group">
-              <span className="w-12 text-xs font-black tracking-wider text-blue-400 dark:text-blue-500">COLD</span>
+              <span className="w-16 text-xs font-black tracking-wider text-amber-500">Tìm hiểu</span>
               <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                <div className="h-full bg-gradient-to-r from-blue-300 to-blue-400 dark:from-blue-500 dark:to-blue-600 transition-all duration-1000 ease-out" style={{ width: `${stats.totalLeads ? (stats.heatCount.Cold / stats.totalLeads) * 100 : 0}%` }} />
+                <div className="h-full bg-gradient-to-r from-amber-300 to-amber-400 transition-all duration-1000 ease-out" style={{ width: `${stats.totalLeads ? ((stats.heatCount["Đang tìm hiểu"] || 0) / stats.totalLeads) * 100 : 0}%` }} />
               </div>
-              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount.Cold}</span>
+              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount["Đang tìm hiểu"] || 0}</span>
+            </div>
+            <div className="flex items-center gap-3 group">
+              <span className="w-16 text-xs font-black tracking-wider text-slate-400">Mờ</span>
+              <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                <div className="h-full bg-gradient-to-r from-slate-300 to-slate-400 dark:from-slate-500 dark:to-slate-600 transition-all duration-1000 ease-out" style={{ width: `${stats.totalLeads ? ((stats.heatCount["Mờ"] || 0) / stats.totalLeads) * 100 : 0}%` }} />
+              </div>
+              <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{stats.heatCount["Mờ"] || 0}</span>
             </div>
           </div>
         </div>

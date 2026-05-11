@@ -307,7 +307,7 @@ export async function getTeamStats(teamId) {
       acc[c.userId] = { total: 0, closed: 0 };
     }
     acc[c.userId].total += 1;
-    if (c.status === "Closed") {
+    if (c.status === "Đã chốt") {
       acc[c.userId].closed += 1;
     }
     return acc;
@@ -316,16 +316,18 @@ export async function getTeamStats(teamId) {
   return {
     totalLeads,
     statusCount: {
-      New: statusCount["New"] || 0,
-      Active: statusCount["Active"] || 0,
-      Waiting: statusCount["Waiting"] || 0,
-      Closed: statusCount["Closed"] || 0,
-      Lost: statusCount["Lost"] || 0,
+      Mới: statusCount["Mới"] || 0,
+      "Đang chăm": statusCount["Đang chăm"] || 0,
+      "Đang chờ": statusCount["Đang chờ"] || 0,
+      "Ngủ đông": statusCount["Ngủ đông"] || 0,
+      "Đã chốt": statusCount["Đã chốt"] || 0,
+      "Mất khách": statusCount["Mất khách"] || 0,
     },
     heatCount: {
-      Hot: heatCount["Hot"] || 0,
-      Warm: heatCount["Warm"] || 0,
-      Cold: heatCount["Cold"] || 0,
+      "Rất nét": heatCount["Rất nét"] || 0,
+      "Tiềm năng": heatCount["Tiềm năng"] || 0,
+      "Đang tìm hiểu": heatCount["Đang tìm hiểu"] || 0,
+      "Mờ": heatCount["Mờ"] || 0,
     },
     memberPerformance
   };
