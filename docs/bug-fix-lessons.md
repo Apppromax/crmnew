@@ -209,3 +209,50 @@
 - **Lỗi**: Nút hẹn "Ngày mai" đôi khi quá lâu đối với các cuộc gọi nhỡ cần gọi lại ngay trong ngày.
 - **Fix**: Mở rộng bộ Option hẹn lịch thành dạng lưới (Grid), hỗ trợ mix cả đơn vị Giờ (2h, 4h) lẫn Ngày (1d, 3d, 7d) trong logic xử lý `Date()`.
 - **Rule**: CRM cho Sale phải phản ứng linh hoạt với thời gian thực. Hỗ trợ đơn vị tính "Giờ" là bắt buộc đối với khách hàng có mức độ Nóng (Hot).
+
+---
+
+## 🔴 Phase 17: Terminology Migration & Performance (2026-05-11)
+
+### Vấn đề 21: Build fail do ternary chain bị vỡ cấu trúc
+- **Lỗi**: `Expected '</', got ':'` tại AdminClient.js:227.
+- **Nguyên nhân**: Chuỗi ternary 2 nhánh (users/pending) dùng `) : (` làm fallback. Khi thêm tab "settings" thành nhánh thứ 3, parser JSX hiểu sai cấu trúc.
+- **Fix**: Đổi `) : (` thành `) : activeTab === "pending" ? (` để tạo chuỗi 4 nhánh đúng.
+- **Rule**: Khi mở rộng ternary chain trong JSX, LUÔN kiểm tra nhánh cuối có phải catch-all `) : (` hay explicit condition. Catch-all phải ở cuối cùng.
+
+### Vấn đề 22: Nút "Đã xong lịch hẹn" không phản hồi
+- **Lỗi**: Nhấn nút hoàn thành lịch hẹn nhưng UI không có bất kỳ phản hồi nào.
+- **Nguyên nhân 1**: Nút không có trạng thái loading (disabled + spinner).
+- **Nguyên nhân 2**: Modal không tự đóng sau khi server action xong.
+- **Nguyên nhân 3**: Server action chỉ `revalidatePath("/")` và `"/customers"`, thiếu `"/schedule"`.
+- **Fix**: Thêm spinner + "Đang xử lý...", auto-close modal, toast thành công, revalidate `/schedule`.
+- **Rule**: Mọi nút gọi Server Action PHẢI có: (1) Loading state, (2) Success feedback, (3) revalidate TẤT CẢ routes liên quan.
+
+### Vấn đề 23: Khách vẫn hiện trong lịch hẹn sau khi hoàn thành
+- **Lỗi**: Nhấn "Đã xong" xong, khách đó vẫn nằm trong danh sách lịch hẹn.
+- **Nguyên nhân**: `const [schedule] = useState(initialSchedule)` — React `useState` chỉ khởi tạo state 1 lần. Dù `router.refresh()` trả về props mới từ server, client state KHÔNG tự cập nhật.
+- **Fix 2 lớp**:
+  1. **Optimistic**: `setSchedule(prev => prev.filter(c => c.id !== item.id))` xóa ngay trên client.
+  2. **Sync**: `useEffect(() => setSchedule(initialSchedule), [initialSchedule])` đồng bộ khi server props thay đổi.
+- **Rule**: Khi Server Component truyền `initialData` cho Client Component qua `useState`, PHẢI thêm `useEffect` để sync. Hoặc dùng `useSyncExternalStore` / React key pattern.
+
+### Vấn đề 24: Thuật ngữ cũ (Hot/Cold/Waiting/Closed) tồn đọng ở 7 file
+- **Lỗi**: Sau migration data sang tiếng Việt, nhiều file UI và logic vẫn so sánh với giá trị cũ (Hot, Warm, Cold, Negotiating, Contacted...) → logic rẽ nhánh không khớp data mới.
+- **Fix**: Grep toàn bộ codebase, cập nhật 7 file: Dashboard.js, ScheduleClient.js, AiClient.js, TeamAnalytics.js, CustomerClient.js, notifications.js, team.js.
+- **Rule**: Khi thay đổi enum/status values trong DB, PHẢI grep toàn bộ codebase tìm giá trị cũ. Không tin tưởng bộ nhớ — sử dụng `grep -r "old_value" src/`.
+
+### Vấn đề 25: Database không có index → Full table scan
+- **Lỗi**: Ước tính ở 1,000 users, Dashboard query scan 200K+ rows → 2-5 giây/request.
+- **Nguyên nhân**: Schema Prisma không khai báo `@@index` cho bất kỳ bảng nào.
+- **Fix**: Thêm 11 composite indexes trên 6 bảng (customers, interactions, notes, notifications, transactions, ai_reports).
+- **Rule**: Mọi Prisma model có `findMany` với `where` clause PHẢI có `@@index` tương ứng. Kiểm tra khi tạo model mới.
+
+### Vấn đề 26: Notification tích lũy vĩnh viễn
+- **Lỗi**: Hệ thống `triggerSmartAlerts()` tạo noti tự động hàng ngày, không có cơ chế dọn dẹp → bảng phồng nhanh.
+- **Fix**: Auto-cleanup noti > 5 ngày mỗi khi user mở trang Thông báo (`deleteMany where createdAt < 5 days ago`).
+- **Rule**: Mọi bảng có auto-generated data (notifications, logs) PHẢI có TTL (Time-to-Live) cleanup.
+
+### Vấn đề 27: Dashboard 12 queries tuần tự
+- **Lỗi**: `getDashboardStats` chạy 3 lượt `await Promise.all()` nối tiếp (4+1+1+6 queries).
+- **Fix**: Gom tất cả 12 queries vào 1 `Promise.all()` duy nhất chạy song song.
+- **Rule**: Các query độc lập LUÔN gom vào 1 `Promise.all()`. Không bao giờ `await` tuần tự nếu queries không phụ thuộc nhau.

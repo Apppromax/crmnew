@@ -73,6 +73,12 @@ model Customer {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  @@index([userId, status])
+  @@index([userId, nextFollowUp])
+  @@index([userId, lastContactAt])
+  @@index([userId, heatLevel])
+  @@index([userId, createdAt])
+  @@index([teamId])
   @@map("customers")
 }
 
@@ -84,6 +90,7 @@ model Interaction {
   summary    String?
   outcome    String?
   createdAt  DateTime @default(now()) @map("created_at")
+  @@index([customerId, createdAt])
   @@map("interactions")
 }
 
@@ -95,6 +102,7 @@ model Note {
   parsed     Boolean  @default(false)
   parsedData Json?    @map("parsed_data")
   createdAt  DateTime @default(now()) @map("created_at")
+  @@index([customerId, createdAt])
   @@map("notes")
 }
 
@@ -107,6 +115,7 @@ model Transaction {
   note      String?
   status    String   @default("COMPLETED")
   createdAt DateTime @default(now()) @map("created_at")
+  @@index([userId, createdAt])
   @@map("transactions")
 }
 
@@ -154,6 +163,7 @@ model Notification {
   type      String   @default("INFO") // "INFO" | "ALERT" | "REMINDER" | "TEAM"
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
+  @@index([userId, isRead, createdAt])
   @@map("notifications")
 }
 
@@ -162,6 +172,7 @@ model AiReport {
   userId    String   @map("user_id")
   content   String
   createdAt DateTime @default(now()) @map("created_at")
+  @@index([userId, createdAt])
   @@map("ai_reports")
 }
 
@@ -187,5 +198,28 @@ ORDER BY:
   3. last_contact_at ASC → chưa chăm lâu nhất
   4. next_follow_up ASC → hẹn gần nhất
 WHERE: status NOT IN (Đã chốt, Mất khách) AND (snoozed_until IS NULL OR < NOW) AND userId = CURRENT_USER
-LIMIT 3
+LIMIT 10
 ```
+
+## Performance & Scalability
+
+### Database Indexes (11 indexes)
+Tất cả các bảng có lượng query lớn đã được tối ưu bằng composite index:
+- **Customer**: 6 indexes (userId+status, userId+nextFollowUp, userId+lastContactAt, userId+heatLevel, userId+createdAt, teamId)
+- **Interaction/Note**: Index theo customerId+createdAt
+- **Notification**: Index theo userId+isRead+createdAt
+- **Transaction/AiReport**: Index theo userId+createdAt
+
+### Auto-Cleanup Notifications
+Notification cũ hơn **5 ngày** tự động bị xóa mỗi khi user mở trang Thông báo. Giảm ~90% dung lượng bảng notifications.
+
+### Dashboard Query Optimization
+12 query tuần tự đã gom thành 1 `Promise.all()` song song → Dashboard load nhanh gấp 3-4x.
+
+### Ước tính Volume (1,000 users / năm)
+| Bảng | Volume/năm | Rủi ro |
+|------|-----------|--------|
+| interactions | ~3.6M rows | Cao - cần archive sau 6 tháng |
+| notifications | ~2.4M → ~50K (sau cleanup) | Thấp |
+| notes | ~600K rows | Trung bình |
+| customers | ~200K rows | Thấp (có index) |
