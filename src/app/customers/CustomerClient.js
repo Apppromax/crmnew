@@ -224,7 +224,7 @@ export default function CustomerClient({ initialCustomers }) {
       {/* Header */}
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Kho khách hàng</h1>
+          <h1 className="text-3xl font-black text-slate-800 dark:text-white">Kho khách hàng</h1>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-slate-500 hidden sm:inline">{initialCustomers.length} người</span>
             <button 
