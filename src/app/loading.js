@@ -9,7 +9,7 @@ export default function RootLoading() {
       </div>
       
       <h2 className="text-xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">SalesPush CRM</h2>
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Đang nạp không gian làm việc...</p>
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Đang tải dữ liệu...</p>
       
       {/* Skeleton preview to give a perception of fast layout load */}
       <div className="w-full max-w-md mt-16 space-y-4 opacity-40">
