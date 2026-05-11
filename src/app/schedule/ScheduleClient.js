@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useTransition } from "react";
+import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import { format, addDays, isSameDay, startOfDay } from "date-fns";
@@ -96,17 +96,24 @@ const SwipeableCard = ({ item, onClick, onComplete, onReschedule }) => {
 
 export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const router = useRouter();
-  const [schedule] = useState(initialSchedule || []);
-  const [overdue] = useState(initialOverdue || []);
+  const [schedule, setSchedule] = useState(initialSchedule || []);
+  const [overdue, setOverdue] = useState(initialOverdue || []);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPending, startTransition] = useTransition();
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Sync state when server props change after router.refresh()
+  useEffect(() => { setSchedule(initialSchedule || []); }, [initialSchedule]);
+  useEffect(() => { setOverdue(initialOverdue || []); }, [initialOverdue]);
+
   const handleComplete = (item) => {
     startTransition(async () => {
       try {
         await completeCustomerAction({ customerId: item.id, note: "Đã liên hệ theo lịch trình" });
+        // Remove from local state immediately
+        setSchedule(prev => prev.filter(c => c.id !== item.id));
+        setOverdue(prev => prev.filter(c => c.id !== item.id));
         setSelectedItem(null);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 2000);
@@ -121,8 +128,11 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
     startTransition(async () => {
       try {
         const nextFollowUp = addDays(new Date(), days).toISOString();
-        await updateCustomer(item.id, { nextFollowUp, status: "Waiting" });
-        if (selectedItem?.id === item.id) setSelectedItem(null);
+        await updateCustomer(item.id, { nextFollowUp, status: "Đang chờ" });
+        // Remove from current view immediately
+        setSchedule(prev => prev.filter(c => c.id !== item.id));
+        setOverdue(prev => prev.filter(c => c.id !== item.id));
+        setSelectedItem(null);
         router.refresh();
       } catch (err) {
         alert(err.message);
