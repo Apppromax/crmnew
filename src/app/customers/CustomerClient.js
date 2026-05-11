@@ -31,7 +31,7 @@ export default function CustomerClient({ initialCustomers }) {
   const [newTag, setNewTag] = useState("");
   // Care state
   const [careNote, setCareNote] = useState("");
-  const [careFollowUpDays, setCareFollowUpDays] = useState(1);
+  const [careFollowUpOption, setCareFollowUpOption] = useState("1d");
   const [isCaring, setIsCaring] = useState(false);
 
   const filteredCustomers = initialCustomers.filter((c) => {
@@ -97,7 +97,7 @@ export default function CustomerClient({ initialCustomers }) {
     setTimeline([]);
     setShowDeleteConfirm(false);
     setCareNote("");
-    setCareFollowUpDays(1);
+    setCareFollowUpOption("1d");
   };
 
   const handleCare = async () => {
@@ -109,7 +109,11 @@ export default function CustomerClient({ initialCustomers }) {
     setSaveMsg("");
     try {
       const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + parseInt(careFollowUpDays));
+      if (careFollowUpOption.endsWith('h')) {
+        nextDate.setHours(nextDate.getHours() + parseInt(careFollowUpOption));
+      } else {
+        nextDate.setDate(nextDate.getDate() + parseInt(careFollowUpOption));
+      }
       
       await completeCustomerAction({
         customerId: selectedCustomer.id,
@@ -646,18 +650,20 @@ export default function CustomerClient({ initialCustomers }) {
                     />
                     
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Hẹn chăm sóc lại sau</label>
-                    <div className="grid grid-cols-2 gap-2 mb-5">
+                    <div className="grid grid-cols-3 gap-2 mb-5">
                       {[
-                        { label: 'Ngày mai', val: 1 },
-                        { label: '3 ngày', val: 3 },
-                        { label: '1 tuần', val: 7 },
-                        { label: '1 tháng', val: 30 }
+                        { label: '2 giờ', val: '2h' },
+                        { label: '4 giờ', val: '4h' },
+                        { label: 'Ngày mai', val: '1d' },
+                        { label: '3 ngày', val: '3d' },
+                        { label: '1 tuần', val: '7d' },
+                        { label: '1 tháng', val: '30d' }
                       ].map(opt => (
                         <button
                           key={opt.val}
-                          onClick={() => setCareFollowUpDays(opt.val)}
-                          className={`py-2 px-3 rounded-lg text-sm font-bold border transition-colors ${
-                            careFollowUpDays === opt.val 
+                          onClick={() => setCareFollowUpOption(opt.val)}
+                          className={`py-2 px-1 rounded-lg text-[11px] font-bold border transition-colors ${
+                            careFollowUpOption === opt.val 
                               ? 'bg-primary-50 dark:bg-primary-500/10 border-primary-500 text-primary-600 dark:text-primary-400' 
                               : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
                           }`}
