@@ -131,3 +131,22 @@ export async function rejectTopUp(transactionId, reason) {
 
   return { success: true };
 }
+
+export async function getSystemSettings() {
+  const settings = await prisma.systemSetting.findMany();
+  const settingsMap = {};
+  for (const s of settings) {
+    settingsMap[s.key] = s.value;
+  }
+  return settingsMap;
+}
+
+export async function updateSystemSetting(key, value) {
+  await requireAdmin();
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value }
+  });
+  return { success: true };
+}

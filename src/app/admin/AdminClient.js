@@ -2,16 +2,20 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getAllUsers, topUpUser, getPendingTopUps, approveTopUp, rejectTopUp } from "@/actions/admin";
-import { ShieldAlert, ChevronLeft, Users, Banknote, CheckCircle, XCircle } from "lucide-react";
+import { getAllUsers, topUpUser, getPendingTopUps, approveTopUp, rejectTopUp, updateSystemSetting, getSystemSettings } from "@/actions/admin";
+import { ShieldAlert, ChevronLeft, Users, Banknote, CheckCircle, XCircle, Settings } from "lucide-react";
 
-export default function AdminClient({ initialUsers, initialTopUps, initialError }) {
+export default function AdminClient({ initialUsers, initialTopUps, initialSettings, initialError }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers || []);
   const [pendingTopUps, setPendingTopUps] = useState(initialTopUps || []);
+  const [settings, setSettings] = useState(initialSettings || {});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(initialError || null);
   const [activeTab, setActiveTab] = useState("users");
+
+  // Settings state
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Top-up Modal state
   const [topupUserId, setTopupUserId] = useState(null);
@@ -21,12 +25,14 @@ export default function AdminClient({ initialUsers, initialTopUps, initialError 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [usersData, topUpsData] = await Promise.all([
+      const [usersData, topUpsData, settingsData] = await Promise.all([
         getAllUsers(),
-        getPendingTopUps()
+        getPendingTopUps(),
+        getSystemSettings()
       ]);
       setUsers(usersData);
       setPendingTopUps(topUpsData);
+      setSettings(settingsData);
       setError(null);
     } catch (err) {
       setError(err.message || "Bạn không có quyền truy cập trang này.");
@@ -73,6 +79,25 @@ export default function AdminClient({ initialUsers, initialTopUps, initialError 
     }
   };
 
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const formData = new FormData(e.target);
+      const updates = [];
+      for (const [key, value] of formData.entries()) {
+        updates.push(updateSystemSetting(key, value));
+      }
+      await Promise.all(updates);
+      await loadData();
+      alert("Đã lưu cấu hình thành công!");
+    } catch (err) {
+      alert("Lỗi khi lưu cấu hình: " + err.message);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center">
@@ -110,7 +135,13 @@ export default function AdminClient({ initialUsers, initialTopUps, initialError 
             onClick={() => setActiveTab("topups")}
             className={`flex-1 py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all ${activeTab === "topups" ? "bg-white dark:bg-slate-700 shadow text-emerald-600 dark:text-emerald-400" : "text-slate-500 hover:text-slate-700"}`}
           >
-            <Banknote className="w-4 h-4" /> Yêu cầu Nạp ({pendingTopUps.length})
+            <Banknote className="w-4 h-4" /> Nạp tiền ({pendingTopUps.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all ${activeTab === "settings" ? "bg-white dark:bg-slate-700 shadow text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            <Settings className="w-4 h-4" /> Cài đặt
           </button>
         </div>
       </div>
@@ -193,7 +224,50 @@ export default function AdminClient({ initialUsers, initialTopUps, initialError 
               ))
             )}
           </div>
-        )}
+        ) : activeTab === "settings" ? (
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Cấu hình Thanh toán</h2>
+            <form onSubmit={handleSaveSettings} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Ngân hàng</label>
+                <input
+                  type="text"
+                  name="bankName"
+                  defaultValue={settings.bankName || ""}
+                  placeholder="VD: Vietcombank (VCB)"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-primary-500 focus:border-primary-500 bg-transparent dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Chủ tài khoản</label>
+                <input
+                  type="text"
+                  name="bankAccountName"
+                  defaultValue={settings.bankAccountName || ""}
+                  placeholder="VD: CONG TY TNHH SALESPUSH"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-primary-500 focus:border-primary-500 bg-transparent dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Số tài khoản</label>
+                <input
+                  type="text"
+                  name="bankAccountNumber"
+                  defaultValue={settings.bankAccountNumber || ""}
+                  placeholder="VD: 999888777666"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-primary-500 focus:border-primary-500 bg-transparent dark:text-white"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isSavingSettings}
+                className="w-full py-3 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-colors"
+              >
+                {isSavingSettings ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
+            </form>
+          </div>
+        ) : null}
       </main>
 
       {/* Top-up Modal */}

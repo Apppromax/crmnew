@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown } from "lucide-react";
 
-export default function ProfileClient({ initialProfile }) {
+export default function ProfileClient({ initialProfile, settings = {} }) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -287,17 +287,17 @@ export default function ProfileClient({ initialProfile }) {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-slate-500">Ngân hàng:</span>
-                        <span className="text-sm font-bold dark:text-white">Vietcombank (VCB)</span>
+                        <span className="text-sm font-bold dark:text-white">{settings.bankName || "Vietcombank (VCB)"}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-slate-500">Chủ tài khoản:</span>
-                        <span className="text-sm font-bold dark:text-white">CONG TY TNHH SALESPUSH</span>
+                        <span className="text-sm font-bold dark:text-white">{settings.bankAccountName || "CONG TY TNHH SALESPUSH"}</span>
                       </div>
                       <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg mt-2">
                         <span className="text-xs text-slate-500">Số tài khoản:</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-base font-black text-indigo-600 dark:text-indigo-400">999888777666</span>
-                          <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400" onClick={() => navigator.clipboard.writeText("999888777666")}>
+                          <span className="text-base font-black text-indigo-600 dark:text-indigo-400">{settings.bankAccountNumber || "999888777666"}</span>
+                          <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400" onClick={() => navigator.clipboard.writeText(settings.bankAccountNumber || "999888777666")}>
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                         </div>
