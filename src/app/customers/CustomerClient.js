@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomerTags, completeCustomerAction } from "@/actions/customers";
 import BottomNav from "@/components/BottomNav";
-import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag } from "lucide-react";
+import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map } from "lucide-react";
 
 const STATUS_OPTIONS = ["Mới", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
 const HEAT_OPTIONS = ["Rất nét", "Tiềm năng", "Đang tìm hiểu", "Mờ"];
@@ -324,7 +324,7 @@ export default function CustomerClient({ initialCustomers }) {
               onChange={(e) => setFilterTag(e.target.value)}
               className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 outline-none focus:border-primary-500"
             >
-              <option value="All">Mọi tag</option>
+              <option value="All">Mọi dự án/khu vực</option>
               {allTags.map(tag => <option key={tag} value={tag}>{tag}</option>)}
             </select>
           )}
@@ -694,7 +694,7 @@ export default function CustomerClient({ initialCustomers }) {
 
                   {/* Tag Manager */}
                   <div className="mt-1">
-                    <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-1"><Tag className="w-3 h-3" /> Tags</p>
+                    <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-1"><Map className="w-3 h-3" /> Dự án / Khu vực (Tags)</p>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {(selectedCustomer.tags || []).map(tag => (
                         <span key={tag} className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20">
@@ -707,7 +707,7 @@ export default function CustomerClient({ initialCustomers }) {
                         </span>
                       ))}
                       {(!selectedCustomer.tags || selectedCustomer.tags.length === 0) && (
-                        <span className="text-xs text-slate-400 italic">Chưa có tag</span>
+                        <span className="text-xs text-slate-400 italic">Chưa gắn vào dự án nào</span>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -723,7 +723,7 @@ export default function CustomerClient({ initialCustomers }) {
                             setNewTag("");
                           }
                         }}
-                        placeholder="Thêm tag..."
+                        placeholder="Nhập tên dự án / khu vực mới..."
                         className="flex-1 px-3 py-1.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-primary-500 text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                       />
                       <button

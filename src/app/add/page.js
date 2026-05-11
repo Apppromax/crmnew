@@ -82,6 +82,8 @@ export default function AddCustomerPage() {
   const [manualArea, setManualArea] = useState("");
   const [manualTimeline, setManualTimeline] = useState("");
   const [manualHeatLevel, setManualHeatLevel] = useState("Đang tìm hiểu");
+  const [manualTags, setManualTags] = useState([]);
+  const [newTag, setNewTag] = useState("");
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -152,7 +154,8 @@ export default function AddCustomerPage() {
         area: manualArea,
         timeline: manualTimeline,
         heatLevel: manualHeatLevel,
-        demand: manualPropertyType
+        demand: manualPropertyType,
+        tags: manualTags
       });
       setSaveSuccess(true);
       setTimeout(() => router.push("/"), 2000);
@@ -380,6 +383,50 @@ export default function AddCustomerPage() {
                   placeholder="Nhập bất kỳ ghi chú nào khác về khách hàng này..."
                   className="w-full h-24 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 resize-none text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
                 />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+                  Dự án / Khu vực (Tags)
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {manualTags.map(tag => (
+                    <span key={tag} className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20">
+                      {tag}
+                      <button type="button" onClick={() => setManualTags(manualTags.filter(t => t !== tag))} className="hover:text-red-500 transition-colors ml-0.5"><X className="w-3 h-3" /></button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newTag.trim()) {
+                        e.preventDefault();
+                        if (!manualTags.includes(newTag.trim())) {
+                          setManualTags([...manualTags, newTag.trim()]);
+                        }
+                        setNewTag("");
+                      }
+                    }}
+                    placeholder="Nhập tên dự án/khu vực và ấn Enter..."
+                    className="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newTag.trim() && !manualTags.includes(newTag.trim())) {
+                        setManualTags([...manualTags, newTag.trim()]);
+                      }
+                      setNewTag("");
+                    }}
+                    className="px-5 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors shadow-sm"
+                  >
+                    Thêm
+                  </button>
+                </div>
               </div>
 
             </div>
