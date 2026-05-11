@@ -29,6 +29,8 @@ export default function CustomerClient({ initialCustomers }) {
   // Tag state
   const [filterTag, setFilterTag] = useState("All");
   const [newTag, setNewTag] = useState("");
+  // Sort state
+  const [sortBy, setSortBy] = useState("newest");
   // Care state
   const [careNote, setCareNote] = useState("");
   const [careFollowUpOption, setCareFollowUpOption] = useState("1d");
@@ -44,6 +46,26 @@ export default function CustomerClient({ initialCustomers }) {
     const matchHeat = filterHeat === "All" || c.heatLevel === filterHeat;
     const matchTag = filterTag === "All" || (c.tags && c.tags.includes(filterTag));
     return matchSearch && matchStatus && matchHeat && matchTag;
+  });
+
+  const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      case "oldest":
+        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      case "nameAsc":
+        return (a.name || "").localeCompare(b.name || "");
+      case "nameDesc":
+        return (b.name || "").localeCompare(a.name || "");
+      case "heat":
+        const heatWeight = { "Hot": 3, "Warm": 2, "Cold": 1 };
+        return (heatWeight[b.heatLevel] || 0) - (heatWeight[a.heatLevel] || 0);
+      case "recentActivity":
+        return new Date(b.lastInteraction || b.updatedAt || 0) - new Date(a.lastInteraction || a.updatedAt || 0);
+      default:
+        return 0;
+    }
   });
 
   // Collect all unique tags for filter dropdown
@@ -229,8 +251,21 @@ export default function CustomerClient({ initialCustomers }) {
           />
         </div>
         
-        {/* Filters */}
+        {/* Filters and Sorting */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-primary-700 dark:text-primary-400 outline-none focus:border-primary-500"
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="recentActivity">Tương tác gần đây</option>
+            <option value="heat">Khách nóng nhất</option>
+            <option value="nameAsc">Tên A-Z</option>
+            <option value="nameDesc">Tên Z-A</option>
+          </select>
+          <div className="w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
           <select 
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -269,13 +304,13 @@ export default function CustomerClient({ initialCustomers }) {
 
       {/* Main List */}
       <main className="px-4 pt-4">
-        {filteredCustomers.length === 0 ? (
+        {sortedCustomers.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-slate-500 dark:text-slate-400">Không tìm thấy khách hàng nào</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {filteredCustomers.map((c) => (
+            {sortedCustomers.map((c) => (
               <div 
                 key={c.id} 
                 onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
