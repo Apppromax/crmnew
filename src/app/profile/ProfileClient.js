@@ -238,7 +238,7 @@ export default function ProfileClient({ initialProfile }) {
                     Hồ sơ 
                     <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
                   </h2>
-                  <p className="font-bold text-2xl truncate">{profile.fullName || "Sales Master"}</p>
+                  <p className="font-bold text-2xl truncate">{profile.fullName || "Chuyên viên tư vấn"}</p>
                   <p className="text-sm opacity-80 mt-0.5">{profile.email}</p>
                 </div>
                 {profile.isPro && (
@@ -291,13 +291,13 @@ export default function ProfileClient({ initialProfile }) {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-slate-500">Chủ tài khoản:</span>
-                        <span className="text-sm font-bold dark:text-white">NGUYEN VAN A</span>
+                        <span className="text-sm font-bold dark:text-white">CONG TY TNHH SALESPUSH</span>
                       </div>
                       <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg mt-2">
                         <span className="text-xs text-slate-500">Số tài khoản:</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-base font-black text-indigo-600 dark:text-indigo-400">10123456789</span>
-                          <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400" onClick={() => navigator.clipboard.writeText("10123456789")}>
+                          <span className="text-base font-black text-indigo-600 dark:text-indigo-400">999888777666</span>
+                          <button className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400" onClick={() => navigator.clipboard.writeText("999888777666")}>
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                         </div>
