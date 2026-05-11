@@ -183,3 +183,29 @@
 - **Lỗi**: Trong Bottom Sheet Chi tiết khách hàng, vừa có icon Bút chì (chỉnh sửa) ở Header trên cùng, vừa có nút to "Chỉnh sửa thông tin" ở cuối cùng.
 - **Fix**: Xóa bỏ nút dưới cùng vì nó nằm xa tầm với (nếu scroll dài) và gây lặp chức năng. Ưu tiên giữ lại icon chuẩn mực ở Header.
 - **Rule**: Với các Bottom Sheet chi tiết (Detail View), các thao tác Edit / Delete nên quy hoạch vào vùng Header (góc phải) hoặc nút Floating thay vì dồn xuống đáy form.
+
+---
+
+## 🟢 Phase 16: UX Polish & Workflow Optimization (2026-05-11)
+
+### Vấn đề 17: Màn hình treo/đơ khi tải trang chủ (Không có Loading State)
+- **Lỗi**: Khi tắt hẳn tab CRM và vào mới từ đầu (vào thẳng route `/`), trang bị kẹt ở trạng thái trắng bóc hoặc tab trình duyệt xoay vòng rất lâu.
+- **Nguyên nhân**: `page.js` gọi `await getSmartQueue()` trực tiếp nhưng thư mục `src/app/` lại không có file `loading.js` (Suspense Fallback). Do đó Next.js không có giao diện chờ để trả về, block hoàn toàn luồng render cho đến khi DB phản hồi.
+- **Fix**: Tạo file `src/app/loading.js` chứa một giao diện Skeleton Loading mang thương hiệu CRM (có Logo nhấp nháy).
+- **Rule**: Bất kỳ App Route nào có `await` Data Fetching ở Component gốc bắt buộc phải có file `loading.js` đi kèm để hiển thị tức thời (Instant Loading State).
+
+### Vấn đề 18: Tương tác khách hàng đột xuất bị gián đoạn luồng
+- **Lỗi**: Khi có khách gọi bất chợt, sale vào Kho Khách Hàng để mở thông tin nhưng không có chỗ nào để ghi chú và "Snooze/Hẹn lại" trực tiếp, bắt buộc phải thao tác qua nhiều bước rườm rà.
+- **Fix**: Bổ sung Tab "Chăm sóc" (Quick Care) ngay bên trong Modal Chi tiết Khách hàng. Cho phép Sale nhập Note và chọn nhanh thời gian hẹn lại (2 giờ, 4 giờ, ngày mai...) và trigger Server Action ngay tại chỗ.
+- **Rule**: Giữ user ở lại ngữ cảnh (Context) hiện tại càng lâu càng tốt. Mọi Modal xem chi tiết đều nên tích hợp sẵn các nút Quick Action (Call-to-Action) cốt lõi của Entity đó.
+
+### Vấn đề 19: Trang Cá nhân (Profile) quá dài và rối mắt trên Mobile
+- **Lỗi**: Đưa toàn bộ Form Nạp tiền, Cài đặt ứng dụng, Tùy chỉnh giao diện hiển thị inline thành các khối thẻ khổng lồ khiến trang Profile phải scroll mỏi tay.
+- **Nguyên nhân**: Tư duy "bày tất cả ra mặt tiền" làm giảm trải nghiệm Mobile-first.
+- **Fix**: Áp dụng Pattern "Accordion List" (Danh sách thả xuống) mang phong cách iOS Settings. Gom các khu vực thành các SectionItem nhỏ gọn có icon. Click vào mới xổ nội dung xuống.
+- **Rule**: Với các trang Settings/Profile nhiều thông tin, luôn phân nhóm (Group) và sử dụng List/Accordion thay vì các Card inline đồ sộ.
+
+### Vấn đề 20: Tùy biến thời gian hẹn giờ (Quick Follow-up)
+- **Lỗi**: Nút hẹn "Ngày mai" đôi khi quá lâu đối với các cuộc gọi nhỡ cần gọi lại ngay trong ngày.
+- **Fix**: Mở rộng bộ Option hẹn lịch thành dạng lưới (Grid), hỗ trợ mix cả đơn vị Giờ (2h, 4h) lẫn Ngày (1d, 3d, 7d) trong logic xử lý `Date()`.
+- **Rule**: CRM cho Sale phải phản ứng linh hoạt với thời gian thực. Hỗ trợ đơn vị tính "Giờ" là bắt buộc đối với khách hàng có mức độ Nóng (Hot).
