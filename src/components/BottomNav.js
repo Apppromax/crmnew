@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Home, Users, Calendar, User, Sparkles } from 'lucide-react';
+import { Home, Users, Calendar, User, Sparkles, BrainCircuit } from 'lucide-react';
 
 const tabs = [
   {
@@ -21,7 +21,7 @@ const tabs = [
     id: 'ai',
     href: '/ai',
     label: 'AI Engine',
-    icon: <Sparkles className="w-6 h-6" />,
+    icon: <BrainCircuit className="w-6 h-6" />,
   },
   {
     id: 'schedule',
