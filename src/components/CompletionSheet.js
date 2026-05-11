@@ -35,9 +35,7 @@ function getQuickDates() {
 export default function CompletionSheet({ isOpen, customer, onComplete, onClose }) {
   const [note, setNote] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [sliderX, setSliderX] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
-  const trackRef = useRef(null);
   const textareaRef = useRef(null);
   const quickDates = getQuickDates();
 
@@ -45,7 +43,6 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
     if (isOpen) {
       setNote('');
       setSelectedDate(null);
-      setSliderX(0);
       setIsCompleting(false);
       setTimeout(() => textareaRef.current?.focus(), 400);
     }
@@ -53,54 +50,15 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
 
   if (!isOpen || !customer) return null;
 
-  const trackWidth = trackRef.current?.offsetWidth || 300;
-  const thumbSize = 56;
-  const maxX = trackWidth - thumbSize - 8;
-  const progress = maxX > 0 ? sliderX / maxX : 0;
-
-  const handleThumbTouchStart = (e) => {
-    e.stopPropagation();
-    const startX = e.touches[0].clientX;
-    const startSlider = sliderX;
-
-    const move = (ev) => {
-      const dx = ev.touches[0].clientX - startX;
-      const newX = Math.max(0, Math.min(maxX, startSlider + dx));
-      setSliderX(newX);
-    };
-
-    const end = () => {
-      document.removeEventListener('touchmove', move);
-      document.removeEventListener('touchend', end);
-      if (progress >= 0.8) {
-        setIsCompleting(true);
-        setSliderX(maxX);
-        setTimeout(() => {
-          onComplete?.({
-            customerId: customer.id,
-            note,
-            nextFollowUp: selectedDate?.toISOString() || null,
-          });
-        }, 300);
-      } else {
-        setSliderX(0);
-      }
-    };
-
-    document.addEventListener('touchmove', move, { passive: true });
-    document.addEventListener('touchend', end);
-  };
-
   const handleClickComplete = () => {
     setIsCompleting(true);
-    setSliderX(maxX);
     setTimeout(() => {
       onComplete?.({
         customerId: customer.id,
         note,
         nextFollowUp: selectedDate?.toISOString() || null,
       });
-    }, 300);
+    }, 200);
   };
 
   return (
@@ -178,34 +136,22 @@ export default function CompletionSheet({ isOpen, customer, onComplete, onClose 
             </div>
           </div>
 
-          {/* Swipe to Complete */}
-          <div
-            ref={trackRef}
-            className={`swipe-track relative h-16 rounded-full transition-colors duration-300 ${
+          {/* Action Button */}
+          <button
+            onClick={handleClickComplete}
+            disabled={isCompleting}
+            className={`w-full py-4 rounded-2xl text-white text-sm font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${
               isCompleting
-                ? 'bg-emerald-500'
-                : 'bg-gradient-to-r from-primary-500 to-primary-600'
+                ? 'bg-emerald-500 shadow-emerald-500/25 scale-95'
+                : 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-primary-500/25 active:scale-[0.98]'
             }`}
           >
-            {/* Label */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className={`text-sm font-bold text-white/80 transition-opacity ${progress > 0.3 ? 'opacity-0' : 'opacity-100'}`}>
-                {isCompleting ? '✅ Hoàn thành!' : '→→→ Vuốt để hoàn thành'}
-              </span>
-            </div>
-
-            {/* Thumb */}
-            {!isCompleting && (
-              <div
-                className="absolute top-1 left-1 w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing transition-none"
-                style={{ transform: `translateX(${sliderX}px)` }}
-                onTouchStart={handleThumbTouchStart}
-                onClick={handleClickComplete}
-              >
-                <Check className="w-6 h-6 text-primary-500" strokeWidth={2.5} />
-              </div>
+            {isCompleting ? (
+              <>✅ Đã lưu thành công!</>
+            ) : (
+              <><Check className="w-5 h-5" /> Đã xong & Lưu ghi chú</>
             )}
-          </div>
+          </button>
         </div>
       </div>
     </div>
