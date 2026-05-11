@@ -145,11 +145,11 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   }, [selectedDaySchedules]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
-      <header className="pt-safe px-6 pt-6 pb-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex justify-between items-center mb-6">
-           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Lịch trình</h1>
-           <CalendarClock className="w-6 h-6 text-indigo-500" />
+    <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
+      <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-20">
+        <div className="flex justify-between items-center mb-4">
+           <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Lịch hẹn</h1>
+           <CalendarClock className="w-6 h-6 text-primary-500" />
         </div>
         
         {/* Horizontal Calendar Strip */}
