@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours, requestTopUp } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown } from "lucide-react";
 
 export default function ProfileClient({ initialProfile }) {
   const router = useRouter();
@@ -21,6 +21,9 @@ export default function ProfileClient({ initialProfile }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile?.fullName || "");
   const [isSavingInfo, setIsSavingInfo] = useState(false);
+
+  // Accordion State
+  const [activeSection, setActiveSection] = useState(null);
 
   // Top Up State
   const [topUpAmount, setTopUpAmount] = useState("");
@@ -159,14 +162,66 @@ export default function ProfileClient({ initialProfile }) {
   const QUEUE_PRESETS = [5, 10, 15, 20];
   const FOLLOWUP_PRESETS = [1, 3, 5, 7, 14];
 
+  const toggleSection = (id) => {
+    setActiveSection(prev => prev === id ? null : id);
+    if (id === 'topup' && activeSection !== 'topup') {
+      setTimeout(() => {
+        document.getElementById('topup-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  };
+
+  const SectionItem = ({ id, icon: Icon, title, description, children, iconColor = "text-primary-500", iconBg = "bg-primary-50 dark:bg-primary-500/10" }) => {
+    const isActive = activeSection === id;
+    return (
+      <div id={`${id}-container`} className={`overflow-hidden rounded-3xl transition-all duration-300 border ${isActive ? 'border-primary-500 shadow-md' : 'border-slate-100 dark:border-slate-800 shadow-sm'} bg-white dark:bg-slate-900 scroll-mt-24`}>
+        <button 
+          onClick={() => toggleSection(id)} 
+          className="w-full flex items-center justify-between p-5 text-left active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-2xl ${isActive ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20' : `${iconBg} ${iconColor} dark:text-slate-300 dark:bg-slate-800`} transition-all`}>
+              <Icon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className={`font-black ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
+            </div>
+          </div>
+          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+        </button>
+        
+        <div className={`transition-all duration-300 ease-in-out ${isActive ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+          <div className="p-5 pt-2 border-t border-slate-100 dark:border-slate-800/50 mt-1">
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ActionItem = ({ icon: Icon, title, description, onClick, danger = false }) => (
+    <button 
+      onClick={onClick} 
+      className={`w-full flex items-center justify-between p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 active:scale-[0.98] transition-transform`}
+    >
+      <div className="flex items-center gap-4">
+        <div className={`p-3 rounded-2xl ${danger ? 'bg-red-50 text-red-500 dark:bg-red-500/10' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <div className="text-left">
+          <h3 className={`font-black ${danger ? 'text-red-500' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
+        </div>
+      </div>
+      <ArrowRight className={`w-5 h-5 ${danger ? 'text-red-400' : 'text-slate-400'}`} />
+    </button>
+  );
+
   return (
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
-      <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10 flex justify-between items-center">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Cá nhân</h1>
-        <button onClick={handleLogout} className="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
-          <LogOut className="w-5 h-5" />
-        </button>
-      </header>
+      <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Cá nhân</h1>
 
       <main className="px-4 pt-6 space-y-6 relative z-0 md:max-w-3xl md:mx-auto w-full">
         {profile ? (
@@ -198,9 +253,7 @@ export default function ProfileClient({ initialProfile }) {
                   <p className="text-4xl font-black tracking-tight">{new Intl.NumberFormat('vi-VN').format(profile.balance)} <span className="text-lg font-bold opacity-80">CR</span></p>
                 </div>
                 <button 
-                  onClick={() => {
-                    document.getElementById('topup-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => toggleSection('topup')}
                   className="bg-white text-indigo-600 px-4 py-2 rounded-xl font-bold text-sm shadow-lg hover:bg-indigo-50 transition-colors flex items-center gap-1.5 active:scale-95"
                 >
                   <Wallet className="w-4 h-4" /> Nạp tiền
@@ -214,11 +267,9 @@ export default function ProfileClient({ initialProfile }) {
               </div>
             )}
 
-            {/* ===== TOP UP SECTION ===== */}
-            <div id="topup-section" className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 scroll-mt-24">
-              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                <Wallet className="w-5 h-5 text-indigo-500" /> Nạp Credits
-              </h3>
+            <div className="space-y-4">
+              {/* ===== TOP UP SECTION ===== */}
+              <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50">
               
               {topUpSuccess ? (
                 <div className="text-center py-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
@@ -298,13 +349,10 @@ export default function ProfileClient({ initialProfile }) {
                   </form>
                 </div>
               )}
-            </div>
+              </SectionItem>
 
-            {/* ===== SETTINGS SECTION ===== */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
-              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-5 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-primary-500" /> Cài đặt sử dụng
-              </h3>
+              {/* ===== SETTINGS SECTION ===== */}
+              <SectionItem id="settings" icon={Settings} title="Cài đặt CRM" description="Quy trình & thời gian chăm sóc" iconColor="text-blue-500" iconBg="bg-blue-50">
               
               <div className="space-y-6">
                 {/* Snooze Time */}
@@ -404,13 +452,10 @@ export default function ProfileClient({ initialProfile }) {
                   <p className={`text-center text-sm font-bold ${settingsSaved.startsWith("✓") ? "text-emerald-600" : "text-red-500"}`}>{settingsSaved}</p>
                 )}
               </div>
-            </div>
+              </SectionItem>
 
-            {/* Theme UI Section */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
-              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                <Palette className="w-5 h-5 text-primary-500" /> Tùy chỉnh Giao diện
-              </h3>
+              {/* ===== THEME SECTION ===== */}
+              <SectionItem id="theme" icon={Palette} title="Giao diện" description="Màu sắc & Chế độ Sáng/Tối" iconColor="text-fuchsia-500" iconBg="bg-fuchsia-50">
               
               <div className="space-y-4">
                 {/* Theme Selector */}
@@ -447,14 +492,10 @@ export default function ProfileClient({ initialProfile }) {
                   </div>
                 </div>
               </div>
-            </div>
+              </SectionItem>
 
-            {/* Upgrade Section */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5">
-                <Rocket className="w-24 h-24" />
-              </div>
-              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-2 relative z-10">Gói SalesPush PRO</h3>
+              {/* ===== PRO UPGRADE SECTION ===== */}
+              <SectionItem id="pro" icon={Rocket} title="Gói SalesPush PRO" description="Mở khóa giới hạn & Dùng AI" iconColor="text-amber-500" iconBg="bg-amber-50">
               
               {profile.isPro ? (
                 <div className="relative z-10">
@@ -474,27 +515,33 @@ export default function ProfileClient({ initialProfile }) {
                   </button>
                 </div>
               )}
-            </div>
+              </SectionItem>
 
-            {/* Team Module Link */}
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5">
-                <Users className="w-24 h-24" />
-              </div>
-              <h3 className="font-black text-slate-900 dark:text-white text-lg mb-2 relative z-10">Đội Nhóm (B2B)</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mb-5 relative z-10">Làm việc nhóm, quản lý và phân bổ khách hàng với tính năng Team Mode.</p>
-              <button onClick={() => router.push('/team')} className="relative z-10 w-full py-4 border-2 border-slate-200 dark:border-slate-700 hover:border-primary-500 dark:hover:border-primary-500 text-slate-900 dark:text-white font-black uppercase tracking-wider rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2">
-                Truy cập Không Gian Team
-              </button>
-            </div>
+              {/* ===== MENU ACTIONS ===== */}
+              <ActionItem 
+                icon={Users} 
+                title="Đội Nhóm (B2B)" 
+                description="Quản lý và phân bổ khách hàng" 
+                onClick={() => router.push('/team')} 
+              />
 
-            {/* Admin Link */}
-            {profile.role === 'admin' && (
-              <button onClick={() => router.push('/admin')} className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold rounded-2xl flex justify-center items-center gap-2 transition-transform active:scale-95">
-                <Settings className="w-5 h-5" />
-                Trang Quản trị Admin
-              </button>
-            )}
+              {profile.role === 'admin' && (
+                <ActionItem 
+                  icon={ShieldCheck} 
+                  title="Trang Quản trị Admin" 
+                  description="Duyệt tiền và hệ thống" 
+                  onClick={() => router.push('/admin')} 
+                />
+              )}
+
+              <ActionItem 
+                icon={LogOut} 
+                title="Đăng xuất" 
+                description="Thoát khỏi tài khoản hiện tại" 
+                onClick={handleLogout} 
+                danger={true}
+              />
+            </div>
           </>
         ) : null}
       </main>
