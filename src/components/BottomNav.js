@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Home, Users, Calendar, User, Sparkles, BrainCircuit } from 'lucide-react';
+import Logo from './Logo';
 
 const tabs = [
   {
@@ -43,9 +44,7 @@ export default function BottomNav({ activeTab = 'home' }) {
       
       {/* Desktop Logo - Hidden on mobile */}
       <div className="hidden md:flex items-center gap-3 px-6 py-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
-          <Sparkles className="w-5 h-5 text-white" />
-        </div>
+        <Logo size="md" />
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white leading-none">SalesPush</h2>
           <p className="text-[10px] font-bold text-primary-500 tracking-wider uppercase mt-1">Smart CRM</p>

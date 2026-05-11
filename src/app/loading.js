@@ -1,12 +1,10 @@
 import { Loader2 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function RootLoading() {
   return (
     <div className="min-h-screen bg-[#F4F8FB] dark:bg-slate-950 flex flex-col items-center justify-center p-6 pb-24 transition-colors duration-300">
-      <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-primary-500/10 flex items-center justify-center mb-6 relative">
-        <div className="absolute inset-0 bg-primary-500/20 rounded-3xl animate-ping"></div>
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600 dark:text-primary-400 relative z-10" />
-      </div>
+      <Logo size="lg" className="mb-6 animate-pulse" />
       
       <h2 className="text-xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">SalesPush CRM</h2>
       <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Đang tải dữ liệu...</p>

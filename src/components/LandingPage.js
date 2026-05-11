@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Zap, ArrowRight, ClipboardList, Clock } from "lucide-react";
+import Logo from "./Logo";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
@@ -26,9 +27,7 @@ export default function LandingPage() {
         {/* Navigation */}
         <header className="py-6 flex justify-between items-center animate-fade-in-up">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
+            <Logo size="md" />
             <span className="text-2xl font-black tracking-tight text-white">SalesPush</span>
           </div>
           <Link href="/login" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">

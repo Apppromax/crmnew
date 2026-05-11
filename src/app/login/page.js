@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Zap, Mail, Lock, Loader2 } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -58,9 +59,7 @@ export default function LoginPage() {
 
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md px-6">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-xl shadow-indigo-500/30 mb-6 text-white">
-            <Zap className="w-8 h-8" strokeWidth={2.5} />
-          </div>
+          <Logo size="lg" className="mb-6 mx-auto" />
           <h2 className="text-4xl font-black text-white tracking-tight">
             SalesPush
           </h2>
