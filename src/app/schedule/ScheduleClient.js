@@ -278,7 +278,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                 <div className="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700" />
               </div>
 
-              <div className="px-5 pb-8">
+              <div className="px-5 pt-2 sm:pt-6 pb-8">
                 {/* Header Profile */}
                 <div className="flex items-start justify-between mb-5">
                   <div className="flex items-center gap-3.5">
