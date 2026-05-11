@@ -222,6 +222,7 @@ export default function ProfileClient({ initialProfile }) {
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
         <h1 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight text-center">Cá nhân</h1>
+      </header>
 
       <main className="px-4 pt-6 space-y-6 relative z-0 md:max-w-3xl md:mx-auto w-full">
         {profile ? (
