@@ -4,9 +4,11 @@ import React, { useRef } from 'react';
 import { Clock } from 'lucide-react';
 
 const heatConfig = {
-  Hot:  { emoji: '🔥', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' },
-  Warm: { emoji: '🌡️', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
-  Cold: { emoji: '❄️', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400' },
+  "Rất Nét": { emoji: '🔥', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400' },
+  "Tiềm Năng": { emoji: '🌡️', bg: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400' },
+  "Quan Tâm": { emoji: '🌡️', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400' },
+  "Tham Khảo": { emoji: '❄️', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-500 dark:text-blue-400' },
+  "Chưa Rõ": { emoji: '❄️', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400' },
 };
 
 function formatFollowUp(dateStr) {
@@ -23,7 +25,7 @@ function formatFollowUp(dateStr) {
 }
 
 export default function RadarCard({ customer, onClick, onSnooze }) {
-  const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
+  const heat = heatConfig[customer.heatLevel] || heatConfig["Chưa Rõ"];
 
   const cardRef = useRef(null);
   const dragState = useRef({ startX: null, startY: null, currentX: 0, isSwiping: null });

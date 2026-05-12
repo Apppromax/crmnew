@@ -6,8 +6,8 @@ import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomer
 import BottomNav from "@/components/BottomNav";
 import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map } from "lucide-react";
 
-const STATUS_OPTIONS = ["Mới", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
-const HEAT_OPTIONS = ["Rất nét", "Tiềm năng", "Đang tìm hiểu", "Mờ"];
+const STATUS_OPTIONS = ["Mới", "Chưa liên lạc được", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
+const HEAT_OPTIONS = ["Rất Nét", "Tiềm Năng", "Quan Tâm", "Tham Khảo", "Chưa Rõ"];
 const JOURNEY_OPTIONS = [
   "1. Phá băng và làm rõ nhu cầu",
   "2. Tư vấn sản phẩm",
@@ -94,7 +94,7 @@ export default function CustomerClient({ initialCustomers }) {
       case "nameDesc":
         return (b.name || "").localeCompare(a.name || "");
       case "heat":
-        const heatWeight = { "Rất nét": 4, "Tiềm năng": 3, "Đang tìm hiểu": 2, "Mờ": 1 };
+        const heatWeight = { "Rất Nét": 5, "Tiềm Năng": 4, "Quan Tâm": 3, "Tham Khảo": 2, "Chưa Rõ": 1 };
         return (heatWeight[b.heatLevel] || 0) - (heatWeight[a.heatLevel] || 0);
       case "recentActivity":
         return new Date(b.lastInteraction || b.updatedAt || 0) - new Date(a.lastInteraction || a.updatedAt || 0);
@@ -119,7 +119,7 @@ export default function CustomerClient({ initialCustomers }) {
       name: selectedCustomer.name || "",
       phone: selectedCustomer.phone || "",
       status: selectedCustomer.status || "Mới",
-      heatLevel: selectedCustomer.heatLevel || "Đang tìm hiểu",
+      heatLevel: selectedCustomer.heatLevel || "Chưa Rõ",
       budget: selectedCustomer.budget || "",
       area: selectedCustomer.area || "",
       demand: selectedCustomer.demand || "",
@@ -353,9 +353,10 @@ export default function CustomerClient({ initialCustomers }) {
                   <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                     {c.name}
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      c.heatLevel === 'Rất nét' ? 'bg-red-100 text-red-700' :
-                      c.heatLevel === 'Tiềm năng' ? 'bg-orange-100 text-orange-700' :
-                      c.heatLevel === 'Đang tìm hiểu' ? 'bg-amber-100 text-amber-700' :
+                      c.heatLevel === 'Rất Nét' ? 'bg-red-100 text-red-700' :
+                      c.heatLevel === 'Tiềm Năng' ? 'bg-orange-100 text-orange-700' :
+                      c.heatLevel === 'Quan Tâm' ? 'bg-amber-100 text-amber-700' :
+                      c.heatLevel === 'Tham Khảo' ? 'bg-blue-100 text-blue-700' :
                       'bg-slate-100 text-slate-600'
                     }`}>
                       {c.heatLevel}
@@ -375,6 +376,7 @@ export default function CustomerClient({ initialCustomers }) {
                 <div className="text-right flex flex-col items-end gap-2">
                   <span className={`text-xs font-medium px-2 py-1 rounded-md ${
                     c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
+                    c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
                     c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
                     c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
                     c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
@@ -523,8 +525,8 @@ export default function CustomerClient({ initialCustomers }) {
                       <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status || "Mới"}</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                      <p className="text-[10px] uppercase text-slate-400 mb-1">Độ nét</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel || "Đang tìm hiểu"}</p>
+                      <p className="text-[10px] uppercase text-slate-400 mb-1">Độ Nét Gốc</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel || "Chưa Rõ"}</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Hành trình</p>

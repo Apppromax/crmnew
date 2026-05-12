@@ -4,9 +4,11 @@ import React, { useRef } from 'react';
 import { Phone, Flame, ThermometerSun, Snowflake, Lightbulb, ClipboardList, PenLine, ArrowLeft } from 'lucide-react';
 
 const heatConfig = {
-  Hot:  { icon: Flame, label: 'Rất cao', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
-  Warm: { icon: ThermometerSun, label: 'Cao',     bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
-  Cold: { icon: Snowflake, label: 'Trung bình', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
+  "Rất Nét": { icon: Flame, label: 'Rất Nét', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+  "Tiềm Năng": { icon: ThermometerSun, label: 'Tiềm Năng', bg: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-200 dark:border-orange-500/20' },
+  "Quan Tâm": { icon: ThermometerSun, label: 'Quan Tâm', bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+  "Tham Khảo": { icon: Snowflake, label: 'Tham Khảo', bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-500 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-500/20' },
+  "Chưa Rõ": { icon: Snowflake, label: 'Chưa Rõ', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
 };
 
 const stageLabels = {
@@ -36,7 +38,7 @@ function formatFollowUp(dateStr) {
 }
 
 export default function FocusCard({ customer, onAction, onSnooze }) {
-  const heat = heatConfig[customer.heatLevel] || heatConfig.Cold;
+  const heat = heatConfig[customer.heatLevel] || heatConfig["Chưa Rõ"];
   const stage = stageLabels[customer.journeyStage] || customer.journeyStage;
   const dot = statusDot[customer.status] || 'bg-slate-400';
 

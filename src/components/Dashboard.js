@@ -40,13 +40,13 @@ function enrichCustomer(c) {
   } else if (c.journeyStage === "2. Tư vấn sản phẩm") {
     reason = "Đã liên hệ, chưa hẹn xem nhà";
     nextStep = "Đặt lịch xem nhà";
-  } else if (c.heatLevel === "Rất nét") {
+  } else if (c.heatLevel === "Rất Nét") {
     reason = "Khách rõ nét, thông tin đầy đủ";
     nextStep = "Gọi tư vấn chi tiết";
-  } else if (c.heatLevel === "Tiềm năng") {
+  } else if (c.heatLevel === "Tiềm Năng") {
     reason = "Khách tiềm năng, cần nuôi dưỡng";
     nextStep = "Nhắn tin follow-up";
-  } else if (c.heatLevel === "Đang tìm hiểu" || c.heatLevel === "Mờ") {
+  } else if (c.heatLevel === "Quan Tâm" || c.heatLevel === "Tham Khảo" || c.heatLevel === "Chưa Rõ") {
     reason = "Thông tin còn mơ hồ, cần khai thác";
     nextStep = "Gọi tìm hiểu ngân sách";
   }

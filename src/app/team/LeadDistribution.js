@@ -47,7 +47,7 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
             {/* Customer Info */}
             <div className="relative">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className={`w-2.5 h-2.5 rounded-full shadow-inner ${customer.heatLevel === 'Hot' ? 'bg-red-500 shadow-red-500/50 animate-pulse' : customer.heatLevel === 'Warm' ? 'bg-amber-500 shadow-amber-500/50' : 'bg-blue-400 shadow-blue-400/50'}`} />
+                <span className={`w-2.5 h-2.5 rounded-full shadow-inner ${customer.heatLevel === 'Rất Nét' ? 'bg-red-500 shadow-red-500/50 animate-pulse' : (customer.heatLevel === 'Tiềm Năng' || customer.heatLevel === 'Quan Tâm') ? 'bg-amber-500 shadow-amber-500/50' : 'bg-blue-400 shadow-blue-400/50'}`} />
                 <h3 className="text-lg font-black text-slate-800 dark:text-white">{customer.name}</h3>
               </div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">{customer.phone}</p>

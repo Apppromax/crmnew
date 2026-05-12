@@ -23,10 +23,11 @@ const TIMELINE_OPTIONS = [
   { value: "Tham khảo", label: "Tham khảo (Chưa rõ)" }
 ];
 const HEAT_LEVEL_OPTIONS = [
-  { value: "Rất nét", label: "🌟 Rất nét", colorClass: "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20", selectedClass: "bg-red-500 text-white border-red-600" },
-  { value: "Tiềm năng", label: "🔥 Tiềm năng", colorClass: "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20", selectedClass: "bg-orange-500 text-white border-orange-600" },
-  { value: "Đang tìm hiểu", label: "🌡️ Đang tìm hiểu", colorClass: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20", selectedClass: "bg-amber-500 text-white border-amber-600" },
-  { value: "Mờ", label: "❄️ Mờ", colorClass: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", selectedClass: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-500" },
+  { value: "Rất Nét", label: "🌟 Rất Nét", colorClass: "bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20", selectedClass: "bg-red-500 text-white border-red-600" },
+  { value: "Tiềm Năng", label: "🔥 Tiềm Năng", colorClass: "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20", selectedClass: "bg-orange-500 text-white border-orange-600" },
+  { value: "Quan Tâm", label: "👀 Quan Tâm", colorClass: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20", selectedClass: "bg-amber-500 text-white border-amber-600" },
+  { value: "Tham Khảo", label: "📚 Tham Khảo", colorClass: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20", selectedClass: "bg-blue-500 text-white border-blue-600 dark:bg-blue-600 dark:border-blue-500" },
+  { value: "Chưa Rõ", label: "❄️ Chưa Rõ", colorClass: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700", selectedClass: "bg-slate-500 text-white border-slate-600 dark:bg-slate-600 dark:border-slate-500" },
 ];
 
 const ScrollChipSelect = ({ label, value, onChange, options }) => {
@@ -76,7 +77,7 @@ export default function AddCustomerPage() {
   const [manualPurpose, setManualPurpose] = useState("");
   const [manualArea, setManualArea] = useState("");
   const [manualTimeline, setManualTimeline] = useState("");
-  const [manualHeatLevel, setManualHeatLevel] = useState("Đang tìm hiểu");
+  const [manualHeatLevel, setManualHeatLevel] = useState("Chưa Rõ");
   const [manualNote, setManualNote] = useState("");
 
   // Flow State
@@ -390,7 +391,7 @@ export default function AddCustomerPage() {
                   <ScrollChipSelect label="Mục đích mua" value={manualPurpose} onChange={setManualPurpose} options={PURPOSE_OPTIONS} />
                   <ScrollChipSelect label="Khu vực quan tâm" value={manualArea} onChange={setManualArea} options={AREA_OPTIONS} />
                   <ScrollChipSelect label="Thời gian dự kiến mua" value={manualTimeline} onChange={setManualTimeline} options={TIMELINE_OPTIONS} />
-                  <ScrollChipSelect label="Độ nét (Mức độ ưu tiên)" value={manualHeatLevel} onChange={setManualHeatLevel} options={HEAT_LEVEL_OPTIONS} />
+                  <ScrollChipSelect label="Độ Nét Gốc" value={manualHeatLevel} onChange={setManualHeatLevel} options={HEAT_LEVEL_OPTIONS} />
 
                   <div className="col-span-2">
                     <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">

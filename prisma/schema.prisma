@@ -45,7 +45,7 @@ model Customer {
   name      String
   phone     String
 
-  status    String   @default("New") // New | Active | Waiting | Dormant | Closed | Lost
+  status    String   @default("Mới") // Mới | Chưa liên lạc được | Đang chăm | Đang chờ | Ngủ đông | Đã chốt | Mất khách
 
   // AI-Parsed Fields
   budget    String?
@@ -56,7 +56,7 @@ model Customer {
 
   // Clarity Score
   clarityScore Int    @default(0) @map("clarity_score")
-  heatLevel    String @default("Cold") @map("heat_level") // Cold | Warm | Hot
+  heatLevel    String @default("Chưa Rõ") @map("heat_level")
 
   // Scheduling
   nextFollowUp  DateTime? @map("next_follow_up")

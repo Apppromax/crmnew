@@ -167,7 +167,7 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       timeline,
       demand,
       status: status || "Mới",
-      heatLevel: heatLevel || "Đang tìm hiểu",
+      heatLevel: heatLevel || "Chưa Rõ",
       clarityScore: 0,
       journeyStage: "1. Phá băng và làm rõ nhu cầu",
       tags: tags || [],
@@ -303,8 +303,8 @@ export async function getCustomerCount() {
   const total = await prisma.customer.count({
     where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } },
   });
-  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Rất nét" } });
-  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Tiềm năng" } });
+  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Rất Nét" } });
+  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Tiềm Năng" } });
   return { total, hot, warm };
 }
 
@@ -321,8 +321,8 @@ export async function getDashboardStats() {
   // Run ALL queries in parallel (single round-trip)
   const [total, hot, warm, overdue, todaySchedule, closedThisMonth, ...funnelCounts] = await Promise.all([
     prisma.customer.count({ where: activeFilter }),
-    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Rất nét" } }),
-    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Tiềm năng" } }),
+    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Rất Nét" } }),
+    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Tiềm Năng" } }),
     prisma.customer.count({ where: { ...activeFilter, nextFollowUp: { lt: now } } }),
     prisma.customer.count({ where: { userId, nextFollowUp: { gte: todayStart, lte: todayEnd } } }),
     prisma.customer.count({ where: { userId, status: "Đã chốt", updatedAt: { gte: monthStart } } }),

@@ -324,10 +324,11 @@ export async function getTeamStats(teamId) {
       "Mất khách": statusCount["Mất khách"] || 0,
     },
     heatCount: {
-      "Rất nét": heatCount["Rất nét"] || 0,
-      "Tiềm năng": heatCount["Tiềm năng"] || 0,
-      "Đang tìm hiểu": heatCount["Đang tìm hiểu"] || 0,
-      "Mờ": heatCount["Mờ"] || 0,
+      "Rất Nét": heatCount["Rất Nét"] || 0,
+      "Tiềm Năng": heatCount["Tiềm Năng"] || 0,
+      "Quan Tâm": heatCount["Quan Tâm"] || 0,
+      "Tham Khảo": heatCount["Tham Khảo"] || 0,
+      "Chưa Rõ": heatCount["Chưa Rõ"] || 0,
     },
     memberPerformance
   };
