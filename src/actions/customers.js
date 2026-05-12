@@ -154,7 +154,7 @@ export async function clearAllSnoozes() {
   return { success: true };
 }
 
-export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand, tags }) {
+export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand, tags, status, nextFollowUp }) {
   const userId = await requireUser();
 
   const customer = await prisma.customer.create({
@@ -166,11 +166,12 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       area,
       timeline,
       demand,
-      status: "Mới",
+      status: status || "Mới",
       heatLevel: heatLevel || "Đang tìm hiểu",
       clarityScore: 0,
       journeyStage: "1. Phá băng và làm rõ nhu cầu",
       tags: tags || [],
+      nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
     },
   });
 
