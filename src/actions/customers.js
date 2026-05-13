@@ -11,6 +11,24 @@ async function requireUser() {
   return user.id;
 }
 
+function enrichStatus(customer) {
+  if (!customer) return customer;
+  if (customer.status !== "Đang chăm" && customer.status !== "Đang chờ") return customer;
+  if (!customer.lastContactAt) return customer;
+
+  const now = new Date();
+  const lastContact = new Date(customer.lastContactAt);
+  const diffMinutes = (now - lastContact) / 60000;
+
+  if (diffMinutes <= 30) {
+    customer.status = "Đang chăm";
+  } else if (customer.nextFollowUp) {
+    customer.status = "Đang chờ";
+  }
+
+  return customer;
+}
+
 export async function getSmartQueue() {
   const userId = await requireUser();
   const now = new Date();
@@ -48,7 +66,7 @@ export async function getSmartQueue() {
     return b.clarityScore - a.clarityScore;
   });
 
-  return sorted.slice(0, 10).map((c) => ({
+  return sorted.slice(0, 10).map((c) => enrichStatus({
     ...c,
     nextFollowUp: c.nextFollowUp?.toISOString() || null,
     lastContactAt: c.lastContactAt?.toISOString() || null,
@@ -65,7 +83,7 @@ export async function getAllCustomers() {
     orderBy: { createdAt: "desc" },
   });
 
-  return customers.map((c) => ({
+  return customers.map((c) => enrichStatus({
     ...c,
     nextFollowUp: c.nextFollowUp?.toISOString() || null,
     lastContactAt: c.lastContactAt?.toISOString() || null,
@@ -88,8 +106,8 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
   const updateData = { lastContactAt: now };
   if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
   if (status) updateData.status = status;
-  else if (!existing.status || existing.status === 'Mới') {
-      updateData.status = nextFollowUp ? "Đang chờ" : "Đang chăm";
+  else if (!existing.status || ["Mới", "Đang chăm", "Đang chờ"].includes(existing.status)) {
+      updateData.status = "Đang chăm";
   }
   if (journeyStage) updateData.journeyStage = journeyStage;
 
@@ -223,14 +241,14 @@ export async function updateCustomer(customerId, data) {
   revalidatePath("/");
   revalidatePath("/customers");
 
-  return {
+  return enrichStatus({
     ...updated,
     nextFollowUp: updated.nextFollowUp?.toISOString() || null,
     lastContactAt: updated.lastContactAt?.toISOString() || null,
     snoozedUntil: updated.snoozedUntil?.toISOString() || null,
     createdAt: updated.createdAt.toISOString(),
     updatedAt: updated.updatedAt.toISOString(),
-  };
+  });
 }
 
 export async function deleteCustomer(customerId) {
@@ -357,7 +375,7 @@ export async function getOverdueCustomers() {
     where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { lt: now } },
     orderBy: { nextFollowUp: "asc" },
   });
-  return customers.map((c) => ({
+  return customers.map((c) => enrichStatus({
     ...c,
     nextFollowUp: c.nextFollowUp?.toISOString() || null,
     lastContactAt: c.lastContactAt?.toISOString() || null,
@@ -374,7 +392,7 @@ export async function getUpcomingSchedule() {
     where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { gte: now } },
     orderBy: { nextFollowUp: "asc" },
   });
-  return customers.map((c) => ({
+  return customers.map((c) => enrichStatus({
     ...c,
     nextFollowUp: c.nextFollowUp?.toISOString() || null,
     lastContactAt: c.lastContactAt?.toISOString() || null,

@@ -256,3 +256,29 @@
 - **Lỗi**: `getDashboardStats` chạy 3 lượt `await Promise.all()` nối tiếp (4+1+1+6 queries).
 - **Fix**: Gom tất cả 12 queries vào 1 `Promise.all()` duy nhất chạy song song.
 - **Rule**: Các query độc lập LUÔN gom vào 1 `Promise.all()`. Không bao giờ `await` tuần tự nếu queries không phụ thuộc nhau.
+
+---
+
+## 🟣 Phase 18: Dynamic Status & Performance (2026-05-13)
+
+### Vấn đề 28: Trạng thái "Đang chăm" bị treo vĩnh viễn (Stale Data)
+- **Lỗi**: Sau khi Sale cập nhật tương tác xong, trạng thái lưu là "Đang chăm". Nếu Sale quên không vào đổi trạng thái sau vài ngày, nó vẫn giữ là "Đang chăm" gây nhầm lẫn với những khách thực sự vừa tương tác.
+- **Nguyên nhân**: Dữ liệu lưu tĩnh xuống DB. Muốn đổi phải dùng Cron Job (nặng hệ thống và phức tạp) hoặc Sale tự đổi bằng tay (tốn thời gian).
+- **Fix**: Áp dụng Pattern **Dynamic Read (Đọc động)**. Khi fetch danh sách khách hàng, tạo hàm trung gian `enrichStatus()`:
+  - Tính khoảng cách thời gian từ `lastContactAt` đến hiện tại.
+  - Nếu `diffMinutes <= 30` -> Trạng thái hiển thị là "Đang chăm".
+  - Nếu `diffMinutes > 30` VÀ có `nextFollowUp` -> Trạng thái tự động hiển thị là "Đang chờ".
+- **Rule**: Đừng cố gắng lưu tất cả trạng thái vào DB nếu nó có tính thời điểm ngắn hạn (Short-lived state). Hãy tính toán động (Compute on Read) để đảm bảo độ chính xác real-time mà không cần Background Job.
+
+### Vấn đề 29: N+1 Query trong Trigger Smart Alerts gây chậm TTFB (Time-to-first-byte)
+- **Lỗi**: Khi mở Dashboard, thỉnh thoảng thấy trang load chậm đáng kể.
+- **Nguyên nhân**: Hàm `triggerSmartAlerts` chạy một vòng lặp `for...of` chứa các câu truy vấn `prisma.notification.findFirst` và `prisma.notification.create`. Nếu có 20 khách thỏa mãn, nó sẽ gửi 40 queries nối tiếp xuống DB.
+- **Fix**: Refactor sang Bulk Action (Xử lý hàng loạt). Lấy toàn bộ notifications hiện có bằng 1 câu `findMany`, sau đó dùng `createMany` để insert toàn bộ alerts mới bằng 1 query duy nhất.
+- **Rule**: Tuyệt đối không dùng loop `for...of` chứa câu truy vấn DB nếu có thể dùng Bulk Operations (`findMany`, `createMany`, `updateMany`).
+
+### Vấn đề 30: Lưu khách hàng chậm do 3 thao tác nối tiếp
+- **Lỗi**: Nhấn "Hoàn tất lưu" khi cập nhật chăm khách bị delay lâu.
+- **Nguyên nhân**: `completeCustomerAction` gọi 3 lần `prisma.create`/`update` nối tiếp nhau (Interaction, Note, Customer update).
+- **Fix**: Gom toàn bộ vào `prisma.$transaction([])`.
+- **Rule**: Khi thực thi một Workflow có nhiều bước thay đổi dữ liệu liên đới, LUÔN LUÔN dùng Transaction. Nó không chỉ nhanh hơn (1 connection, 1 lượt TCP roundtrip) mà còn an toàn (Atomic).
+
