@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomerTags, completeCustomerAction } from "@/actions/customers";
 import BottomNav from "@/components/BottomNav";
+import UpdateCareSheet from "@/components/UpdateCareSheet";
 import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map } from "lucide-react";
 
 const STATUS_OPTIONS = ["Mới", "Chưa liên lạc được", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
@@ -70,7 +71,7 @@ export default function CustomerClient({ initialCustomers }) {
   const [careNote, setCareNote] = useState("");
   const [careFollowUpOption, setCareFollowUpOption] = useState("1d");
   const [isCaring, setIsCaring] = useState(false);
-
+  const [isUpdateCareOpen, setIsUpdateCareOpen] = useState(false);
   const filteredCustomers = initialCustomers.filter((c) => {
     const term = search.toLowerCase();
     const matchSearch = 
@@ -430,15 +431,20 @@ export default function CustomerClient({ initialCustomers }) {
             
             {/* Tab Switcher (only in non-edit mode) */}
             {!isEditing && (
-              <div className="flex gap-1 mx-6 mb-3 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
-                <button onClick={() => setModalTab('info')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition-colors ${modalTab === 'info' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500'}`}>
-                  <FileText className="w-3.5 h-3.5" /> Thông tin
-                </button>
-                <button onClick={() => setModalTab('care')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition-colors ${modalTab === 'care' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500'}`}>
-                  <Activity className="w-3.5 h-3.5" /> Chăm sóc
-                </button>
-                <button onClick={() => { setModalTab('history'); if (timeline.length === 0) loadHistory(selectedCustomer.id); }} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition-colors ${modalTab === 'history' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500'}`}>
-                  <History className="w-3.5 h-3.5" /> Lịch sử
+              <div className="flex gap-2 mx-6 mb-3 shrink-0">
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex-1">
+                  <button onClick={() => setModalTab('info')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] font-bold transition-colors ${modalTab === 'info' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                    <FileText className="w-3.5 h-3.5" /> Thông tin
+                  </button>
+                  <button onClick={() => { setModalTab('history'); if (timeline.length === 0) loadHistory(selectedCustomer.id); }} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] font-bold transition-colors ${modalTab === 'history' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
+                    <History className="w-3.5 h-3.5" /> Lịch sử
+                  </button>
+                </div>
+                <button 
+                  onClick={() => setIsUpdateCareOpen(true)}
+                  className="px-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl text-[13px] font-bold flex items-center gap-1.5 shadow-md shadow-primary-500/30 active:scale-95 transition-all"
+                >
+                  <Activity className="w-4 h-4" /> Cập nhật chăm khách
                 </button>
               </div>
             )}
@@ -585,13 +591,12 @@ export default function CustomerClient({ initialCustomers }) {
                             className="w-full text-sm p-3 pr-8 rounded-xl border border-primary-200 dark:border-primary-900/50 bg-primary-50/50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none shadow-sm"
                             onChange={(e) => {
                               if (e.target.value) {
-                                setCareNote("Đã thực hiện: " + e.target.value);
-                                setModalTab('care');
+                                setIsUpdateCareOpen(true);
                                 e.target.value = "";
                               }
                             }}
                           >
-                            <option value="">-- Chọn một hành động để ghi nhận --</option>
+                            <option value="">-- Chọn để ghi nhận --</option>
                             {JOURNEY_DETAILS[selectedCustomer.journeyStage || JOURNEY_OPTIONS[0]].actions.map(action => (
                               <option key={action} value={action}>{action}</option>
                             ))}
@@ -773,53 +778,6 @@ export default function CustomerClient({ initialCustomers }) {
                     ))
                   )}
                 </div>
-              ) : modalTab === 'care' ? (
-                /* ===== CARE TAB ===== */
-                <div className="space-y-4">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <p className="text-xs font-bold text-slate-500 mb-3">Tương tác đột xuất (Không trong kế hoạch)</p>
-                    <textarea
-                      value={careNote}
-                      onChange={(e) => setCareNote(e.target.value)}
-                      placeholder="Ghi chú nội dung trao đổi với khách hàng..."
-                      className="w-full px-3 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white resize-none mb-4"
-                      rows={4}
-                    />
-                    
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Hẹn chăm sóc lại sau</label>
-                    <div className="grid grid-cols-3 gap-2 mb-5">
-                      {[
-                        { label: '2 giờ', val: '2h' },
-                        { label: '4 giờ', val: '4h' },
-                        { label: 'Ngày mai', val: '1d' },
-                        { label: '3 ngày', val: '3d' },
-                        { label: '1 tuần', val: '7d' },
-                        { label: '1 tháng', val: '30d' }
-                      ].map(opt => (
-                        <button
-                          key={opt.val}
-                          onClick={() => setCareFollowUpOption(opt.val)}
-                          className={`py-2 px-1 rounded-lg text-[11px] font-bold border transition-colors ${
-                            careFollowUpOption === opt.val 
-                              ? 'bg-primary-50 dark:bg-primary-500/10 border-primary-500 text-primary-600 dark:text-primary-400' 
-                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={handleCare}
-                      disabled={isCaring || !careNote.trim()}
-                      className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-bold shadow-lg shadow-primary-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {isCaring ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <Save className="w-4 h-4" />}
-                      Lưu và Lên lịch hẹn
-                    </button>
-                  </div>
-                </div>
               ) : null}
             </div>
           </div>
@@ -829,6 +787,36 @@ export default function CustomerClient({ initialCustomers }) {
       {/* FAB removed - moved to header */}
 
       <BottomNav activeTab="customers" />
+
+      <UpdateCareSheet
+        isOpen={isUpdateCareOpen}
+        customer={selectedCustomer}
+        onClose={() => setIsUpdateCareOpen(false)}
+        onComplete={async (data) => {
+          try {
+            await completeCustomerAction(data);
+            setIsUpdateCareOpen(false);
+            setSaveMsg("✓ Đã lưu thông tin chăm sóc");
+            setTimeout(() => setSaveMsg(""), 3000);
+            
+            // Update local state
+            setSelectedCustomer(prev => ({
+              ...prev,
+              status: data.status || prev.status,
+              journeyStage: data.journeyStage || prev.journeyStage,
+              nextFollowUp: data.nextFollowUp || prev.nextFollowUp,
+            }));
+            
+            // Reload history if on history tab
+            if (modalTab === 'history') {
+              loadHistory(selectedCustomer.id);
+            }
+          } catch (err) {
+            console.error(err);
+            setSaveMsg("❌ Có lỗi xảy ra, vui lòng thử lại");
+          }
+        }}
+      />
     </div>
   );
 }

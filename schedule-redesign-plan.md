@@ -11,10 +11,11 @@
 - Có giới hạn độ đàn hồi (`dragConstraints`) để tránh bị xung đột với thao tác "Back/Forward" mặc định của trình duyệt Safari/Chrome trên mobile.
 
 ## 3. Phân cấp thị giác (Visual Hierarchy & Color Coding)
-- Thiết kế hệ thống màu sắc dựa theo độ nóng (Heat Level):
-  - 🔥 **Chốt Ngay / Rất Nóng:** Viền Đỏ/Cam, nền sáng, có icon phát sáng.
-  - ☀️ **Nóng / Ấm:** Viền Vàng/Hổ phách.
-  - ❄️ **Lạnh:** Viền Xanh dương nhạt.
+- Thiết kế hệ thống màu sắc dựa theo Độ Nét Gốc (Heat Level):
+  - 🔥 **Rất Nét:** Nền Đỏ nhạt (bg-red-50), viền đỏ, chữ đỏ.
+  - ☀️ **Tiềm Năng:** Nền Vàng (bg-amber-50).
+  - 👁️ **Quan Tâm:** Nền Xanh (bg-blue-50).
+  - ❄️ **Tham Khảo / Chưa Rõ:** Nền xám nhạt (bg-slate-50).
 - Các khách hàng Quá hạn (Overdue) sẽ bị đẩy lên đầu cùng thiết kế cảnh báo đỏ.
 
 ## 4. Tương tác khác

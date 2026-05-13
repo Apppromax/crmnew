@@ -75,7 +75,7 @@ export async function getAllCustomers() {
   }));
 }
 
-export async function completeCustomerAction({ customerId, note, nextFollowUp }) {
+export async function completeCustomerAction({ customerId, note, nextFollowUp, status, journeyStage, nextAction }) {
   const userId = await requireUser();
   const now = new Date();
 
@@ -83,33 +83,39 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp })
   const existing = await prisma.customer.findFirst({ where: { id: customerId, userId } });
   if (!existing) throw new Error("Not found or unauthorized");
 
+  const fullNote = nextAction ? `${note || "Đã chăm sóc"}\n\nHành động tiếp theo: ${nextAction}` : (note || "Đã chăm sóc");
+
   // Create interaction
   await prisma.interaction.create({
     data: {
       customerId,
       type: "note",
-      summary: note || "Đã chăm sóc",
+      summary: fullNote,
     },
   });
 
   // Create note if provided
-  if (note) {
+  if (fullNote) {
     await prisma.note.create({
       data: {
         customerId,
-        rawText: note,
+        rawText: fullNote,
       },
     });
   }
 
+  const updateData = { lastContactAt: now };
+  if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
+  if (status) updateData.status = status;
+  else if (!existing.status || existing.status === 'Mới') {
+      updateData.status = nextFollowUp ? "Đang chờ" : "Đang chăm";
+  }
+  if (journeyStage) updateData.journeyStage = journeyStage;
+
   // Update customer
   await prisma.customer.update({
     where: { id: customerId },
-    data: {
-      lastContactAt: now,
-      nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
-      status: nextFollowUp ? "Đang chờ" : "Đang chăm",
-    },
+    data: updateData,
   });
 
   revalidatePath("/");
