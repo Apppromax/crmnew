@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import FocusCard from "@/components/FocusCard";
 import RadarCard from "@/components/RadarCard";
-import CompletionSheet from "@/components/CompletionSheet";
+import UpdateCareSheet from "@/components/UpdateCareSheet";
 import InboxZero from "@/components/InboxZero";
 import BottomNav from "@/components/BottomNav";
 import {
@@ -309,7 +309,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
 
       <BottomNav activeTab="home" />
 
-      <CompletionSheet
+      <UpdateCareSheet
         isOpen={!!sheetCustomer}
         customer={sheetCustomer}
         onComplete={handleComplete}

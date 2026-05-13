@@ -85,25 +85,6 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
 
   const fullNote = nextAction ? `${note || "Đã chăm sóc"}\n\nHành động tiếp theo: ${nextAction}` : (note || "Đã chăm sóc");
 
-  // Create interaction
-  await prisma.interaction.create({
-    data: {
-      customerId,
-      type: "note",
-      summary: fullNote,
-    },
-  });
-
-  // Create note if provided
-  if (fullNote) {
-    await prisma.note.create({
-      data: {
-        customerId,
-        rawText: fullNote,
-      },
-    });
-  }
-
   const updateData = { lastContactAt: now };
   if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
   if (status) updateData.status = status;
@@ -112,11 +93,35 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
   }
   if (journeyStage) updateData.journeyStage = journeyStage;
 
-  // Update customer
-  await prisma.customer.update({
-    where: { id: customerId },
-    data: updateData,
-  });
+  const transactionOps = [
+    prisma.interaction.create({
+      data: {
+        customerId,
+        type: "note",
+        summary: fullNote,
+      },
+    })
+  ];
+
+  if (fullNote) {
+    transactionOps.push(
+      prisma.note.create({
+        data: {
+          customerId,
+          rawText: fullNote,
+        },
+      })
+    );
+  }
+
+  transactionOps.push(
+    prisma.customer.update({
+      where: { id: customerId },
+      data: updateData,
+    })
+  );
+
+  await prisma.$transaction(transactionOps);
 
   revalidatePath("/");
   revalidatePath("/customers");
@@ -306,11 +311,13 @@ export async function getAllTags() {
 
 export async function getCustomerCount() {
   const userId = await requireUser();
-  const total = await prisma.customer.count({
-    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } },
-  });
-  const hot = await prisma.customer.count({ where: { userId, heatLevel: "Rất Nét" } });
-  const warm = await prisma.customer.count({ where: { userId, heatLevel: "Tiềm Năng" } });
+  const [total, hot, warm] = await Promise.all([
+    prisma.customer.count({
+      where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } },
+    }),
+    prisma.customer.count({ where: { userId, heatLevel: "Rất Nét" } }),
+    prisma.customer.count({ where: { userId, heatLevel: "Tiềm Năng" } }),
+  ]);
   return { total, hot, warm };
 }
 

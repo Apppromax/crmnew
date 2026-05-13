@@ -61,76 +61,66 @@ export async function triggerSmartAlerts() {
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-    const forgottenHotLeads = await prisma.customer.findMany({
-      where: {
-        userId,
-        heatLevel: "Rất nét",
-        status: { notIn: ["Đã chốt", "Mất khách"] },
-        updatedAt: { lt: threeDaysAgo },
-      }
-    });
-
-    let newCount = 0;
-
-    for (const lead of forgottenHotLeads) {
-      const existing = await prisma.notification.findFirst({
-        where: { 
-          userId, 
-          type: "ALERT", 
-          body: { contains: lead.name },
-          createdAt: { gte: threeDaysAgo } 
-        }
-      });
-
-      if (!existing) {
-        await prisma.notification.create({
-          data: {
-            userId,
-            title: "🔥 Khách Rất Nét đang bị bỏ quên!",
-            body: `VIP ${lead.name} đã không có tương tác nào trong 3 ngày qua. Hãy nhấc máy gọi ngay!`,
-            type: "ALERT",
-          }
-        });
-        newCount++;
-      }
-    }
-
-    // 2. Lịch hẹn trong ngày hôm nay
     const todayStart = new Date();
     todayStart.setHours(0,0,0,0);
     const todayEnd = new Date();
     todayEnd.setHours(23,59,59,999);
 
-    const upcomingFollowups = await prisma.customer.findMany({
-      where: {
-        userId,
-        nextFollowUp: {
-          gte: todayStart,
-          lte: todayEnd
+    const [forgottenHotLeads, upcomingFollowups] = await Promise.all([
+      prisma.customer.findMany({
+        where: {
+          userId,
+          heatLevel: "Rất Nét",
+          status: { notIn: ["Đã chốt", "Mất khách"] },
+          updatedAt: { lt: threeDaysAgo },
         }
-      }
-    });
-
-    for (const lead of upcomingFollowups) {
-      const existing = await prisma.notification.findFirst({
-        where: { 
-          userId, 
-          type: "REMINDER", 
-          body: { contains: lead.name },
-          createdAt: { gte: todayStart } 
-        }
-      });
-
-      if (!existing) {
-        await prisma.notification.create({
-          data: {
-            userId,
-            title: "⏰ Lịch hẹn hôm nay",
-            body: `Tới giờ chăm sóc ${lead.name} rồi. Nhấn vào để xem chi tiết!`,
-            type: "REMINDER",
+      }),
+      prisma.customer.findMany({
+        where: {
+          userId,
+          nextFollowUp: {
+            gte: todayStart,
+            lte: todayEnd
           }
-        });
-        newCount++;
+        }
+      })
+    ]);
+
+    let newCount = 0;
+
+    if (forgottenHotLeads.length > 0) {
+      const existingNotifs = await prisma.notification.findMany({
+        where: { userId, type: "ALERT", createdAt: { gte: threeDaysAgo } }
+      });
+      const newNotifsData = forgottenHotLeads
+        .filter(lead => !existingNotifs.some(n => n.body.includes(lead.name)))
+        .map(lead => ({
+          userId,
+          title: "🔥 Khách Rất Nét đang bị bỏ quên!",
+          body: `VIP ${lead.name} đã không có tương tác nào trong 3 ngày qua. Hãy nhấc máy gọi ngay!`,
+          type: "ALERT",
+        }));
+      if (newNotifsData.length > 0) {
+        await prisma.notification.createMany({ data: newNotifsData });
+        newCount += newNotifsData.length;
+      }
+    }
+
+    if (upcomingFollowups.length > 0) {
+      const existingReminders = await prisma.notification.findMany({
+        where: { userId, type: "REMINDER", createdAt: { gte: todayStart } }
+      });
+      const newRemindersData = upcomingFollowups
+        .filter(lead => !existingReminders.some(n => n.body.includes(lead.name)))
+        .map(lead => ({
+          userId,
+          title: "⏰ Lịch hẹn hôm nay",
+          body: `Tới giờ chăm sóc ${lead.name} rồi. Nhấn vào để xem chi tiết!`,
+          type: "REMINDER",
+        }));
+      if (newRemindersData.length > 0) {
+        await prisma.notification.createMany({ data: newRemindersData });
+        newCount += newRemindersData.length;
       }
     }
 
