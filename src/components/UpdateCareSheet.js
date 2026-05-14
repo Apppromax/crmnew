@@ -94,8 +94,10 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
   const handleNextStep = (action) => {
     if (action) {
       setStatusAction(action);
+      setStep(3);
+    } else {
+      setStep(2);
     }
-    setStep(2);
   };
 
   const handleProgressClick = (progress) => {
@@ -170,7 +172,6 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                     <span className="text-xs opacity-80">Gọi không bắt máy / Thuê bao</span>
                   </button>
                 </div>
-              ) : (
                 <div className="space-y-5">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Nội dung chăm sóc</label>
@@ -180,7 +181,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder="Khách phản hồi như thế nào? Cần note lại ý gì quan trọng?"
-                        rows={4}
+                        rows={6}
                         className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 transition-all"
                       />
                       <button className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-transform">
@@ -189,56 +190,76 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Đánh giá khách hàng</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => handleProgressClick('Nguội đi')}
-                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Nguội đi' ? 'bg-red-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
-                      >
-                        ❄️ Nguội đi
-                      </button>
-                      <button
-                        onClick={() => handleProgressClick('Giữ nguyên')}
-                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Giữ nguyên' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
-                      >
-                        ➖ Giữ nguyên
-                      </button>
-                      <button
-                        onClick={() => handleProgressClick('Lên mốc')}
-                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Lên mốc' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
-                      >
-                        🔥 Lên mốc
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Tiến độ hành trình</label>
-                    <select
-                      value={journeyStage}
-                      onChange={(e) => setJourneyStage(e.target.value)}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-all appearance-none"
-                    >
-                      {LOCAL_JOURNEY_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  </div>
-
                   <button
                     onClick={() => handleNextStep()}
-                    disabled={!journeyProgress}
+                    disabled={!note.trim()}
                     className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
                   >
-                    Tiếp tục lên lịch <ArrowRight className="w-4 h-4" />
+                    Tiếp tục đánh giá <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {step === 2 && (
+          {step === 2 && !isNewOrUnreachable && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Đánh giá khách hàng</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => handleProgressClick('Nguội đi')}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Nguội đi' ? 'bg-red-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                  >
+                    ❄️ Nguội đi
+                  </button>
+                  <button
+                    onClick={() => handleProgressClick('Giữ nguyên')}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Giữ nguyên' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                  >
+                    ➖ Giữ nguyên
+                  </button>
+                  <button
+                    onClick={() => handleProgressClick('Lên mốc')}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Lên mốc' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                  >
+                    🔥 Lên mốc
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Tiến độ hành trình</label>
+                <select
+                  value={journeyStage}
+                  onChange={(e) => setJourneyStage(e.target.value)}
+                  className="w-full px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-all appearance-none"
+                >
+                  {LOCAL_JOURNEY_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setStep(1)}
+                  className="px-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold"
+                >
+                  Quay lại
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!journeyProgress}
+                  className="flex-1 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
+                >
+                  Tiếp tục lên lịch <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-6">
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-500 mb-3">
@@ -286,7 +307,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(isNewOrUnreachable ? 1 : 2)}
                   className="px-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold"
                 >
                   Quay lại
