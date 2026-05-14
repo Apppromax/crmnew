@@ -210,25 +210,23 @@ export async function getTeamCustomers(teamId) {
     where: {
       OR: [
         { teamId },
-        { userId: userId, teamId: null } // Lấy cả khách cá nhân của Leader chưa đưa vào Team
+        { userId: userId, teamId: null }
       ]
     },
-    include: {
-      profile: {
-        select: { email: true }
-      }
+    select: {
+      id: true,
+      userId: true,
+      name: true,
+      phone: true,
+      status: true,
+      heatLevel: true,
+      journeyStage: true,
+      clarityScore: true,
     },
     orderBy: { createdAt: "desc" }
   });
 
-  return customers.map(c => ({
-    ...c,
-    nextFollowUp: c.nextFollowUp?.toISOString() || null,
-    lastContactAt: c.lastContactAt?.toISOString() || null,
-    snoozedUntil: c.snoozedUntil?.toISOString() || null,
-    createdAt: c.createdAt.toISOString(),
-    updatedAt: c.updatedAt.toISOString(),
-  }));
+  return customers;
 }
 
 // Phân bổ Khách hàng cho Thành viên (Dành cho Leader)

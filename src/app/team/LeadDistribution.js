@@ -9,6 +9,9 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [assigningId, setAssigningId] = useState(null);
+  const [displayLimit, setDisplayLimit] = useState(20);
+
+  const displayedCustomers = initialCustomers.slice(0, displayLimit);
 
   const handleAssign = (customerId, targetUserId) => {
     setAssigningId(customerId);
@@ -37,7 +40,13 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
 
   return (
     <div className="space-y-4">
-      {initialCustomers.map((customer) => {
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-slate-500">
+          Hiển thị {displayedCustomers.length} / {initialCustomers.length} khách hàng
+        </p>
+      </div>
+
+      {displayedCustomers.map((customer) => {
         const currentAssignee = members.find(m => m.userId === customer.userId);
 
         return (
@@ -101,6 +110,15 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
           </div>
         );
       })}
+
+      {displayLimit < initialCustomers.length && (
+        <button
+          onClick={() => setDisplayLimit(prev => prev + 20)}
+          className="w-full py-3 mt-4 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold hover:border-primary-400 hover:text-primary-500 transition-all"
+        >
+          Xem thêm
+        </button>
+      )}
     </div>
   );
 }
