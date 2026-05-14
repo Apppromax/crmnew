@@ -125,16 +125,9 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
       onMouseUp={handleEnd}
       onMouseLeave={() => handleEnd()}
     >
-      <div className="flex items-center gap-3 mb-3 pointer-events-none">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-sm font-bold shrink-0">
-          {customer.name?.charAt(0)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate flex items-center gap-1">
-            {customer.name}
-            <span className="text-[12px]" title={`Độ nét gốc: ${customer.heatLevel}`}>{heat.emoji}</span>
-          </h4>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{customer.phone}</p>
+      <div className="flex justify-between items-center mb-2 pointer-events-none">
+        <div className="text-[12px]" title={`Độ nét gốc: ${customer.heatLevel}`}>
+          {heat.emoji}
         </div>
         <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border shrink-0 ${
             customer.nextFollowUp && new Date(customer.nextFollowUp) < new Date() 
@@ -146,9 +139,19 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 pointer-events-none mt-2">
+      <div className="flex items-center gap-2.5 mb-2 pointer-events-none">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">
+          {customer.name?.charAt(0)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="font-bold text-[13px] text-slate-800 dark:text-white truncate">
+            {customer.name}
+          </h4>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{customer.phone}</p>
+        </div>
+      </div>
 
-        
+      <div className="flex flex-col gap-2 pointer-events-none">
         {/* Journey Progress Bar */}
         <div className="flex flex-col gap-1 mt-1">
           <div className="flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
