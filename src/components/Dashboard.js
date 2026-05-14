@@ -225,12 +225,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
             >
               <RotateCcw className={`w-5 h-5 text-slate-600 dark:text-slate-300 ${isPending ? 'animate-spin' : ''}`} />
             </button>
-            <button 
-              onClick={() => router.push("/add")}
-              className="w-11 h-11 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center active:scale-95 transition-transform hover:bg-primary-700"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
+
             <button 
               onClick={() => setIsNotifOpen(true)}
               className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"

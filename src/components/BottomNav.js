@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Home, Users, Calendar, User, Sparkles, BrainCircuit } from 'lucide-react';
+import { Home, Users, Calendar, User, Sparkles, BrainCircuit, Plus } from 'lucide-react';
 import Logo from './Logo';
 
 const tabs = [
@@ -84,6 +84,15 @@ export default function BottomNav({ activeTab = 'home' }) {
           );
         })}
       </div>
+
+      {/* Floating Action Button (Mobile Only) */}
+      <Link 
+        href="/add"
+        className="fixed bottom-[84px] right-4 md:hidden flex items-center gap-2 px-4 py-3.5 bg-slate-900 dark:bg-primary-600 rounded-full text-white shadow-xl shadow-slate-900/20 dark:shadow-primary-600/20 active:scale-95 transition-transform z-50"
+      >
+        <Plus className="w-5 h-5" />
+        <span className="text-sm font-bold pr-1">Thêm khách</span>
+      </Link>
     </nav>
   );
 }
