@@ -130,21 +130,24 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
           {customer.name?.charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">{customer.name}</h4>
+          <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate flex items-center gap-1">
+            {customer.name}
+            <span className="text-[12px]" title={`Độ nét gốc: ${customer.heatLevel}`}>{heat.emoji}</span>
+          </h4>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{customer.phone}</p>
+        </div>
+        <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border shrink-0 ${
+            customer.nextFollowUp && new Date(customer.nextFollowUp) < new Date() 
+              ? 'text-red-600 bg-red-50 border-red-100 dark:bg-red-500/10 dark:border-red-500/20' 
+              : 'text-slate-500 bg-slate-50 border-slate-100 dark:text-slate-400 dark:bg-slate-800/50 dark:border-slate-800'
+          }`}>
+          <Clock className="w-3 h-3" />
+          <span>{formatFollowUp(customer.nextFollowUp)}</span>
         </div>
       </div>
 
       <div className="flex flex-col gap-2 pointer-events-none mt-2">
-        <div className="flex items-center justify-between mb-0.5">
-          <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-            <Clock className="w-3 h-3" />
-            <span className="font-medium text-slate-700 dark:text-slate-300">{formatFollowUp(customer.nextFollowUp)}</span>
-          </div>
-          <div className="text-[12px]" title={`Độ nét gốc: ${customer.heatLevel}`}>
-            {heat.emoji}
-          </div>
-        </div>
+
         
         {/* Journey Progress Bar */}
         <div className="flex flex-col gap-1 mt-1">

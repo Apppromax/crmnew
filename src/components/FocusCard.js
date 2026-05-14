@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from 'react';
-import { Phone, Flame, ThermometerSun, Snowflake, Lightbulb, ClipboardList, PenLine, ArrowLeft } from 'lucide-react';
+import { Phone, Flame, ThermometerSun, Snowflake, Lightbulb, ClipboardList, PenLine, ArrowLeft, Clock } from 'lucide-react';
 
 const heatConfig = {
   "Rất Nét": { icon: Flame, label: 'Rất Nét', bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
@@ -144,9 +144,13 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
               </a>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800">
-            <span>{heat.icon && <heat.icon className={`w-3 h-3 ${heat.text.split(' ')[0]}`} />}</span> 
-            <span>Độ nét: <span className="font-semibold">{heat.label}</span></span>
+          <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border shrink-0 ${
+              customer.nextFollowUp && new Date(customer.nextFollowUp) < new Date() 
+                ? 'text-red-600 bg-red-50 border-red-100 dark:bg-red-500/10 dark:border-red-500/20' 
+                : 'text-slate-500 bg-slate-50 border-slate-100 dark:text-slate-400 dark:bg-slate-800/50 dark:border-slate-800'
+            }`}>
+            <Clock className="w-3 h-3" />
+            <span>{formatFollowUp(customer.nextFollowUp)}</span>
           </div>
         </div>
       </div>
