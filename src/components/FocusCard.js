@@ -187,21 +187,7 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
         </div>
       </div>
 
-      {/* Bottom Info Row: Status | Time */}
-      <div className="border-t border-slate-100 dark:border-slate-700/50 px-5 py-3 flex items-center justify-between">
-        <div className="text-center flex-1">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Trạng thái</p>
-          <div className="flex items-center justify-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${dot}`} />
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{customer.status}</span>
-          </div>
-        </div>
-        <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
-        <div className="text-center flex-1">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Thời gian</p>
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{formatFollowUp(customer.nextFollowUp)}</span>
-        </div>
-      </div>
+
 
       {/* Action Button */}
       <div className="px-5 pb-5 pt-2 flex gap-2">

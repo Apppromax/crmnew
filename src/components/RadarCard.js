@@ -136,13 +136,13 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
       </div>
 
       <div className="flex flex-col gap-2 pointer-events-none mt-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
             <Clock className="w-3 h-3" />
             <span className="font-medium text-slate-700 dark:text-slate-300">{formatFollowUp(customer.nextFollowUp)}</span>
           </div>
-          <div className="flex items-center gap-1 text-[10px] text-slate-400">
-            <span>{heat.emoji}</span> <span>Độ nét (gốc): {customer.heatLevel}</span>
+          <div className="text-[12px]" title={`Độ nét gốc: ${customer.heatLevel}`}>
+            {heat.emoji}
           </div>
         </div>
         
