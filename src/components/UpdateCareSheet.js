@@ -37,27 +37,30 @@ function getQuickDates() {
 }
 
 const LOCAL_JOURNEY_OPTIONS = [
-  "1. Phá băng và làm rõ nhu cầu",
-  "2. Tư vấn sản phẩm",
-  "3. Xây dựng lòng tin",
-  "4. Hẹn gặp/xem",
-  "5. Xử lý từ chối",
-  "6. Chốt giao dịch"
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1 (căn hot, phương án tài chính hay, cơ hội, chốt giả định ..)",
+  "3. Xây dựng lòng tin (Sản phẩm và Sale, gợi ý cho sale)",
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt (Tạo khan hiếm, phương án căn đặc biệt, xử lý từ chối ...)",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ (Gợi ý)"
 ];
 
 const LOCAL_JOURNEY_DETAILS = {
-  "1. Phá băng và làm rõ nhu cầu": { actions: ["Gọi điện làm quen", "Gửi tin nhắn gợi mở nhu cầu", "Hỏi thêm về khu vực/tài chính", "Gửi 1-2 dự án mẫu để đo lường phản ứng"] },
-  "2. Tư vấn sản phẩm": { actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"] },
-  "3. Xây dựng lòng tin": { actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"] },
-  "4. Hẹn gặp/xem": { actions: ["Lên lịch hẹn xem nhà mẫu", "Gọi điện chốt lịch hẹn", "Gửi vị trí định vị/hướng dẫn đường đi", "Gợi ý đưa đón khách"] },
-  "5. Xử lý từ chối": { actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng"] },
-  "6. Chốt giao dịch": { actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback", "Xin lời giới thiệu khách hàng mới (Referral)"] }
+  "1. Phá băng và tư vấn ban đầu": { actions: ["Gọi điện làm quen", "Gửi tin nhắn gợi mở nhu cầu", "Hỏi thêm về khu vực/tài chính", "Gửi 1-2 dự án mẫu để đo lường phản ứng"] },
+  "2. Tư vấn chuyên sâu lần 1 (căn hot, phương án tài chính hay, cơ hội, chốt giả định ..)": { actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"] },
+  "3. Xây dựng lòng tin (Sản phẩm và Sale, gợi ý cho sale)": { actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"] },
+  "4. Hẹn gặp khách": { actions: ["Lên lịch hẹn xem nhà mẫu", "Gọi điện chốt lịch hẹn", "Gửi vị trí định vị/hướng dẫn đường đi", "Gợi ý đưa đón khách"] },
+  "5. Dồn Chốt (Tạo khan hiếm, phương án căn đặc biệt, xử lý từ chối ...)": { actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng", "Tạo khan hiếm căn đẹp"] },
+  "6. Chốt Cọc": { actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback"] },
+  "7. Xây dựng mối quan hệ (Gợi ý)": { actions: ["Xin lời giới thiệu khách hàng mới (Referral)", "Mời tham gia event tri ân", "Cập nhật tiến độ xây dựng", "Hỗ trợ tìm khách thuê"] }
 };
 
 export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose }) {
   const [step, setStep] = useState(1);
   const [note, setNote] = useState('');
   const [journeyStage, setJourneyStage] = useState('');
+  const [journeyProgress, setJourneyProgress] = useState(null); // 'Nguội đi', 'Giữ nguyên', 'Lên mốc'
   const [statusAction, setStatusAction] = useState(null); // 'Chưa liên lạc được' | 'Đã Tư Vấn'
   
   const [selectedDate, setSelectedDate] = useState(null);
@@ -71,6 +74,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
       setStep(1);
       setNote('');
       setJourneyStage(customer.journeyStage || LOCAL_JOURNEY_OPTIONS[0]);
+      setJourneyProgress(null);
       setStatusAction(null);
       setSelectedDate(null);
       setNextAction('');
@@ -103,6 +107,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
         nextFollowUp: selectedDate?.toISOString() || null,
         status: statusAction === 'Chưa liên lạc được' ? 'Chưa liên lạc được' : (statusAction === 'Đã Tư Vấn' ? 'Đang chăm' : undefined),
         journeyStage: isNewOrUnreachable ? undefined : journeyStage,
+        journeyProgress: isNewOrUnreachable ? undefined : journeyProgress,
         nextAction,
       });
     }, 200);
@@ -175,6 +180,30 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                   </div>
 
                   <div>
+                    <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Đánh giá khách hàng</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setJourneyProgress('Nguội đi')}
+                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Nguội đi' ? 'bg-red-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                      >
+                        ❄️ Nguội đi
+                      </button>
+                      <button
+                        onClick={() => setJourneyProgress('Giữ nguyên')}
+                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Giữ nguyên' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                      >
+                        ➖ Giữ nguyên
+                      </button>
+                      <button
+                        onClick={() => setJourneyProgress('Lên mốc')}
+                        className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Lên mốc' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                      >
+                        🔥 Lên mốc
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Tiến độ hành trình</label>
                     <select
                       value={journeyStage}
@@ -189,7 +218,8 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
 
                   <button
                     onClick={() => handleNextStep()}
-                    className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    disabled={!journeyProgress}
+                    className="w-full py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:active:scale-100"
                   >
                     Tiếp tục lên lịch <ArrowRight className="w-4 h-4" />
                   </button>

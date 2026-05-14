@@ -58,11 +58,16 @@ export async function getSmartQueue() {
     take: 10,
   });
 
-  // Re-sort: overdue first, then clarity score
+  // Re-sort: overdue first, then journeyStage
   const sorted = customers.sort((a, b) => {
     const aOverdue = a.nextFollowUp && a.nextFollowUp < now ? 0 : 1;
     const bOverdue = b.nextFollowUp && b.nextFollowUp < now ? 0 : 1;
     if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+    
+    const aJourney = parseInt((a.journeyStage || "1.").split(".")[0]) || 1;
+    const bJourney = parseInt((b.journeyStage || "1.").split(".")[0]) || 1;
+    if (aJourney !== bJourney) return bJourney - aJourney;
+    
     return b.clarityScore - a.clarityScore;
   });
 
@@ -93,7 +98,7 @@ export async function getAllCustomers() {
   }));
 }
 
-export async function completeCustomerAction({ customerId, note, nextFollowUp, status, journeyStage, nextAction }) {
+export async function completeCustomerAction({ customerId, note, nextFollowUp, status, journeyStage, nextAction, journeyProgress }) {
   const userId = await requireUser();
   const now = new Date();
 
@@ -103,12 +108,24 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
 
   const fullNote = nextAction ? `${note || "Đã chăm sóc"}\n\nHành động tiếp theo: ${nextAction}` : (note || "Đã chăm sóc");
 
-  const updateData = { lastContactAt: now };
-  if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
-  if (status) updateData.status = status;
-  else if (!existing.status || ["Mới", "Đang chăm", "Đang chờ"].includes(existing.status)) {
-      updateData.status = "Đang chăm";
+  let coldStreak = existing.coldStreak || 0;
+  if (journeyProgress === "Lên mốc") {
+    coldStreak = 0;
+  } else if (journeyProgress === "Nguội đi" || journeyProgress === "Giữ nguyên") {
+    coldStreak += 1;
   }
+
+  const updateData = { lastContactAt: now, coldStreak };
+  if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
+  
+  if (status) {
+    updateData.status = status;
+  } else if (coldStreak >= 3 && journeyProgress === "Nguội đi") {
+    updateData.status = "Ngủ đông";
+  } else if (!existing.status || ["Mới", "Đang chăm", "Đang chờ"].includes(existing.status)) {
+    updateData.status = "Đang chăm";
+  }
+  
   if (journeyStage) updateData.journeyStage = journeyStage;
 
   const transactionOps = [

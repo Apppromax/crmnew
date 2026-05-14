@@ -11,10 +11,16 @@ const heatConfig = {
   "Chưa Rõ": { icon: Snowflake, label: 'Chưa Rõ', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
 };
 
-const stageLabels = {
-  Lead: 'Mới', Contacted: 'Đã liên hệ', Viewed: 'Đã xem nhà',
-  Negotiating: 'Đang thương lượng', Deposited: 'Đã đặt cọc', Closed: 'Chốt',
-};
+// Journey options for UI logic if needed
+const JOURNEY_OPTIONS = [
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1",
+  "3. Xây dựng lòng tin",
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ"
+];
 
 const statusDot = {
   New: 'bg-blue-500', Active: 'bg-emerald-500', Waiting: 'bg-amber-500',
@@ -39,7 +45,7 @@ function formatFollowUp(dateStr) {
 
 export default function FocusCard({ customer, onAction, onSnooze }) {
   const heat = heatConfig[customer.heatLevel] || heatConfig["Chưa Rõ"];
-  const stage = stageLabels[customer.journeyStage] || customer.journeyStage;
+  const stage = (customer.journeyStage || "1. Phá băng").split(". ")[1] || customer.journeyStage;
   const dot = statusDot[customer.status] || 'bg-slate-400';
 
   const cardRef = useRef(null);
@@ -167,9 +173,9 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
           </div>
         </div>
         <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
-        <div className="text-center flex-1">
+        <div className="text-center flex-1 max-w-[33%] px-1">
           <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Hành trình</p>
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{stage}</span>
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate block" title={stage}>{stage}</span>
         </div>
         <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
         <div className="text-center flex-1">

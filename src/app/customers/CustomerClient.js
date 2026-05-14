@@ -10,20 +10,21 @@ import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, File
 const STATUS_OPTIONS = ["Mới", "Chưa liên lạc được", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
 const HEAT_OPTIONS = ["Rất Nét", "Tiềm Năng", "Quan Tâm", "Tham Khảo", "Chưa Rõ"];
 const JOURNEY_OPTIONS = [
-  "1. Phá băng và làm rõ nhu cầu",
-  "2. Tư vấn sản phẩm",
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1",
   "3. Xây dựng lòng tin",
-  "4. Hẹn gặp/xem",
-  "5. Xử lý từ chối",
-  "6. Chốt giao dịch"
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ"
 ];
 
 const JOURNEY_DETAILS = {
-  "1. Phá băng và làm rõ nhu cầu": {
+  "1. Phá băng và tư vấn ban đầu": {
     hints: "• Khách rụt rè, chưa cung cấp đủ thông tin.\n• Khách hỏi giá xong im lặng, khách nói 'để xem đã'.",
     actions: ["Gọi điện làm quen", "Gửi tin nhắn gợi mở nhu cầu", "Hỏi thêm về khu vực/tài chính", "Gửi 1-2 dự án mẫu để đo lường phản ứng"]
   },
-  "2. Tư vấn sản phẩm": {
+  "2. Tư vấn chuyên sâu lần 1": {
     hints: "• Khách bắt đầu hỏi sâu về pháp lý, giá, chính sách.\n• So sánh với dự án khác, chê giá cao.",
     actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"]
   },
@@ -31,17 +32,21 @@ const JOURNEY_DETAILS = {
     hints: "• Khách đã ưng nhưng còn lưỡng lự về CĐT hoặc môi giới.\n• Khách muốn xin thêm chiết khấu, 'cần bàn với gia đình'.",
     actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"]
   },
-  "4. Hẹn gặp/xem": {
+  "4. Hẹn gặp khách": {
     hints: null,
     actions: ["Lên lịch hẹn xem nhà mẫu", "Gọi điện chốt lịch hẹn", "Gửi vị trí định vị/hướng dẫn đường đi", "Gợi ý đưa đón khách"]
   },
-  "5. Xử lý từ chối": {
+  "5. Dồn Chốt": {
     hints: "• Khách im lặng sau khi xem, báo 'không hợp hướng', 'xa quá'.\n• Sợ rủi ro pháp lý, ngân hàng không duyệt vay đủ.",
-    actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng"]
+    actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng", "Tạo khan hiếm căn đẹp"]
   },
-  "6. Chốt giao dịch": {
+  "6. Chốt Cọc": {
     hints: null,
-    actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback", "Xin lời giới thiệu khách hàng mới (Referral)"]
+    actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback"]
+  },
+  "7. Xây dựng mối quan hệ": {
+    hints: null,
+    actions: ["Xin lời giới thiệu khách hàng mới (Referral)", "Mời tham gia event tri ân", "Cập nhật tiến độ xây dựng", "Hỗ trợ tìm khách thuê"]
   }
 };
 
@@ -125,7 +130,7 @@ export default function CustomerClient({ initialCustomers }) {
       area: selectedCustomer.area || "",
       demand: selectedCustomer.demand || "",
       timeline: selectedCustomer.timeline || "",
-      journeyStage: selectedCustomer.journeyStage || "1. Phá băng và làm rõ nhu cầu",
+      journeyStage: selectedCustomer.journeyStage || "1. Phá băng và tư vấn ban đầu",
     });
     setIsEditing(true);
     setSaveMsg("");
@@ -365,6 +370,25 @@ export default function CustomerClient({ initialCustomers }) {
                   </h3>
                   <p className="text-sm text-slate-500 mt-1">{c.phone}</p>
                   {c.demand && <p className="text-xs text-slate-400 mt-1 truncate max-w-[200px]">{c.demand}</p>}
+                  
+                  {/* Journey Progress Bar */}
+                  <div className="mt-2.5 flex items-center gap-1.5 w-48">
+                    <div className="flex-1 flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
+                      {JOURNEY_OPTIONS.map((_, idx) => {
+                        const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500' : 'bg-transparent'}`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span className="text-[9px] font-bold text-slate-500 shrink-0">
+                      {(c.journeyStage || "1.").split(". ")[1]}
+                    </span>
+                  </div>
+
                   {c.tags && c.tags.length > 0 && (
                     <div className="flex gap-1 mt-1.5 flex-wrap">
                       {c.tags.slice(0, 3).map(t => (
@@ -525,19 +549,20 @@ export default function CustomerClient({ initialCustomers }) {
                   </div>
 
                   {/* Status and Metrics Grid */}
-                  <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="grid grid-cols-2 gap-2 mt-4">
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Trạng thái</p>
                       <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status || "Mới"}</p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                      <p className="text-[10px] uppercase text-slate-400 mb-1">Độ Nét Gốc</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.heatLevel || "Chưa Rõ"}</p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Hành trình</p>
                       <p className="font-bold text-sm text-slate-900 dark:text-white truncate" title={selectedCustomer.journeyStage}>{selectedCustomer.journeyStage ? selectedCustomer.journeyStage.split(". ")[1] || selectedCustomer.journeyStage : "Mới"}</p>
                     </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mt-2 px-1">
+                      <p className="text-[10px] uppercase text-slate-400">Độ Nét Gốc (Ban đầu):</p>
+                      <p className="font-bold text-xs text-slate-600 dark:text-slate-300">{selectedCustomer.heatLevel || "Chưa Rõ"}</p>
                   </div>
 
                   {/* Journey Component */}
@@ -550,7 +575,7 @@ export default function CustomerClient({ initialCustomers }) {
                     </p>
                     <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-2">
                       {JOURNEY_OPTIONS.map((stage, idx) => {
-                        const currentIdx = Math.max(0, JOURNEY_OPTIONS.indexOf(selectedCustomer.journeyStage || JOURNEY_OPTIONS[0]));
+                        const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((selectedCustomer.journeyStage || "1.").split(".")[0])));
                         const isPast = idx < currentIdx;
                         const isCurrent = idx === currentIdx;
                         const hasHint = JOURNEY_DETAILS[stage]?.hints;

@@ -68,6 +68,7 @@ model Customer {
 
   // Journey
   journeyStage String @default("Lead") @map("journey_stage")
+  coldStreak   Int    @default(0) @map("cold_streak")
 
   // Relations
   interactions Interaction[]

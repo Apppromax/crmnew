@@ -11,6 +11,16 @@ const heatConfig = {
   "Chưa Rõ": { emoji: '❄️', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400' },
 };
 
+const JOURNEY_OPTIONS = [
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1",
+  "3. Xây dựng lòng tin",
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ"
+];
+
 function formatFollowUp(dateStr) {
   if (!dateStr) return 'Chưa hẹn';
   const date = new Date(dateStr);
@@ -125,13 +135,33 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between pointer-events-none">
-        <div className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${heat.bg} ${heat.text} flex items-center gap-1`}>
-          <span>{heat.emoji}</span> {customer.heatLevel}
+      <div className="flex flex-col gap-2 pointer-events-none mt-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
+            <Clock className="w-3 h-3" />
+            <span className="font-medium text-slate-700 dark:text-slate-300">{formatFollowUp(customer.nextFollowUp)}</span>
+          </div>
+          <div className="flex items-center gap-1 text-[10px] text-slate-400">
+            <span>{heat.emoji}</span> <span>Độ nét (gốc): {customer.heatLevel}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-          <Clock className="w-3 h-3" />
-          <span className="font-medium">{formatFollowUp(customer.nextFollowUp)}</span>
+        
+        {/* Journey Progress Bar */}
+        <div className="flex flex-col gap-1 mt-1">
+          <div className="flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
+            {JOURNEY_OPTIONS.map((_, idx) => {
+              const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((customer.journeyStage || "1.").split(".")[0])));
+              return (
+                <div 
+                  key={idx} 
+                  className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500' : 'bg-transparent'}`}
+                />
+              );
+            })}
+          </div>
+          <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 truncate">
+            {(customer.journeyStage || "1.").split(". ")[1]}
+          </span>
         </div>
       </div>
     </div>
