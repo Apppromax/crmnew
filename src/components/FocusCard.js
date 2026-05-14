@@ -144,9 +144,9 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
               </a>
             </div>
           </div>
-          <div className={`px-2.5 py-1 text-xs font-bold rounded-full border ${heat.bg} ${heat.text} ${heat.border} flex items-center gap-1.5`}>
-            {heat.icon && <heat.icon className="w-3.5 h-3.5" />} 
-            <span>{heat.label}</span>
+          <div className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800">
+            <span>{heat.icon && <heat.icon className={`w-3 h-3 ${heat.text.split(' ')[0]}`} />}</span> 
+            <span>Độ nét: <span className="font-semibold">{heat.label}</span></span>
           </div>
         </div>
       </div>
@@ -163,7 +163,30 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
         </div>
       </div>
 
-      {/* Bottom Info Row: Status | Journey Stage | Time */}
+      {/* Journey Progress Bar */}
+      <div className="px-5 pb-4">
+        <div className="flex flex-col gap-1.5 mt-1">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Hành trình</p>
+            <span className="text-[11px] font-bold text-primary-600 dark:text-primary-400 truncate">
+              {stage}
+            </span>
+          </div>
+          <div className="flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
+            {JOURNEY_OPTIONS.map((_, idx) => {
+              const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((customer.journeyStage || "1.").split(".")[0])));
+              return (
+                <div 
+                  key={idx} 
+                  className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500' : 'bg-transparent'}`}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Info Row: Status | Time */}
       <div className="border-t border-slate-100 dark:border-slate-700/50 px-5 py-3 flex items-center justify-between">
         <div className="text-center flex-1">
           <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Trạng thái</p>
@@ -171,11 +194,6 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
             <span className={`w-2 h-2 rounded-full ${dot}`} />
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{customer.status}</span>
           </div>
-        </div>
-        <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
-        <div className="text-center flex-1 max-w-[33%] px-1">
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Hành trình</p>
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate block" title={stage}>{stage}</span>
         </div>
         <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
         <div className="text-center flex-1">
