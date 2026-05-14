@@ -151,10 +151,11 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
           <div className="flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
             {JOURNEY_OPTIONS.map((_, idx) => {
               const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((customer.journeyStage || "1.").split(".")[0])));
+              const opacities = ['opacity-20', 'opacity-30', 'opacity-40', 'opacity-60', 'opacity-80', 'opacity-90', 'opacity-100'];
               return (
                 <div 
                   key={idx} 
-                  className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500' : 'bg-transparent'}`}
+                  className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500 ' + (opacities[idx] || 'opacity-100') : 'bg-transparent'}`}
                 />
               );
             })}

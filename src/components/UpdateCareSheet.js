@@ -38,22 +38,22 @@ function getQuickDates() {
 
 const LOCAL_JOURNEY_OPTIONS = [
   "1. Phá băng và tư vấn ban đầu",
-  "2. Tư vấn chuyên sâu lần 1 (căn hot, phương án tài chính hay, cơ hội, chốt giả định ..)",
-  "3. Xây dựng lòng tin (Sản phẩm và Sale, gợi ý cho sale)",
+  "2. Tư vấn chuyên sâu lần 1",
+  "3. Xây dựng lòng tin",
   "4. Hẹn gặp khách",
-  "5. Dồn Chốt (Tạo khan hiếm, phương án căn đặc biệt, xử lý từ chối ...)",
+  "5. Dồn Chốt",
   "6. Chốt Cọc",
-  "7. Xây dựng mối quan hệ (Gợi ý)"
+  "7. Xây dựng mối quan hệ"
 ];
 
 const LOCAL_JOURNEY_DETAILS = {
   "1. Phá băng và tư vấn ban đầu": { actions: ["Gọi điện làm quen", "Gửi tin nhắn gợi mở nhu cầu", "Hỏi thêm về khu vực/tài chính", "Gửi 1-2 dự án mẫu để đo lường phản ứng"] },
-  "2. Tư vấn chuyên sâu lần 1 (căn hot, phương án tài chính hay, cơ hội, chốt giả định ..)": { actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"] },
-  "3. Xây dựng lòng tin (Sản phẩm và Sale, gợi ý cho sale)": { actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"] },
+  "2. Tư vấn chuyên sâu lần 1": { actions: ["Gửi thông tin chi tiết dự án", "Làm bảng tính dòng tiền", "Gửi video/hình ảnh thực tế", "Phân tích ưu/nhược điểm so với đối thủ"] },
+  "3. Xây dựng lòng tin": { actions: ["Chia sẻ các case study thành công", "Gửi thông tin uy tín của CĐT", "Cập nhật tiến độ dự án hàng tuần", "Hỏi thăm cá nhân/Tặng quà nhỏ"] },
   "4. Hẹn gặp khách": { actions: ["Lên lịch hẹn xem nhà mẫu", "Gọi điện chốt lịch hẹn", "Gửi vị trí định vị/hướng dẫn đường đi", "Gợi ý đưa đón khách"] },
-  "5. Dồn Chốt (Tạo khan hiếm, phương án căn đặc biệt, xử lý từ chối ...)": { actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng", "Tạo khan hiếm căn đẹp"] },
-  "6. Chốt Cọc": { actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback"] },
-  "7. Xây dựng mối quan hệ (Gợi ý)": { actions: ["Xin lời giới thiệu khách hàng mới (Referral)", "Mời tham gia event tri ân", "Cập nhật tiến độ xây dựng", "Hỗ trợ tìm khách thuê"] }
+  "5. Dồn chốt": { actions: ["Gọi điện hỏi thăm cảm nhận sau khi xem", "Đưa ra giải pháp thay thế (căn khác/dự án khác)", "Gửi chính sách thanh toán giãn tiến độ", "Hỗ trợ check CIC/ngân hàng", "Tạo khan hiếm căn đẹp"] },
+  "6. Chốt cọc": { actions: ["Soạn thảo hợp đồng cọc", "Hướng dẫn thủ tục ngân hàng", "Chúc mừng và xin feedback"] },
+  "7. Xây dựng mối quan hệ": { actions: ["Xin lời giới thiệu khách hàng mới (Referral)", "Mời tham gia event tri ân", "Cập nhật tiến độ xây dựng", "Hỗ trợ tìm khách thuê"] }
 };
 
 export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose }) {
@@ -96,6 +96,16 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
       setStatusAction(action);
     }
     setStep(2);
+  };
+
+  const handleProgressClick = (progress) => {
+    setJourneyProgress(progress);
+    if (progress === 'Lên mốc') {
+      const currentIndex = LOCAL_JOURNEY_OPTIONS.findIndex(s => s.startsWith((journeyStage || "1.").split(".")[0]));
+      if (currentIndex >= 0 && currentIndex < LOCAL_JOURNEY_OPTIONS.length - 1) {
+        setJourneyStage(LOCAL_JOURNEY_OPTIONS[currentIndex + 1]);
+      }
+    }
   };
 
   const handleComplete = () => {
@@ -183,19 +193,19 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Đánh giá khách hàng</label>
                     <div className="grid grid-cols-3 gap-2">
                       <button
-                        onClick={() => setJourneyProgress('Nguội đi')}
+                        onClick={() => handleProgressClick('Nguội đi')}
                         className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Nguội đi' ? 'bg-red-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
                       >
                         ❄️ Nguội đi
                       </button>
                       <button
-                        onClick={() => setJourneyProgress('Giữ nguyên')}
+                        onClick={() => handleProgressClick('Giữ nguyên')}
                         className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Giữ nguyên' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
                       >
                         ➖ Giữ nguyên
                       </button>
                       <button
-                        onClick={() => setJourneyProgress('Lên mốc')}
+                        onClick={() => handleProgressClick('Lên mốc')}
                         className={`py-2 rounded-xl text-xs font-bold transition-all ${journeyProgress === 'Lên mốc' ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}
                       >
                         🔥 Lên mốc
