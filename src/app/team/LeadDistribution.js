@@ -29,8 +29,8 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
 
   if (initialCustomers.length === 0) {
     return (
-      <div className="p-6 md:p-8 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md text-center text-slate-500 font-medium">
-        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+      <div className="p-6 md:p-8 rounded-2xl glass text-center text-slate-500 font-medium">
+        <div className="w-12 h-12 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-slate-200 dark:border-slate-700">
           <UserCircle2 className="w-6 h-6 text-slate-400" />
         </div>
         Kho dữ liệu Team hiện tại đang trống.<br/>Bạn cần thêm khách hàng vào Team để phân bổ.
@@ -50,7 +50,7 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
         const currentAssignee = members.find(m => m.userId === customer.userId);
 
         return (
-          <div key={customer.id} className="group relative border border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-lg transition-all duration-300 overflow-hidden">
+          <div key={customer.id} className="group relative glass p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-lg transition-all duration-300 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
             {/* Customer Info */}
@@ -61,8 +61,8 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
               </div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">{customer.phone}</p>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{customer.journeyStage}</span>
-                <span className="px-2 py-0.5 rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">Clarity: {customer.clarityScore}</span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{customer.journeyStage}</span>
+                <span className="px-2 py-0.5 rounded-md bg-primary-50/50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/30">Clarity: {customer.clarityScore}</span>
               </div>
             </div>
 
@@ -93,10 +93,10 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
                 </div>
 
                 {isPending && assigningId === customer.id ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-amber-500 shrink-0" />
+                  <Loader2 className="w-5 h-5 animate-spin text-amber-500 shrink-0 drop-shadow-md" />
                 ) : (
-                  <div className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                    <ArrowRight className="w-3 h-3 text-slate-400" />
+                  <div className="w-6 h-6 rounded-md bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                   </div>
                 )}
               </div>
