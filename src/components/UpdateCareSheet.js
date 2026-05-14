@@ -172,6 +172,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                     <span className="text-xs opacity-80">Gọi không bắt máy / Thuê bao</span>
                   </button>
                 </div>
+              ) : (
                 <div className="space-y-5">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Nội dung chăm sóc</label>
