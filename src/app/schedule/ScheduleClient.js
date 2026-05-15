@@ -350,10 +350,30 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
 
                 {/* Quick Actions identical to CompletionSheet */}
                 <div className="flex gap-2 mb-4">
-                  <a href={`tel:${selectedItem.phone?.replace(/\s/g, '')}`} className="flex-1 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-emerald-100 dark:border-emerald-500/20">
+                  <a 
+                    href={selectedItem.phone ? `tel:${selectedItem.phone.replace(/[^0-9+]/g, '')}` : '#'} 
+                    onClick={(e) => {
+                      if (!selectedItem.phone) {
+                        e.preventDefault();
+                        alert('Khách hàng này chưa có số điện thoại!');
+                      }
+                    }}
+                    className="flex-1 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-emerald-100 dark:border-emerald-500/20"
+                  >
                     <Phone className="w-4 h-4 fill-current" /> Gọi điện
                   </a>
-                  <a href={`https://zalo.me/${selectedItem.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-blue-100 dark:border-blue-500/20">
+                  <a 
+                    href={selectedItem.phone ? `https://zalo.me/${selectedItem.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
+                    target={selectedItem.phone ? "_blank" : "_self"}
+                    rel="noopener noreferrer" 
+                    onClick={(e) => {
+                      if (!selectedItem.phone) {
+                        e.preventDefault();
+                        alert('Khách hàng này chưa có số điện thoại!');
+                      }
+                    }}
+                    className="flex-1 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-blue-100 dark:border-blue-500/20"
+                  >
                     Nhắn Zalo
                   </a>
                 </div>

@@ -202,10 +202,22 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
           <PenLine className="w-4 h-4" />
           Cập nhật trạng thái
         </button>
-        <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} onClick={(e) => e.stopPropagation()} className="w-12 h-[52px] shrink-0 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center transition-all">
+        <a href={customer.phone ? `tel:${customer.phone.replace(/[^0-9+]/g, '')}` : '#'} onClick={(e) => e.stopPropagation()} className="w-12 h-[52px] shrink-0 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center transition-all">
           <Phone className="w-5 h-5 fill-current" />
         </a>
-        <a href={`https://zalo.me/${customer.phone?.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-12 h-[52px] shrink-0 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center transition-all font-black text-[11px]">
+        <a 
+          href={customer.phone ? `https://zalo.me/${customer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
+          target={customer.phone ? "_blank" : "_self"} 
+          rel="noopener noreferrer" 
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!customer.phone) {
+              e.preventDefault();
+              alert('Khách hàng này chưa có số điện thoại!');
+            }
+          }} 
+          className="w-12 h-[52px] shrink-0 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center transition-all font-black text-[11px]"
+        >
           Zalo
         </a>
       </div>

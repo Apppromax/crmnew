@@ -541,10 +541,30 @@ export default function CustomerClient({ initialCustomers }) {
                   </div>
 
                   <div className="flex gap-3 pt-2">
-                    <a href={`tel:${selectedCustomer.phone}`} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
+                    <a 
+                      href={selectedCustomer.phone ? `tel:${selectedCustomer.phone.replace(/[^0-9+]/g, '')}` : '#'} 
+                      onClick={(e) => {
+                        if (!selectedCustomer.phone) {
+                          e.preventDefault();
+                          alert('Khách hàng này chưa có số điện thoại!');
+                        }
+                      }}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+                    >
                       <Phone className="w-4 h-4 fill-current" /> Gọi Điện
                     </a>
-                    <a href={`https://zalo.me/${selectedCustomer.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                    <a 
+                      href={selectedCustomer.phone ? `https://zalo.me/${selectedCustomer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
+                      target={selectedCustomer.phone ? "_blank" : "_self"} 
+                      rel="noopener noreferrer" 
+                      onClick={(e) => {
+                        if (!selectedCustomer.phone) {
+                          e.preventDefault();
+                          alert('Khách hàng này chưa có số điện thoại!');
+                        }
+                      }}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20"
+                    >
                       <span className="font-black text-sm">Zalo</span> Nhắn Tin
                     </a>
                   </div>
