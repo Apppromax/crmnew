@@ -298,12 +298,19 @@ export default function AddCustomerPage() {
                 
                 <div className="mb-6">
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Thời gian</label>
-                  <input 
-                    type="datetime-local" 
-                    value={followUpDate}
-                    onChange={(e) => setFollowUpDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white"
-                  />
+                  <div className="relative">
+                    <input 
+                      type="datetime-local" 
+                      value={followUpDate}
+                      onChange={(e) => setFollowUpDate(e.target.value)}
+                      className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${followUpDate ? 'text-slate-900 dark:text-white' : 'text-transparent'}`}
+                    />
+                    {!followUpDate && (
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 font-medium">
+                        Chọn ngày giờ...
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
@@ -364,12 +371,19 @@ export default function AddCustomerPage() {
                   </button>
                 ))}
               </div>
-              <input 
-                type="datetime-local" 
-                value={finalDateString}
-                onChange={(e) => setFinalDateString(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white"
-              />
+              <div className="relative">
+                <input 
+                  type="datetime-local" 
+                  value={finalDateString}
+                  onChange={(e) => setFinalDateString(e.target.value)}
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${finalDateString ? 'text-slate-900 dark:text-white' : 'text-transparent'}`}
+                />
+                {!finalDateString && (
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 font-medium">
+                    Chọn ngày giờ...
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3">
