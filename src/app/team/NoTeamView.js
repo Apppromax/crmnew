@@ -164,9 +164,9 @@ export default function NoTeamView() {
                   <input
                     type="text"
                     value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.replace(/\s/g, '').toUpperCase().slice(0, 6))}
+                    onChange={(e) => setJoinCode(e.target.value.replace(/\s/g, '').toUpperCase())}
                     placeholder="VD: X7A9K2"
-                    className="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 font-black text-center text-2xl tracking-[0.25em] uppercase focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white"
+                    className="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 rounded-xl p-4 font-black text-center text-2xl tracking-widest uppercase focus:border-primary-500 focus:outline-none transition-colors text-slate-900 dark:text-white"
                   />
                 </div>
 
