@@ -31,9 +31,16 @@ export default async function TeamDashboard({ context }) {
     }, {});
     const memberPerformance = customers.reduce((acc, c) => {
       if (!c.userId) return acc;
-      if (!acc[c.userId]) acc[c.userId] = { total: 0, closed: 0 };
+      if (!acc[c.userId]) acc[c.userId] = { total: 0, active: 0, closed: 0 };
       acc[c.userId].total += 1;
+      if (c.status === "Đang chăm" || c.status === "Đang chờ") acc[c.userId].active += 1;
       if (c.status === "Đã chốt") acc[c.userId].closed += 1;
+      return acc;
+    }, {});
+
+    const journeyCount = customers.reduce((acc, c) => {
+      const stage = c.journeyStage || "Mới";
+      acc[stage] = (acc[stage] || 0) + 1;
       return acc;
     }, {});
 
@@ -41,6 +48,7 @@ export default async function TeamDashboard({ context }) {
       totalLeads: customers.length,
       statusCount,
       heatCount,
+      journeyCount,
       memberPerformance
     };
   }

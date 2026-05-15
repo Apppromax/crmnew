@@ -5,11 +5,11 @@ import { BarChart3, Users, Flame, CheckCircle2, TrendingUp, Trophy } from "lucid
 export default function TeamAnalytics({ stats, members }) {
   if (!stats) return null;
 
-  // Sắp xếp leaderboard (Nhiều Closed nhất -> Nhiều Total nhất)
+  // Sắp xếp leaderboard (Nhiều Closed nhất -> Nhiều Active nhất)
   const leaderboard = members.map(m => {
-    const p = stats.memberPerformance[m.userId] || { total: 0, closed: 0 };
+    const p = stats.memberPerformance[m.userId] || { total: 0, active: 0, closed: 0 };
     return { ...m, ...p };
-  }).sort((a, b) => b.closed - a.closed || b.total - a.total);
+  }).sort((a, b) => b.closed - a.closed || b.active - a.active);
 
   return (
     <div className="space-y-5 animate-in slide-in-from-bottom-6 duration-700">
@@ -179,7 +179,7 @@ export default function TeamAnalytics({ stats, members }) {
               <div className="relative text-right flex items-center gap-4">
                 <div className="text-xs">
                   <p className="text-slate-400 uppercase tracking-widest font-bold text-[9px] mb-0.5">Đang chăm</p>
-                  <p className="font-bold text-sm text-slate-800 dark:text-white">{member.total}</p>
+                  <p className="font-bold text-sm text-slate-800 dark:text-white">{member.active}</p>
                 </div>
                 <div className="text-xs bg-emerald-50/50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-200/50 dark:border-emerald-500/20 shadow-sm">
                   <p className="text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-bold text-[9px] mb-0.5 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span> Đã chốt</p>

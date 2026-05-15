@@ -142,7 +142,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                     <div className="flex items-center gap-2 mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
                       <div className="flex-1 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg py-1.5">
                         <span className="block text-[9px] text-slate-400 font-bold uppercase">Đang chăm</span>
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-300">{memberStats.total}</span>
+                        <span className="text-sm font-black text-slate-700 dark:text-slate-300">{memberStats.active}</span>
                       </div>
                       <div className="flex-1 text-center bg-emerald-50 dark:bg-emerald-500/10 rounded-lg py-1.5">
                         <span className="block text-[9px] text-emerald-600/70 dark:text-emerald-400/70 font-bold uppercase">Đã chốt</span>
