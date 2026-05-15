@@ -23,6 +23,49 @@ const heatConfig = {
   "Chưa Rõ": { icon: Snowflake, label: 'Chưa Rõ', bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-500/20' },
 };
 
+function getQuickDates() {
+  const now = new Date();
+  const hour = now.getHours();
+  const chips = [];
+
+  if (hour < 14) {
+    const afternoon = new Date(now);
+    afternoon.setHours(15, 0, 0, 0);
+    chips.push({ label: 'Chiều nay', date: afternoon });
+  } else {
+    const tonight = new Date(now);
+    tonight.setHours(20, 0, 0, 0);
+    chips.push({ label: 'Tối nay', date: tonight });
+  }
+
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  chips.push({ label: 'Sáng mai', date: tomorrow });
+
+  const tomorrowAfternoon = new Date(now);
+  tomorrowAfternoon.setDate(tomorrowAfternoon.getDate() + 1);
+  tomorrowAfternoon.setHours(15, 0, 0, 0);
+  chips.push({ label: 'Chiều mai', date: tomorrowAfternoon });
+
+  const in3days = new Date(now);
+  in3days.setDate(in3days.getDate() + 3);
+  in3days.setHours(9, 0, 0, 0);
+  chips.push({ label: '3 ngày nữa', date: in3days });
+
+  return chips;
+}
+
+function parseLocalToISO(dateTimeLocalString) {
+  if (!dateTimeLocalString) return null;
+  const [datePart, timePart] = dateTimeLocalString.split('T');
+  if (!datePart || !timePart) return null;
+  const [year, month, day] = datePart.split('-');
+  const [hour, minute] = timePart.split(':');
+  const d = new Date(year, month - 1, day, hour, minute);
+  return d.toISOString();
+}
+
 const getHeatStyle = (level) => {
   if (!level) return heatConfig["Chưa Rõ"];
   for (const key in heatConfig) {
@@ -103,6 +146,8 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPending, startTransition] = useTransition();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [rescheduleDateStr, setRescheduleDateStr] = useState("");
 
   // Sync state when server props change after router.refresh()
   useEffect(() => { setSchedule(initialSchedule || []); }, [initialSchedule]);
@@ -134,6 +179,23 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
         setSchedule(prev => prev.filter(c => c.id !== item.id));
         setOverdue(prev => prev.filter(c => c.id !== item.id));
         setSelectedItem(null);
+        router.refresh();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  };
+
+  const handleRescheduleSubmit = () => {
+    if (!rescheduleDateStr) return;
+    startTransition(async () => {
+      try {
+        const nextFollowUp = parseLocalToISO(rescheduleDateStr);
+        await updateCustomer(selectedItem.id, { nextFollowUp, status: "Đang chờ" });
+        setSchedule(prev => prev.filter(c => c.id !== selectedItem.id));
+        setOverdue(prev => prev.filter(c => c.id !== selectedItem.id));
+        setSelectedItem(null);
+        setIsRescheduling(false);
         router.refresh();
       } catch (err) {
         alert(err.message);
@@ -288,7 +350,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setSelectedItem(null)}
+              onClick={() => { setSelectedItem(null); setIsRescheduling(false); setRescheduleDateStr(""); }}
               className="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm"
             />
             {/* Sheet Content */}
@@ -313,7 +375,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                       <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{selectedItem.phone}</p>
                     </div>
                   </div>
-                  <button onClick={() => setSelectedItem(null)} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                  <button onClick={() => { setSelectedItem(null); setIsRescheduling(false); setRescheduleDateStr(""); }} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -379,39 +441,86 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                 </div>
 
                 {/* Primary Action Button like FocusCard */}
-                <div className="space-y-2">
-                  <button 
-                    onClick={() => handleComplete(selectedItem)}
-                    disabled={isPending}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
-                  >
-                    {isPending ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4" /> Đã xong lịch hẹn
-                      </>
-                    )}
-                  </button>
-                  
-                  <div className="relative group">
-                    <button disabled={isPending} className="w-full py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm">
+                {!isRescheduling ? (
+                  <div className="space-y-2">
+                    <button 
+                      onClick={() => handleComplete(selectedItem)}
+                      disabled={isPending}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          Đang xử lý...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" /> Đã xong lịch hẹn
+                        </>
+                      )}
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        setIsRescheduling(true);
+                        setRescheduleDateStr("");
+                      }}
+                      disabled={isPending} 
+                      className="w-full py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
                       <Clock className="w-4 h-4" /> Dời lịch hẹn
                     </button>
-                    {/* Dropdown menu for Reschedule */}
-                    <div className="absolute bottom-full left-0 right-0 mb-2 p-2 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-10">
-                      <button onClick={() => handleReschedule(selectedItem, 1)} className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl text-left w-full transition-colors flex justify-between items-center">
-                        Dời sang ngày mai <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">+1d</span>
+                  </div>
+                ) : (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    <div className="mb-4">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chọn thời gian dời lịch</label>
+                      <div className="flex gap-2 flex-wrap mb-3">
+                        {getQuickDates().map((chip) => (
+                          <button
+                            key={chip.label}
+                            type="button"
+                            onClick={() => {
+                              const tzOffset = new Date().getTimezoneOffset() * 60000;
+                              setRescheduleDateStr(new Date(chip.date.getTime() - tzOffset).toISOString().slice(0, 16));
+                            }}
+                            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="relative">
+                        <input 
+                          type="datetime-local" 
+                          value={rescheduleDateStr}
+                          onChange={(e) => setRescheduleDateStr(e.target.value)}
+                          className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${rescheduleDateStr ? 'text-slate-900 dark:text-white' : 'text-transparent'}`}
+                        />
+                        {!rescheduleDateStr && (
+                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 font-medium">
+                            Chọn ngày giờ...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setIsRescheduling(false)}
+                        className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors"
+                      >
+                        Quay lại
                       </button>
-                      <button onClick={() => handleReschedule(selectedItem, 3)} className="px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl text-left w-full transition-colors flex justify-between items-center">
-                        Dời 3 ngày tới <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">+3d</span>
+                      <button 
+                        onClick={handleRescheduleSubmit}
+                        disabled={isPending || !rescheduleDateStr}
+                        className="flex-1 py-3.5 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 shadow-lg shadow-primary-500/25"
+                      >
+                        {isPending ? "Đang lưu..." : "Xác nhận dời"}
                       </button>
                     </div>
                   </div>
-                </div>
+                )}
 
               </div>
             </motion.div>
