@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createCustomer } from "@/actions/customers";
+import { createCustomer, getAllTags } from "@/actions/customers";
 import { X, Check, Calendar, PhoneOff, UserPlus, FileText, ChevronRight, Activity } from "lucide-react";
 
 const LOCAL_JOURNEY_OPTIONS = [
@@ -112,6 +112,11 @@ export default function AddCustomerPage() {
   const [manualSource, setManualSource] = useState("");
   const [manualTags, setManualTags] = useState([]);
   const [newTag, setNewTag] = useState("");
+  const [availableTags, setAvailableTags] = useState([]);
+
+  useEffect(() => {
+    getAllTags().then(tags => setAvailableTags(tags)).catch(console.error);
+  }, []);
 
   // Detailed Info (shown after "Đã Tư Vấn")
   const [showDetails, setShowDetails] = useState(false);
@@ -173,7 +178,7 @@ export default function AddCustomerPage() {
         nextFollowUp: followUpDate
       });
       setSaveSuccess(true);
-      setTimeout(() => router.push("/"), 600);
+      router.push("/");
     } catch (err) {
       setError("Lỗi lưu khách hàng.");
       setIsSaving(false);
@@ -219,7 +224,7 @@ export default function AddCustomerPage() {
       });
       setSaveSuccess(true);
       setShowFinalPopup(false);
-      setTimeout(() => router.push("/"), 600);
+      router.push("/");
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
       setIsSaving(false);
@@ -513,6 +518,23 @@ export default function AddCustomerPage() {
                     Thêm
                   </button>
                 </div>
+                {availableTags.filter(t => !manualTags.includes(t)).length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs text-slate-500 mb-2 font-medium">Gợi ý từ dữ liệu cũ:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableTags.filter(t => !manualTags.includes(t)).map(tag => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => setManualTags([...manualTags, tag])}
+                          className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg text-xs font-semibold transition-colors border border-slate-200 dark:border-slate-700 shadow-sm"
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Reveal details if "Đã Tư Vấn" is selected */}
