@@ -250,11 +250,17 @@ export async function assignCustomer(customerId, targetUserId) {
   }
 
   // Kiểm tra xem khách hàng có thuộc team không (hoặc là khách của Leader nhưng chưa vào Team)
-  const customer = await prisma.customer.findUnique({
-    where: { id: customerId }
+  const customer = await prisma.customer.findFirst({
+    where: { 
+      id: customerId,
+      OR: [
+        { teamId: membership.teamId },
+        { userId: userId, teamId: null }
+      ]
+    }
   });
 
-  if (!customer) throw new Error("Customer not found");
+  if (!customer) throw new Error("Customer not found or you don't have permission to assign this customer.");
   
   // Cập nhật userId mới (Người được phân công) và đảm bảo khách nằm trong teamId
   await prisma.customer.update({
@@ -337,4 +343,84 @@ export async function getTeamStats(teamId) {
     },
     memberPerformance
   };
+}
+
+// Xóa thành viên khỏi Team (Dành cho Leader)
+export async function removeTeamMember(targetUserId) {
+  const userId = await requireUser();
+  
+  // Xác thực quyền Leader
+  const membership = await prisma.teamMember.findUnique({
+    where: { userId },
+  });
+  if (!membership || membership.role !== "LEADER") {
+    throw new Error("Chỉ Leader mới có quyền xóa thành viên.");
+  }
+
+  if (userId === targetUserId) {
+    throw new Error("Không thể tự xóa chính mình khỏi team theo cách này.");
+  }
+
+  // Thu hồi toàn bộ khách hàng đang gán cho thành viên này về cho Leader
+  await prisma.customer.updateMany({
+    where: {
+      userId: targetUserId,
+      teamId: membership.teamId
+    },
+    data: {
+      userId: userId // Gán lại cho Leader
+    }
+  });
+
+  // Xóa member
+  await prisma.teamMember.delete({
+    where: {
+      teamId_userId: {
+        teamId: membership.teamId,
+        userId: targetUserId
+      }
+    }
+  });
+
+  return { success: true };
+}
+
+// Tự rời Team (Dành cho Member)
+export async function leaveTeam() {
+  const userId = await requireUser();
+  
+  const membership = await prisma.teamMember.findUnique({
+    where: { userId },
+  });
+  
+  if (!membership) {
+    throw new Error("Bạn không thuộc team nào.");
+  }
+
+  if (membership.role === "LEADER") {
+    throw new Error("Leader không thể rời team. Vui lòng giải tán team hoặc chuyển quyền (nếu có).");
+  }
+
+  // Lấy ownerId của Team để gán lại khách
+  const team = await prisma.team.findUnique({
+    where: { id: membership.teamId }
+  });
+
+  // Gán trả lại tất cả khách hàng (thuộc team) về cho Leader
+  await prisma.customer.updateMany({
+    where: {
+      userId: userId,
+      teamId: membership.teamId
+    },
+    data: {
+      userId: team.ownerId
+    }
+  });
+
+  // Xóa membership
+  await prisma.teamMember.delete({
+    where: { userId }
+  });
+
+  return { success: true };
 }

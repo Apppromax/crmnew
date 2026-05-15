@@ -3,7 +3,50 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createCustomer } from "@/actions/customers";
-import { X, Check, Calendar, PhoneOff, UserPlus, FileText, ChevronRight } from "lucide-react";
+import { X, Check, Calendar, PhoneOff, UserPlus, FileText, ChevronRight, Activity } from "lucide-react";
+
+const LOCAL_JOURNEY_OPTIONS = [
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1",
+  "3. Xây dựng lòng tin",
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ"
+];
+
+function getQuickDates() {
+  const now = new Date();
+  const hour = now.getHours();
+  const chips = [];
+
+  if (hour < 14) {
+    const afternoon = new Date(now);
+    afternoon.setHours(15, 0, 0, 0);
+    chips.push({ label: 'Chiều nay', date: afternoon });
+  } else {
+    const tonight = new Date(now);
+    tonight.setHours(20, 0, 0, 0);
+    chips.push({ label: 'Tối nay', date: tonight });
+  }
+
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+  chips.push({ label: 'Sáng mai', date: tomorrow });
+
+  const tomorrowAfternoon = new Date(now);
+  tomorrowAfternoon.setDate(tomorrowAfternoon.getDate() + 1);
+  tomorrowAfternoon.setHours(15, 0, 0, 0);
+  chips.push({ label: 'Chiều mai', date: tomorrowAfternoon });
+
+  const in3days = new Date(now);
+  in3days.setDate(in3days.getDate() + 3);
+  in3days.setHours(9, 0, 0, 0);
+  chips.push({ label: '3 ngày nữa', date: in3days });
+
+  return chips;
+}
 
 const SOURCE_OPTIONS = ["Tự khai thác", "Facebook", "Zalo", "Tiktok", "Khách giới thiệu", "Hotline / Website", "Khác"];
 const BUDGET_OPTIONS = ["Dưới 2 tỷ", "2 - 3 tỷ", "3 - 5 tỷ", "5 - 10 tỷ", "10 - 20 tỷ", "Trên 20 tỷ", "Chưa xác định"];
@@ -85,6 +128,10 @@ export default function AddCustomerPage() {
   const [pendingStatus, setPendingStatus] = useState(null); // 'Chưa liên lạc được' | 'Mới' | null
   const [followUpDate, setFollowUpDate] = useState("");
   
+  const [showFinalPopup, setShowFinalPopup] = useState(false);
+  const [finalJourney, setFinalJourney] = useState(LOCAL_JOURNEY_OPTIONS[0]);
+  const [finalDateString, setFinalDateString] = useState("");
+
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -133,6 +180,14 @@ export default function AddCustomerPage() {
     }
   };
 
+  const handleFinalSaveClick = () => {
+    if (!manualName.trim() || !manualPhone.trim()) {
+      setError("Vui lòng nhập Họ tên và Số điện thoại.");
+      return;
+    }
+    setShowFinalPopup(true);
+  };
+
   const handleFinalSave = async () => {
     if (!manualName.trim() || !manualPhone.trim()) {
       setError("Vui lòng nhập Họ tên và Số điện thoại.");
@@ -158,9 +213,12 @@ export default function AddCustomerPage() {
         heatLevel: manualHeatLevel,
         demand: manualPropertyType,
         tags: manualTags,
-        status: "Đang chăm"
+        status: "Đang chăm",
+        journeyStage: finalJourney,
+        nextFollowUp: finalDateString ? new Date(finalDateString).toISOString() : null
       });
       setSaveSuccess(true);
+      setShowFinalPopup(false);
       setTimeout(() => router.push("/"), 2000);
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
@@ -265,6 +323,70 @@ export default function AddCustomerPage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Final Save Popup Overlay */}
+      {showFinalPopup && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl scale-in-center">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-center">Bước cuối</h3>
+            <p className="text-sm text-slate-500 text-center mb-6">Xác nhận hành trình và lịch chăm tiếp theo</p>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tiến độ hành trình</label>
+              <select
+                value={finalJourney}
+                onChange={(e) => setFinalJourney(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white appearance-none"
+              >
+                {LOCAL_JOURNEY_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Hẹn giờ chăm tiếp theo <span className="text-red-500">*</span></label>
+              <div className="flex gap-2 flex-wrap mb-3">
+                {getQuickDates().map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => {
+                      const tzOffset = new Date().getTimezoneOffset() * 60000;
+                      setFinalDateString(new Date(chip.date.getTime() - tzOffset).toISOString().slice(0, 16));
+                    }}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+              <input 
+                type="datetime-local" 
+                value={finalDateString}
+                onChange={(e) => setFinalDateString(e.target.value)}
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowFinalPopup(false)}
+                className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors"
+              >
+                Quay lại
+              </button>
+              <button 
+                onClick={handleFinalSave}
+                disabled={isSaving || !finalDateString}
+                className="flex-1 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 shadow-lg shadow-emerald-500/25"
+              >
+                {isSaving ? "Đang lưu..." : "Hoàn tất"}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -418,11 +540,11 @@ export default function AddCustomerPage() {
               </button>
             ) : (
               <button
-                onClick={handleFinalSave}
+                onClick={handleFinalSaveClick}
                 disabled={isSaving || !manualName.trim() || !manualPhone.trim()}
                 className="mt-6 w-full py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/25 transition-all active:scale-[0.98]"
               >
-                {isSaving ? "Đang lưu..." : "Hoàn tất lưu"}
+                {isSaving ? "Đang xử lý..." : "Tiếp tục"}
               </button>
             )}
           </div>
