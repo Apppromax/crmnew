@@ -15,6 +15,16 @@ const LOCAL_JOURNEY_OPTIONS = [
   "7. Xây dựng mối quan hệ"
 ];
 
+function parseLocalToISO(dateTimeLocalString) {
+  if (!dateTimeLocalString) return null;
+  const [datePart, timePart] = dateTimeLocalString.split('T');
+  if (!datePart || !timePart) return null;
+  const [year, month, day] = datePart.split('-');
+  const [hour, minute] = timePart.split(':');
+  const d = new Date(year, month - 1, day, hour, minute);
+  return d.toISOString();
+}
+
 function getQuickDates() {
   const now = new Date();
   const hour = now.getHours();
@@ -175,7 +185,7 @@ export default function AddCustomerPage() {
         note: fullNote,
         tags: manualTags,
         status: pendingStatus,
-        nextFollowUp: followUpDate
+        nextFollowUp: parseLocalToISO(followUpDate)
       });
       setSaveSuccess(true);
       router.push("/?success=1");
@@ -220,7 +230,7 @@ export default function AddCustomerPage() {
         tags: manualTags,
         status: "Đang chăm",
         journeyStage: finalJourney,
-        nextFollowUp: finalDateString ? new Date(finalDateString).toISOString() : null
+        nextFollowUp: parseLocalToISO(finalDateString)
       });
       setSaveSuccess(true);
       setShowFinalPopup(false);
