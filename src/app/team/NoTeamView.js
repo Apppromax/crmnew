@@ -23,8 +23,12 @@ export default function NoTeamView() {
     setError("");
     startTransition(async () => {
       try {
-        await createTeam(teamName, 1);
-        router.refresh();
+        const res = await createTeam(teamName, 1);
+        if (res?.error) {
+          setError(res.error);
+        } else {
+          router.refresh();
+        }
       } catch (err) {
         setError(err.message || "Có lỗi xảy ra khi tạo team.");
       }
@@ -39,8 +43,12 @@ export default function NoTeamView() {
     setError("");
     startTransition(async () => {
       try {
-        await joinTeam(joinCode.trim().toUpperCase());
-        router.refresh();
+        const res = await joinTeam(joinCode.trim().toUpperCase());
+        if (res?.error) {
+          setError(res.error);
+        } else {
+          router.refresh();
+        }
       } catch (err) {
         setError(err.message || "Mã mời không hợp lệ.");
       }

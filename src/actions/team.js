@@ -59,115 +59,122 @@ export async function getTeamContext() {
 
 // Tạo Team mới (Trừ tiền)
 export async function createTeam(name, months = 1) {
-  const userId = await requireUser();
-  const PRICE_PER_MONTH = 299000; // 299k/tháng cho 5 members
-  const totalCost = PRICE_PER_MONTH * months;
+  try {
+    const userId = await requireUser();
+    const PRICE_PER_MONTH = 299000; // 299k/tháng cho 5 members
+    const totalCost = PRICE_PER_MONTH * months;
 
-  const result = await prisma.$transaction(async (tx) => {
-    const profile = await tx.profile.findUnique({ where: { id: userId } });
-    if (!profile) throw new Error("User not found");
+    const result = await prisma.$transaction(async (tx) => {
+      const profile = await tx.profile.findUnique({ where: { id: userId } });
+      if (!profile) throw new Error("User not found");
 
-    if (profile.balance < totalCost) {
-      throw new Error("Số dư không đủ để mở Team. Vui lòng nạp thêm Credits.");
-    }
-
-    // Đảm bảo chưa có team
-    const existingTeam = await tx.team.findUnique({ where: { ownerId: userId } });
-    if (existingTeam) throw new Error("Bạn đã sở hữu một Team rồi.");
-
-    const existingMembership = await tx.teamMember.findUnique({ where: { userId } });
-    if (existingMembership) throw new Error("Bạn đang là thành viên của Team khác. Vui lòng rời Team trước.");
-
-    const now = new Date();
-    const validUntil = new Date();
-    validUntil.setMonth(now.getMonth() + months);
-
-    // Trừ tiền
-    await tx.profile.update({
-      where: { id: userId },
-      data: { balance: profile.balance - totalCost },
-    });
-
-    // Tạo Transaction
-    await tx.transaction.create({
-      data: {
-        userId,
-        amount: -totalCost,
-        type: "SPEND",
-        note: `Đăng ký gói TEAM ${months} tháng`,
-        status: "COMPLETED",
-      },
-    });
-
-    // Tạo Team
-    let inviteCode = generateInviteCode();
-    // (Lý tưởng nên dùng vòng lặp check trùng mã, nhưng random 6 ký tự khá an toàn cho MVP)
-    
-    const team = await tx.team.create({
-      data: {
-        name,
-        ownerId: userId,
-        inviteCode,
-        isActive: true,
-        validUntil,
-        maxMembers: 5,
+      if (profile.balance < totalCost) {
+        throw new Error("Số dư không đủ để mở Team. Vui lòng nạp thêm Credits.");
       }
+
+      // Đảm bảo chưa có team
+      const existingTeam = await tx.team.findUnique({ where: { ownerId: userId } });
+      if (existingTeam) throw new Error("Bạn đã sở hữu một Team rồi.");
+
+      const existingMembership = await tx.teamMember.findUnique({ where: { userId } });
+      if (existingMembership) throw new Error("Bạn đang là thành viên của Team khác. Vui lòng rời Team trước.");
+
+      const now = new Date();
+      const validUntil = new Date();
+      validUntil.setMonth(now.getMonth() + months);
+
+      // Trừ tiền
+      await tx.profile.update({
+        where: { id: userId },
+        data: { balance: profile.balance - totalCost },
+      });
+
+      // Tạo Transaction
+      await tx.transaction.create({
+        data: {
+          userId,
+          amount: -totalCost,
+          type: "SPEND",
+          note: `Đăng ký gói TEAM ${months} tháng`,
+          status: "COMPLETED",
+        },
+      });
+
+      // Tạo Team
+      let inviteCode = generateInviteCode();
+      
+      const team = await tx.team.create({
+        data: {
+          name,
+          ownerId: userId,
+          inviteCode,
+          isActive: true,
+          validUntil,
+          maxMembers: 5,
+        }
+      });
+
+      // Tự động thêm owner vào bảng TeamMember với quyền LEADER
+      await tx.teamMember.create({
+        data: {
+          teamId: team.id,
+          userId: userId,
+          role: "LEADER"
+        }
+      });
+
+      return team;
     });
 
-    // Tự động thêm owner vào bảng TeamMember với quyền LEADER
-    await tx.teamMember.create({
-      data: {
-        teamId: team.id,
-        userId: userId,
-        role: "LEADER"
-      }
-    });
-
-    return team;
-  });
-
-  return { success: true, team: result };
+    return { success: true, team: result };
+  } catch (err) {
+    return { error: err.message || "Có lỗi xảy ra khi tạo team." };
+  }
 }
 
 // Tham gia team
 export async function joinTeam(inviteCode) {
-  const userId = await requireUser();
-  
-  const result = await prisma.$transaction(async (tx) => {
-    // 1. Check if user already in a team
-    const membership = await tx.teamMember.findUnique({ where: { userId } });
-    if (membership) throw new Error("Bạn đã thuộc về một Team khác.");
-
-    // 2. Find Team
-    const team = await tx.team.findUnique({ 
-      where: { inviteCode },
-      include: {
-        _count: { select: { members: true } }
-      }
-    });
+  try {
+    const userId = await requireUser();
     
-    if (!team) throw new Error("Mã mời không hợp lệ.");
-    if (!team.isActive || (team.validUntil && team.validUntil < new Date())) {
-      throw new Error("Team này đã hết hạn gói đăng ký.");
-    }
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Check if user already in a team
+      const membership = await tx.teamMember.findUnique({ where: { userId } });
+      if (membership) throw new Error("Bạn đã thuộc về một Team khác.");
 
-    if (team._count.members >= team.maxMembers) {
-      throw new Error("Team đã đạt giới hạn thành viên.");
-    }
-
-    // 3. Create membership
-    await tx.teamMember.create({
-      data: {
-        teamId: team.id,
-        userId: userId,
-        role: "MEMBER"
+      // 2. Find Team
+      const team = await tx.team.findUnique({ 
+        where: { inviteCode },
+        include: {
+          _count: { select: { members: true } }
+        }
+      });
+      
+      if (!team) throw new Error("Mã mời không hợp lệ.");
+      if (!team.isActive || (team.validUntil && team.validUntil < new Date())) {
+        throw new Error("Team này đã hết hạn gói đăng ký.");
       }
+
+      if (team._count.members >= team.maxMembers) {
+        throw new Error("Team đã đạt giới hạn thành viên.");
+      }
+
+      // 3. Create membership
+      await tx.teamMember.create({
+        data: {
+          teamId: team.id,
+          userId: userId,
+          role: "MEMBER"
+        }
+      });
+
+      return team;
     });
 
-    return team;
-  });
-
-  return { success: true, team: result };
+    return { success: true, team: result };
+  } catch (err) {
+    return { error: err.message || "Mã mời không hợp lệ hoặc có lỗi xảy ra." };
+  }
 }
 
 // Lấy danh sách thành viên (Dành cho Leader)
