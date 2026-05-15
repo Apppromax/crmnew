@@ -1,10 +1,22 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Flame, CheckCircle2, User, TrendingUp, BarChart3, Database } from "lucide-react";
 
 export default function MemberPerformanceModal({ member, customers, onClose }) {
-  if (!member) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Ngăn scroll body khi mở modal
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  if (!member || !mounted) return null;
 
   // Lọc danh sách khách hàng của Sale này
   const memberCustomers = customers.filter(c => c.userId === member.userId);
@@ -32,8 +44,8 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
   const closedLeads = statusCount["Đã chốt"] || 0;
   const lostLeads = statusCount["Mất khách"] || 0;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
@@ -167,4 +179,6 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
