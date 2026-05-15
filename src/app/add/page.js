@@ -173,7 +173,7 @@ export default function AddCustomerPage() {
         nextFollowUp: followUpDate
       });
       setSaveSuccess(true);
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/"), 600);
     } catch (err) {
       setError("Lỗi lưu khách hàng.");
       setIsSaving(false);
@@ -219,7 +219,7 @@ export default function AddCustomerPage() {
       });
       setSaveSuccess(true);
       setShowFinalPopup(false);
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/"), 600);
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
       setIsSaving(false);

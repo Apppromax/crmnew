@@ -225,17 +225,11 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       journeyStage: journeyStage || "1. Phá băng và làm rõ nhu cầu",
       tags: tags || [],
       nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
+      notes: note ? {
+        create: [{ rawText: note }]
+      } : undefined
     },
   });
-
-  if (note) {
-    await prisma.note.create({
-      data: {
-        customerId: customer.id,
-        rawText: note,
-      },
-    });
-  }
 
   revalidatePath("/");
   revalidatePath("/customers");
