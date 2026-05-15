@@ -12,7 +12,15 @@ const vFirstNames = ["Anh", "Tuấn", "Linh", "Hải", "Sơn", "Hoàng", "Minh",
 const vLastNames = ["Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý"];
 
 const heatLevels = ["Chưa Rõ", "Tham Khảo", "Quan Tâm", "Tiềm Năng", "Rất Nét"];
-const journeyStages = ["1. Phá băng", "2. Tư vấn", "3. Khảo sát", "4. Hẹn gặp", "5. Dồn chốt", "6. Chốt Deal"];
+const journeyStages = [
+  "1. Phá băng và tư vấn ban đầu",
+  "2. Tư vấn chuyên sâu lần 1",
+  "3. Xây dựng lòng tin",
+  "4. Hẹn gặp khách",
+  "5. Dồn Chốt",
+  "6. Chốt Cọc",
+  "7. Xây dựng mối quan hệ"
+];
 const statuses = ["Mới", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
 const budgets = ["Dưới 2 tỷ", "2 - 5 tỷ", "5 - 10 tỷ", "Trên 10 tỷ", "Đang gom vốn", "Vay ngân hàng 50%"];
 const demands = ["Đầu tư lướt sóng", "Mua để ở", "Đầu tư dài hạn", "Cho thuê dòng tiền", "Tìm đất nền", "Tìm chung cư"];
