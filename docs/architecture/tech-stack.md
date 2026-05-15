@@ -17,6 +17,7 @@
   - `url`/`directUrl` trong schema.prisma đã bị xóa → phải dùng `prisma.config.ts`.
   - Constructor PrismaClient bắt buộc `adapter` hoặc `accelerateUrl` → dùng `PrismaPg(pool)`.
   - CLI operations (db push, migrate) dùng `DIRECT_URL` (port 5432), runtime dùng `DATABASE_URL` (pooler, port 6543).
+- **Server Actions Error Handling:** Throwing a generic `Error` inside a Next.js Server Action triggers a Digest Error on the client (masking the original message for security). Bắt buộc phải dùng pattern: `try/catch` bên trong Action và return `{ error: "Message" }` để client xử lý.
 
 ## Dependencies chính
 ```json

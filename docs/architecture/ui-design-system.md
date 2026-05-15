@@ -42,6 +42,7 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 5. **Dialog & Sheet**:
    - `Dialog`: Dùng cho Modal pop-up xuất hiện ở giữa màn hình (Ví dụ: Xác nhận xoá).
    - `Sheet`: Dùng cho Bottom Sheet vuốt từ dưới lên (Thiết kế ưu tiên cho Mobile, ví dụ: CompletionSheet).
+   - **Lưu ý Stacking Contexts**: Các container bọc ngoài sử dụng CSS animation (như `animate-in`, `transform`) sẽ tự động tạo ra một stacking context riêng, làm vô hiệu hóa `fixed inset-0 z-50` đối với thành phần con. Do đó, các Modal Popup độc lập (ví dụ: `MemberPerformanceModal`) **BẮT BUỘC** phải được bọc trong `createPortal(..., document.body)` để thoát khỏi stacking context của container và luôn được nổi lên trên cùng (chống đè với các Sticky Header).
 
 ## Custom Business Components (Kế thừa từ Core)
 1. **FocusCard**: Thẻ ưu tiên cỡ lớn, kết hợp `Card` + `Badge` + Glassmorphism. Hỗ trợ sự kiện chuột và cảm ứng để nhận diện tương tác vuốt (Tinder Swipe). Chặn text-selection (`select-none`) để vuốt mượt trên PC.
