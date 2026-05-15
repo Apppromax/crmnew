@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import { ShieldAlert, ShieldCheck, User, Database, PieChart, Users, Star, LayoutDashboard, UserCheck } from "lucide-react";
 import LeadDistribution from "./LeadDistribution";
 import TeamAnalytics from "./TeamAnalytics";
+import MemberPerformanceModal from "./MemberPerformanceModal";
 
 export default function TeamDashboardClient({ team, role, members, customers, stats }) {
   const isLeader = role === "LEADER";
   const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'members', 'leads'
+  const [selectedMember, setSelectedMember] = useState(null);
 
   if (!isLeader) {
     return (
@@ -145,7 +147,10 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                         <span className="block text-[9px] text-emerald-600/70 dark:text-emerald-400/70 font-bold uppercase">Đã chốt</span>
                         <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{memberStats.closed}</span>
                       </div>
-                      <button className="flex-1 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold text-[11px] rounded-lg py-2 hover:bg-primary-100 dark:hover:bg-primary-500/20 transition-colors">
+                      <button 
+                        onClick={() => setSelectedMember(m)}
+                        className="flex-1 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold text-[11px] rounded-lg py-2 hover:bg-primary-100 dark:hover:bg-primary-500/20 transition-colors"
+                      >
                         Chi tiết
                       </button>
                     </div>
@@ -162,6 +167,15 @@ export default function TeamDashboardClient({ team, role, members, customers, st
           </div>
         )}
       </div>
+
+      {/* MODAL */}
+      {selectedMember && (
+        <MemberPerformanceModal 
+          member={selectedMember} 
+          customers={customers} 
+          onClose={() => setSelectedMember(null)} 
+        />
+      )}
     </div>
   );
 }
