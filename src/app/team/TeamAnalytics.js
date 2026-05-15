@@ -114,39 +114,80 @@ export default function TeamAnalytics({ stats, members }) {
           </div>
         </div>
 
-        {/* Bảng Xếp Hạng Thành Viên */}
+        {/* Phân bổ Mốc Hành Trình */}
         <div className="p-5 md:p-6 rounded-2xl glass shadow-sm">
-          <h3 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2 text-slate-800 dark:text-white">
-            <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-500">
-              <Trophy className="w-5 h-5" />
+          <h3 className="text-lg font-black tracking-tight mb-5 flex items-center gap-2 text-slate-800 dark:text-white">
+            <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-500">
+              <BarChart3 className="w-5 h-5" />
             </div>
-            Bảng Vàng
+            Mốc Hành Trình
           </h3>
-          <div className="space-y-3">
-            {leaderboard.map((member, idx) => (
-              <div key={member.id} className="group relative flex items-center justify-between p-3 rounded-xl bg-slate-100/30 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all duration-300 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative flex items-center gap-3">
-                  <span className={`w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg shadow-inner ${idx === 0 ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-white shadow-amber-500/30' : idx === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 shadow-slate-400/30' : idx === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-orange-500/30' : 'bg-slate-200/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'}`}>
-                    #{idx + 1}
+          <div className="space-y-4">
+            {[
+              "1. Phá băng và tư vấn ban đầu",
+              "2. Tư vấn chuyên sâu lần 1",
+              "3. Xây dựng lòng tin",
+              "4. Hẹn gặp khách",
+              "5. Dồn Chốt",
+              "6. Chốt Cọc",
+              "7. Xây dựng mối quan hệ"
+            ].map((stage, idx) => {
+              const count = stats.journeyCount[stage] || 0;
+              if (count === 0 && stats.totalLeads > 0) return null;
+              const shortStage = stage.split(". ")[1] || stage;
+              return (
+                <div key={stage} className="flex items-center gap-3 group">
+                  <span className="w-24 text-xs font-black tracking-wider text-slate-600 dark:text-slate-300 truncate" title={shortStage}>
+                    {shortStage}
                   </span>
-                  <div className="font-bold text-sm text-slate-800 dark:text-white">
-                    {member.user.email.split('@')[0]}
+                  <div className="flex-1 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-400 to-blue-500 transition-all duration-1000 ease-out relative" 
+                      style={{ width: `${stats.totalLeads ? (count / stats.totalLeads) * 100 : 0}%` }}
+                    >
+                      {idx === 0 && <div className="absolute inset-0 bg-white/20 animate-pulse"></div>}
+                    </div>
                   </div>
+                  <span className="w-8 text-right text-base font-black text-slate-800 dark:text-white">{count}</span>
                 </div>
-                <div className="relative text-right flex items-center gap-4">
-                  <div className="text-xs">
-                    <p className="text-slate-400 uppercase tracking-widest font-bold text-[9px] mb-0.5">Đang chăm</p>
-                    <p className="font-bold text-sm text-slate-800 dark:text-white">{member.total}</p>
-                  </div>
-                  <div className="text-xs bg-emerald-50/50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-200/50 dark:border-emerald-500/20 shadow-sm">
-                    <p className="text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-bold text-[9px] mb-0.5 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span> Đã chốt</p>
-                    <p className="font-black text-emerald-600 dark:text-emerald-400 text-base leading-none drop-shadow-sm">{member.closed}</p>
-                  </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bảng Xếp Hạng Thành Viên */}
+      <div className="p-5 md:p-6 rounded-2xl glass shadow-sm mt-4 md:mt-5">
+        <h3 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2 text-slate-800 dark:text-white">
+          <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-500">
+            <Trophy className="w-5 h-5" />
+          </div>
+          Bảng Vàng
+        </h3>
+        <div className="space-y-3">
+          {leaderboard.map((member, idx) => (
+            <div key={member.id} className="group relative flex items-center justify-between p-3 rounded-xl bg-slate-100/30 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:border-amber-300 dark:hover:border-amber-500/50 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="relative flex items-center gap-3">
+                <span className={`w-8 h-8 flex items-center justify-center text-xs font-black rounded-lg shadow-inner ${idx === 0 ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-white shadow-amber-500/30' : idx === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800 shadow-slate-400/30' : idx === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-orange-500/30' : 'bg-slate-200/50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400'}`}>
+                  #{idx + 1}
+                </span>
+                <div className="font-bold text-sm text-slate-800 dark:text-white">
+                  {member.user.email.split('@')[0]}
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="relative text-right flex items-center gap-4">
+                <div className="text-xs">
+                  <p className="text-slate-400 uppercase tracking-widest font-bold text-[9px] mb-0.5">Đang chăm</p>
+                  <p className="font-bold text-sm text-slate-800 dark:text-white">{member.total}</p>
+                </div>
+                <div className="text-xs bg-emerald-50/50 dark:bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-200/50 dark:border-emerald-500/20 shadow-sm">
+                  <p className="text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-bold text-[9px] mb-0.5 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span> Đã chốt</p>
+                  <p className="font-black text-emerald-600 dark:text-emerald-400 text-base leading-none drop-shadow-sm">{member.closed}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
