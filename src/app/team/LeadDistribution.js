@@ -57,9 +57,9 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
             <div className="relative">
               <div className="flex items-center gap-2 mb-1.5">
                 <span className={`w-2.5 h-2.5 rounded-full shadow-inner ${customer.heatLevel === 'Rất Nét' ? 'bg-red-500 shadow-red-500/50 animate-pulse' : (customer.heatLevel === 'Tiềm Năng' || customer.heatLevel === 'Quan Tâm') ? 'bg-amber-500 shadow-amber-500/50' : 'bg-blue-400 shadow-blue-400/50'}`} />
-                <h3 className="text-lg font-black text-slate-800 dark:text-white">{customer.name}</h3>
+                <h3 className="text-lg font-black text-slate-800 dark:text-white">Khách hàng #{customer.id.substring(0, 6).toUpperCase()}</h3>
               </div>
-              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">{customer.phone}</p>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">*** **** {customer.phone.slice(-3)}</p>
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 <span className="px-2 py-0.5 rounded-md bg-slate-100/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{customer.journeyStage}</span>
                 <span className="px-2 py-0.5 rounded-md bg-primary-50/50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/30">Clarity: {customer.clarityScore}</span>

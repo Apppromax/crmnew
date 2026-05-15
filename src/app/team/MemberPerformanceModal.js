@@ -22,6 +22,12 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
     return acc;
   }, {});
 
+  const journeyCount = memberCustomers.reduce((acc, c) => {
+    const stage = c.journeyStage || "Mới";
+    acc[stage] = (acc[stage] || 0) + 1;
+    return acc;
+  }, {});
+
   const activeLeads = (statusCount["Đang chăm"] || 0) + (statusCount["Đang chờ"] || 0);
   const closedLeads = statusCount["Đã chốt"] || 0;
   const lostLeads = statusCount["Mất khách"] || 0;
@@ -101,6 +107,42 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
                   <span className="w-8 text-right text-sm font-black text-slate-800 dark:text-white">{item.count}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Phân bổ theo hành trình */}
+          <div>
+            <h3 className="text-sm font-black text-slate-800 dark:text-white flex items-center gap-2 mb-4 uppercase tracking-widest">
+              <BarChart3 className="w-4 h-4 text-blue-500" />
+              Mốc Hành Trình
+            </h3>
+            <div className="space-y-2">
+              {[
+                "1. Phá băng và tư vấn ban đầu",
+                "2. Tư vấn chuyên sâu lần 1",
+                "3. Xây dựng lòng tin",
+                "4. Hẹn gặp khách",
+                "5. Dồn Chốt",
+                "6. Chốt Cọc",
+                "7. Xây dựng mối quan hệ"
+              ].map(stage => {
+                const count = journeyCount[stage] || 0;
+                if (count === 0 && totalLeads > 0) return null; // Chỉ hiện các mốc có khách, hoặc nếu chưa có lead nào thì vẫn hiện trống
+                return (
+                  <div key={stage} className="flex items-center gap-3 group">
+                    <span className="w-28 text-[10px] font-bold text-slate-500 dark:text-slate-400 truncate" title={stage}>
+                      {stage.split(". ")[1] || stage}
+                    </span>
+                    <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-blue-400 dark:bg-blue-500 rounded-full group-hover:bg-blue-500 transition-colors"
+                        style={{ width: `${totalLeads ? (count / totalLeads) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <span className="w-6 text-right text-xs font-black text-slate-800 dark:text-white">{count}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
