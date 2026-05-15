@@ -36,32 +36,34 @@ export default function TeamDashboardClient({ team, role, members, customers, st
 
   return (
     <div className="animate-in fade-in duration-500 pb-24 md:pb-8 flex flex-col h-full min-h-[calc(100vh-100px)]">
-      {/* HEADER BAR (Compact) */}
-      <div className="relative overflow-hidden rounded-t-3xl glass p-5 text-slate-900 dark:text-white shadow-lg shrink-0">
+      {/* HEADER & TABS (Combined Block) */}
+      <div className="relative overflow-hidden rounded-3xl glass shadow-lg shrink-0 mb-6 flex flex-col">
         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 flex items-center justify-between">
+        
+        {/* Header Content */}
+        <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded-full bg-slate-200/50 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-[9px] font-bold uppercase tracking-widest backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="px-2.5 py-1 rounded-full bg-slate-200/50 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-[9px] md:text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm text-slate-600 dark:text-slate-300">
                 Quản trị
               </span>
               {team.isActive && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 backdrop-blur-sm">
-                  <span className="w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" /> Active
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" /> Active
                 </span>
               )}
             </div>
-            <h1 className="text-xl md:text-2xl font-black tracking-tight">{team.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-800 dark:text-white leading-none">{team.name}</h1>
           </div>
-          <div className="text-right">
-            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest block mb-0.5">Mã Mời</span>
-            <span className="text-xl font-black tracking-[0.1em] text-primary-600 dark:text-primary-400 bg-white/50 dark:bg-white/10 px-3 py-1 rounded-lg border border-slate-200 dark:border-white/10 shadow-sm">{team.inviteCode}</span>
+          
+          <div className="md:text-right bg-white/50 dark:bg-slate-800/50 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm self-start flex items-center gap-3 md:block">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest md:mb-0.5">Mã Mời</span>
+            <span className="text-xl md:text-2xl font-black tracking-[0.1em] text-primary-600 dark:text-primary-400 leading-none">{team.inviteCode}</span>
           </div>
         </div>
-      </div>
 
-      {/* TABS NAVIGATION */}
-      <div className="flex p-1.5 glass rounded-b-3xl shrink-0 shadow-inner rounded-t-none border-t-0">
+        {/* TABS NAVIGATION */}
+        <div className="relative z-10 flex p-1.5 mx-3 mb-3 bg-slate-200/50 dark:bg-slate-900/50 rounded-2xl shadow-inner backdrop-blur-sm">
         <button
           onClick={() => setActiveTab("overview")}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-2xl transition-all ${
@@ -95,7 +97,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
       </div>
 
       {/* TAB CONTENT */}
-      <div className="mt-4 flex-1 overflow-y-auto hide-scrollbar">
+      <div className="flex-1 overflow-y-auto hide-scrollbar">
         {activeTab === "overview" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             <TeamAnalytics stats={stats} members={members} />
