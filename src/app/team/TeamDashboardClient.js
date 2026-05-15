@@ -97,6 +97,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
           <Database className="w-4 h-4" /> Điều Phối
         </button>
       </div>
+      </div>
 
       {/* TAB CONTENT */}
       <div className="flex-1 overflow-y-auto hide-scrollbar">
