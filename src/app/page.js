@@ -6,7 +6,7 @@ import { getSmartQueue, getCustomerCount } from "@/actions/customers";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
+export default async function Home({ searchParams }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -19,5 +19,5 @@ export default async function Home() {
     getCustomerCount(),
   ]);
 
-  return <Dashboard initialQueue={queue} initialCounts={counts} />;
+  return <Dashboard initialQueue={queue} initialCounts={counts} successParam={searchParams?.success} />;
 }

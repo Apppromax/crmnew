@@ -55,7 +55,7 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, dashboardStats }) {
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, successParam }) {
   const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
   const [counts, setCounts] = useState(initialCounts);
   const [loading, setLoading] = useState(false);
@@ -66,9 +66,19 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   const [isPending, startTransition] = useTransition();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+  const [showSuccessToast, setShowSuccessToast] = useState(successParam === '1');
   const router = useRouter();
 
   const dismissedIds = React.useRef(new Set());
+
+  useEffect(() => {
+    if (successParam === '1') {
+      // Xóa param khỏi URL để không hiện lại nếu user refresh
+      window.history.replaceState({}, '', '/');
+      const t = setTimeout(() => setShowSuccessToast(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [successParam]);
 
   const loadQueue = useCallback(async () => {
     try {
@@ -184,6 +194,16 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
 
   return (
     <div className="min-h-screen pb-24 md:pb-0 md:pl-64 relative overflow-hidden bg-transparent font-sans transition-all duration-300">
+      {/* Success Toast */}
+      {showSuccessToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-8 fade-in duration-300 zoom-in-95">
+          <div className="bg-emerald-500 text-white px-5 py-3 rounded-full shadow-xl shadow-emerald-500/20 font-bold text-sm flex items-center gap-2">
+            <Check className="w-5 h-5" />
+            Lưu thành công!
+          </div>
+        </div>
+      )}
+
       {/* City Skyline Background */}
       <div 
         className="dashboard-bg-illustration absolute top-0 right-0 w-full max-w-2xl h-[500px] z-0 pointer-events-none opacity-90 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen"

@@ -178,7 +178,7 @@ export default function AddCustomerPage() {
         nextFollowUp: followUpDate
       });
       setSaveSuccess(true);
-      router.push("/");
+      router.push("/?success=1");
     } catch (err) {
       setError("Lỗi lưu khách hàng.");
       setIsSaving(false);
@@ -224,7 +224,7 @@ export default function AddCustomerPage() {
       });
       setSaveSuccess(true);
       setShowFinalPopup(false);
-      router.push("/");
+      router.push("/?success=1");
     } catch (err) {
       setError("Lỗi lưu khách hàng thủ công.");
       setIsSaving(false);
@@ -233,16 +233,6 @@ export default function AddCustomerPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans pb-24">
-      {saveSuccess && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-emerald-500 text-white animate-in zoom-in duration-300">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 animate-bounce shadow-2xl">
-            <Check className="w-12 h-12 text-emerald-500" strokeWidth={4} />
-          </div>
-          <h2 className="text-3xl font-black mb-2">Đã lưu thành công!</h2>
-          <p className="text-emerald-100 font-medium">Đang tự động chuyển về trang chủ...</p>
-        </div>
-      )}
-
       {/* Status Popup Overlay */}
       {showStatusPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
