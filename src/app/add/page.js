@@ -469,7 +469,7 @@ export default function AddCustomerPage() {
                     </span>
                   ))}
                 </div>
-                <div className="flex gap-2">
+                <div className="relative">
                   <input
                     type="text"
                     value={newTag}
@@ -483,8 +483,8 @@ export default function AddCustomerPage() {
                         setNewTag("");
                       }
                     }}
-                    placeholder="Nhập tên dự án/khu vực và ấn Enter..."
-                    className="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
+                    placeholder="Nhập dự án/khu vực (VD: Vinhomes...)"
+                    className="w-full pl-4 pr-20 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 text-slate-900 dark:text-white placeholder-slate-400 shadow-sm"
                   />
                   <button
                     type="button"
@@ -494,7 +494,7 @@ export default function AddCustomerPage() {
                       }
                       setNewTag("");
                     }}
-                    className="px-5 bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors shadow-sm"
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-lg font-bold text-xs transition-colors flex items-center justify-center"
                   >
                     Thêm
                   </button>
