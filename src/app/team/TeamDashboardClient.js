@@ -103,7 +103,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
       <div className="flex-1 overflow-y-auto hide-scrollbar">
         {activeTab === "overview" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <TeamAnalytics stats={stats} members={members} />
+            <TeamAnalytics stats={stats} members={members} customers={customers} setActiveTab={setActiveTab} />
           </div>
         )}
 
