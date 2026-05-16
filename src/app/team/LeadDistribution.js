@@ -11,7 +11,11 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
   const [assigningId, setAssigningId] = useState(null);
   const [displayLimit, setDisplayLimit] = useState(20);
 
-  const displayedCustomers = initialCustomers.slice(0, displayLimit);
+  const leaderIds = members.filter(m => m.role === "LEADER").map(m => m.userId);
+  // Trưởng phòng chỉ thấy những khách hàng chưa giao (hoặc đang gán cho chính trưởng phòng)
+  const distributableCustomers = initialCustomers.filter(c => !c.userId || leaderIds.includes(c.userId));
+  
+  const displayedCustomers = distributableCustomers.slice(0, displayLimit);
 
   const handleAssign = (customerId, targetUserId) => {
     setAssigningId(customerId);
@@ -27,13 +31,13 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
     });
   };
 
-  if (initialCustomers.length === 0) {
+  if (distributableCustomers.length === 0) {
     return (
       <div className="p-6 md:p-8 rounded-2xl glass text-center text-slate-500 font-medium">
         <div className="w-12 h-12 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-slate-200 dark:border-slate-700">
           <UserCircle2 className="w-6 h-6 text-slate-400" />
         </div>
-        Kho dữ liệu Team hiện tại đang trống.<br/>Bạn cần thêm khách hàng vào Team để phân bổ.
+        Không có khách hàng nào chờ phân bổ.<br/>Bạn cần thêm khách hàng mới vào hệ thống để phân bổ.
       </div>
     );
   }
@@ -42,7 +46,7 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold text-slate-500">
-          Hiển thị {displayedCustomers.length} / {initialCustomers.length} khách hàng
+          Hiển thị {displayedCustomers.length} / {distributableCustomers.length} khách hàng chờ phân bổ
         </p>
       </div>
 
@@ -111,7 +115,7 @@ export default function LeadDistribution({ members, initialCustomers, teamId }) 
         );
       })}
 
-      {displayLimit < initialCustomers.length && (
+      {displayLimit < distributableCustomers.length && (
         <button
           onClick={() => setDisplayLimit(prev => prev + 20)}
           className="w-full py-3 mt-4 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold hover:border-primary-400 hover:text-primary-500 transition-all"
