@@ -38,65 +38,31 @@ export default function TeamDashboardClient({ team, role, members, customers, st
 
   return (
     <div className="animate-in fade-in duration-500 pb-24 md:pb-8 flex flex-col h-full min-h-[calc(100vh-100px)]">
-      {/* HEADER & TABS (Combined Block) */}
-      <div className="relative overflow-hidden rounded-3xl glass shadow-lg shrink-0 mb-6 flex flex-col">
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        
-        {/* Header Content */}
-        <div className="relative z-10 p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="px-2.5 py-1 rounded-full bg-slate-200/50 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-[9px] md:text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm text-slate-600 dark:text-slate-300">
-                Quản trị
-              </span>
-              {team.isActive && (
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[9px] md:text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" /> Active
-                </span>
-              )}
-            </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-800 dark:text-white leading-none">{team.name}</h1>
-          </div>
-          
-          <div className="md:text-right bg-white/50 dark:bg-slate-800/50 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm self-start flex items-center gap-3 md:block">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest md:mb-0.5">Mã Mời</span>
-            <span className="text-xl md:text-2xl font-black tracking-[0.1em] text-primary-600 dark:text-primary-400 leading-none">{team.inviteCode}</span>
-          </div>
+      {/* HEADER EXACTLY LIKE MOCKUP */}
+      <div className="flex items-center justify-between pt-2 mb-5 relative z-10">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Team</h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Tổng quan nhanh hiệu suất team hôm nay</p>
         </div>
-
-        {/* TABS NAVIGATION */}
-        <div className="relative z-10 flex p-1.5 mx-3 mb-3 bg-slate-200/50 dark:bg-slate-900/50 rounded-2xl shadow-inner backdrop-blur-sm">
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-2xl transition-all ${
-            activeTab === "overview" 
-              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
-              : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4" /> Tổng Quan
-        </button>
-        <button
-          onClick={() => setActiveTab("members")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-2xl transition-all ${
-            activeTab === "members" 
-              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
-              : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-          }`}
-        >
-          <Users className="w-4 h-4" /> Nhân Sự
-        </button>
-        <button
-          onClick={() => setActiveTab("leads")}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-2xl transition-all ${
-            activeTab === "leads" 
-              ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
-              : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-          }`}
-        >
-          <Database className="w-4 h-4" /> Điều Phối
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => window.location.reload()} className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+          </button>
+          <button onClick={() => alert(`Mã mời của team: ${team.inviteCode}`)} className="w-10 h-10 rounded-full bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white hover:bg-primary-600 transition-all active:scale-95 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </button>
+          <button className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all relative shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 border-2 border-white dark:border-slate-800"></span>
+          </button>
+        </div>
       </div>
+
+      {/* TABS NAVIGATION (Subtle) */}
+      <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
+        <button onClick={() => setActiveTab("overview")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Tổng Quan</button>
+        <button onClick={() => setActiveTab("members")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'members' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Nhân Sự (Mã: {team.inviteCode})</button>
+        <button onClick={() => setActiveTab("leads")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Điều Phối</button>
       </div>
 
       {/* TAB CONTENT */}
