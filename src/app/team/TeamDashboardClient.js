@@ -37,32 +37,31 @@ export default function TeamDashboardClient({ team, role, members, customers, st
   }
 
   return (
-    <div className="animate-in fade-in duration-500 pb-24 md:pb-8 flex flex-col h-full min-h-[calc(100vh-100px)]">
       {/* HEADER EXACTLY LIKE MOCKUP */}
-      <div className="flex items-center justify-between pt-2 mb-5 relative z-10">
+      <div className="flex items-center justify-between pt-1 mb-3 relative z-10">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Team</h1>
-          <p className="text-xs text-slate-500 font-medium mt-1">Tổng quan nhanh hiệu suất team hôm nay</p>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Team</h1>
+          <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tổng quan nhanh hiệu suất team hôm nay</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => window.location.reload()} className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => window.location.reload()} className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
           </button>
-          <button onClick={() => alert(`Mã mời của team: ${team.inviteCode}`)} className="w-10 h-10 rounded-full bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white hover:bg-primary-600 transition-all active:scale-95 shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <button onClick={() => alert(`Mã mời của team: ${team.inviteCode}`)} className="w-9 h-9 rounded-full bg-primary-500 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white hover:bg-primary-600 transition-all active:scale-95 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           </button>
-          <button className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all relative shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 border-2 border-white dark:border-slate-800"></span>
+          <button className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all relative shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-red-500 border border-white dark:border-slate-800"></span>
           </button>
         </div>
       </div>
 
       {/* TABS NAVIGATION (Subtle) */}
-      <div className="flex gap-2 mb-4 overflow-x-auto hide-scrollbar pb-1">
-        <button onClick={() => setActiveTab("overview")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Tổng Quan</button>
-        <button onClick={() => setActiveTab("members")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'members' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Nhân Sự (Mã: {team.inviteCode})</button>
-        <button onClick={() => setActiveTab("leads")} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Điều Phối</button>
+      <div className="flex gap-1.5 mb-3 overflow-x-auto hide-scrollbar pb-1">
+        <button onClick={() => setActiveTab("overview")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Tổng Quan</button>
+        <button onClick={() => setActiveTab("members")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'members' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Nhân Sự (Mã: {team.inviteCode})</button>
+        <button onClick={() => setActiveTab("leads")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Điều Phối</button>
       </div>
 
       {/* TAB CONTENT */}
