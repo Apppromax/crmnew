@@ -121,6 +121,18 @@ export default function TeamDashboardClient({ team, role, members, customers, st
             <div className="grid md:grid-cols-2 gap-3">
               {members.map((m) => {
                 const memberStats = stats?.memberPerformance?.[m.userId] || { total: 0, closed: 0 };
+                const now = new Date();
+                const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+                
+                const hasClosingSoon = customers.some(c => c.assignedToId === m.userId && (
+                  c.heatLevel?.includes("Rất Nét") || 
+                  c.heatLevel?.includes("Chốt Ngay") || 
+                  c.journeyStage?.includes("Dồn Chốt") || 
+                  c.journeyStage?.includes("Chốt Cọc")
+                ));
+                
+                const hasUpcomingAppt = customers.some(c => c.assignedToId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) > now && new Date(c.nextFollowUp) <= in48h);
+
                 return (
                   <div key={m.id} className="group flex flex-col p-4 rounded-2xl glass hover:border-primary-400/50 transition-all">
                     <div className="flex items-center justify-between mb-3">
@@ -129,7 +141,9 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                           {m.role === 'LEADER' ? <ShieldCheck className="w-5 h-5" /> : <User className="w-5 h-5" />}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-800 dark:text-white text-sm">{m.user.email.split('@')[0]}</p>
+                          <p className="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-1.5">
+                            {m.user.email.split('@')[0]}
+                          </p>
                           <p className="text-[10px] text-slate-500 font-medium">Tham gia: {new Date(m.joinedAt).toLocaleDateString("vi-VN")}</p>
                         </div>
                       </div>
@@ -137,6 +151,21 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                         {m.role}
                       </span>
                     </div>
+
+                    {(hasClosingSoon || hasUpcomingAppt) && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {hasClosingSoon && (
+                           <span className="px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-[9px] font-bold uppercase tracking-widest border border-red-100 dark:border-red-500/20 flex items-center gap-1">
+                             🔥 Đang có khách Sắp chốt
+                           </span>
+                        )}
+                        {hasUpcomingAppt && (
+                           <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-widest border border-amber-100 dark:border-amber-500/20 flex items-center gap-1">
+                             ⏰ Sắp có hẹn
+                           </span>
+                        )}
+                      </div>
+                    )}
                     
                     {/* Performance mini-stats */}
                     <div className="flex items-center gap-2 mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
