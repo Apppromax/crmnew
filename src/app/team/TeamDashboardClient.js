@@ -37,6 +37,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
   }
 
   return (
+    <div className="animate-in fade-in duration-500 pb-24 md:pb-8 flex flex-col h-full min-h-[calc(100vh-100px)]">
       {/* HEADER EXACTLY LIKE MOCKUP */}
       <div className="flex items-center justify-between pt-1 mb-3 relative z-10">
         <div>
