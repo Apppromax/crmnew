@@ -218,7 +218,11 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
     }
   });
 
-  const isPro = profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive;
+  const trialPeriodDays = 60; // 2 months trial
+  const trialEndDate = new Date(profile.createdAt.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
+  const isTrial = new Date() < trialEndDate;
+
+  const isPro = profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive || isTrial;
   
   if (!isPro) {
     const customerCount = await prisma.customer.count({ where: { userId } });
@@ -404,23 +408,39 @@ export async function getDashboardStats() {
   const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
   const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
 
-  const activeFilter = { userId, status: { notIn: ["Đã chốt", "Mất khách"] } };
+  // Tối ưu N+1: Query 1 lần lấy data cần thiết, tính toán trên RAM
+  const customers = await prisma.customer.findMany({
+    where: { userId, status: { notIn: ["Mất khách"] } },
+    select: { status: true, heatLevel: true, nextFollowUp: true, journeyStage: true, updatedAt: true }
+  });
 
-  // Run ALL queries in parallel (single round-trip)
-  const [total, hot, warm, overdue, todaySchedule, closedThisMonth, ...funnelCounts] = await Promise.all([
-    prisma.customer.count({ where: activeFilter }),
-    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Rất Nét" } }),
-    prisma.customer.count({ where: { ...activeFilter, heatLevel: "Tiềm Năng" } }),
-    prisma.customer.count({ where: { ...activeFilter, nextFollowUp: { lt: now } } }),
-    prisma.customer.count({ where: { userId, nextFollowUp: { gte: todayStart, lte: todayEnd } } }),
-    prisma.customer.count({ where: { userId, status: "Đã chốt", updatedAt: { gte: monthStart } } }),
-    // Funnel stages (6 queries in parallel)
-    ...["1. Phá băng và làm rõ nhu cầu", "2. Tư vấn sản phẩm", "3. Xây dựng lòng tin", "4. Hẹn gặp/xem", "5. Xử lý từ chối", "6. Chốt giao dịch"]
-      .map(s => prisma.customer.count({ where: { userId, journeyStage: s, status: { notIn: ["Mất khách"] } } }))
-  ]);
-
+  let total = 0, hot = 0, warm = 0, overdue = 0, todaySchedule = 0, closedThisMonth = 0;
   const stages = ["1. Phá băng và làm rõ nhu cầu", "2. Tư vấn sản phẩm", "3. Xây dựng lòng tin", "4. Hẹn gặp/xem", "5. Xử lý từ chối", "6. Chốt giao dịch"];
-  const funnel = stages.map((s, i) => ({ stage: s, count: funnelCounts[i] }));
+  const funnelCounts = Object.fromEntries(stages.map(s => [s, 0]));
+
+  for (const c of customers) {
+    if (funnelCounts[c.journeyStage] !== undefined) {
+      funnelCounts[c.journeyStage]++;
+    }
+
+    if (c.status === "Đã chốt") {
+      if (c.updatedAt >= monthStart) closedThisMonth++;
+      continue;
+    }
+
+    // Active customers
+    total++;
+    
+    if (c.heatLevel === "Rất Nét") hot++;
+    if (c.heatLevel === "Tiềm Năng") warm++;
+    
+    if (c.nextFollowUp) {
+      if (c.nextFollowUp < now) overdue++;
+      if (c.nextFollowUp >= todayStart && c.nextFollowUp <= todayEnd) todaySchedule++;
+    }
+  }
+
+  const funnel = stages.map(s => ({ stage: s, count: funnelCounts[s] }));
 
   return { total, hot, warm, overdue, todaySchedule, closedThisMonth, funnel };
 }

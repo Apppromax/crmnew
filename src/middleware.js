@@ -27,11 +27,10 @@ export async function middleware(request) {
     }
   )
 
-  // Lấy session từ cookie (nhanh hơn getUser rất nhiều vì không gọi API)
+  // Dùng getUser thay vì getSession để bảo mật (kiểm tra token còn hợp lệ với server không)
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const user = session?.user
+    data: { user },
+  } = await supabase.auth.getUser()
 
   // Define public routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')

@@ -250,6 +250,11 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
     </button>
   );
 
+  const trialPeriodDays = 60;
+  const trialEndDate = profile?.createdAt ? new Date(new Date(profile.createdAt).getTime() + trialPeriodDays * 24 * 60 * 60 * 1000) : new Date();
+  const isTrial = new Date() < trialEndDate;
+  const isPro = profile?.isPro || profile?.ownedTeam?.isActive || profile?.teamMembership?.team?.isActive || isTrial;
+
   return (
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm sticky top-0 z-10">
@@ -278,9 +283,9 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                     </div>
                   )}
                 </div>
-                {(profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive) && (
+                {isPro && (
                   <span className="flex items-center gap-1 bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 text-xs font-black px-3 py-1.5 rounded-full shadow-sm shrink-0">
-                    <Crown className="w-3.5 h-3.5" /> PRO
+                    <Crown className="w-3.5 h-3.5" /> {isTrial && !profile?.isPro && !profile?.ownedTeam?.isActive && !profile?.teamMembership?.team?.isActive ? "TRIAL" : "PRO"}
                   </span>
                 )}
               </div>
@@ -578,7 +583,14 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                   </div>
                 ) : (
                   <div className="relative z-10">
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Mở khóa tính năng thêm khách hàng bằng AI, không giới hạn lưu trữ.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
+                      {isTrial ? (
+                        <span className="block mb-2 text-emerald-600 font-medium">
+                          Bạn đang trong thời gian dùng thử 2 tháng miễn phí (còn {Math.max(0, Math.ceil((trialEndDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} ngày).
+                        </span>
+                      ) : null}
+                      Mở khóa tính năng thêm khách hàng bằng AI, không giới hạn lưu trữ.
+                    </p>
                     <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
                       {isUpgrading ? "Đang xử lý..." : "Nâng cấp ngay (99K CR/tháng)"}
                     </button>

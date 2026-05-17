@@ -5,6 +5,8 @@ import { generateWeeklyStrategy } from "@/actions/ai";
 import BottomNav from "@/components/BottomNav";
 import { Sparkles, BarChart3, Users, Flame, ThermometerSun, Snowflake, Loader2, Calendar, FileText, AlertTriangle, CalendarCheck, Trophy, TrendingUp } from "lucide-react";
 
+import DOMPurify from 'isomorphic-dompurify';
+
 function formatMarkdown(text) {
   if (!text) return null;
   const lines = text.split('\n');
@@ -14,17 +16,17 @@ function formatMarkdown(text) {
     let line = lines[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-      elements.push(<li key={i} className="ml-4 mb-1 list-disc" dangerouslySetInnerHTML={{ __html: line.substring(2) }} />);
+      elements.push(<li key={i} className="ml-4 mb-1 list-disc" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.substring(2)) }} />);
     } else if (line.trim().startsWith('### ')) {
-      elements.push(<h4 key={i} className="text-lg font-bold mt-4 mb-2 text-slate-800 dark:text-white" dangerouslySetInnerHTML={{ __html: line.substring(4) }} />);
+      elements.push(<h4 key={i} className="text-lg font-bold mt-4 mb-2 text-slate-800 dark:text-white" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.substring(4)) }} />);
     } else if (line.trim().startsWith('## ')) {
-      elements.push(<h3 key={i} className="text-xl font-black mt-5 mb-3 text-slate-900 dark:text-white" dangerouslySetInnerHTML={{ __html: line.substring(3) }} />);
+      elements.push(<h3 key={i} className="text-xl font-black mt-5 mb-3 text-slate-900 dark:text-white" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.substring(3)) }} />);
     } else if (line.trim().startsWith('# ')) {
-      elements.push(<h2 key={i} className="text-2xl font-black mt-6 mb-3 text-primary-600 dark:text-primary-400" dangerouslySetInnerHTML={{ __html: line.substring(2) }} />);
+      elements.push(<h2 key={i} className="text-2xl font-black mt-6 mb-3 text-primary-600 dark:text-primary-400" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.substring(2)) }} />);
     } else if (line.trim() === '') {
       elements.push(<div key={i} className="h-2" />);
     } else {
-      elements.push(<p key={i} className="mb-2 text-slate-600 dark:text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: line }} />);
+      elements.push(<p key={i} className="mb-2 text-slate-600 dark:text-slate-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line) }} />);
     }
   }
   return elements;
