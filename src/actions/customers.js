@@ -209,6 +209,24 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
   });
   const teamId = membership ? membership.teamId : null;
 
+  // FREE TIER LIMIT LOGIC
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    include: {
+      ownedTeam: true,
+      teamMembership: { include: { team: true } }
+    }
+  });
+
+  const isPro = profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive;
+  
+  if (!isPro) {
+    const customerCount = await prisma.customer.count({ where: { userId } });
+    if (customerCount >= 10) {
+      throw new Error("FREE_LIMIT_REACHED");
+    }
+  }
+
   const customer = await prisma.customer.create({
     data: {
       userId,

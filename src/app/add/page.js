@@ -158,6 +158,9 @@ export default function AddCustomerPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  
+  // Free Tier Limit Popup
+  const [showLimitPopup, setShowLimitPopup] = useState(false);
 
   const handleInitialSaveClick = () => {
     if (!manualName.trim() || !manualPhone.trim()) {
@@ -198,7 +201,12 @@ export default function AddCustomerPage() {
       setSaveSuccess(true);
       router.push("/?success=1");
     } catch (err) {
-      setError("Lỗi lưu khách hàng.");
+      if (err.message?.includes("FREE_LIMIT_REACHED")) {
+        setShowStatusPopup(false);
+        setShowLimitPopup(true);
+      } else {
+        setError("Lỗi lưu khách hàng.");
+      }
       setIsSaving(false);
     }
   };
@@ -244,7 +252,12 @@ export default function AddCustomerPage() {
       setShowFinalPopup(false);
       router.push("/?success=1");
     } catch (err) {
-      setError("Lỗi lưu khách hàng thủ công.");
+      if (err.message?.includes("FREE_LIMIT_REACHED")) {
+        setShowFinalPopup(false);
+        setShowLimitPopup(true);
+      } else {
+        setError("Lỗi lưu khách hàng thủ công.");
+      }
       setIsSaving(false);
     }
   };
@@ -263,6 +276,35 @@ export default function AddCustomerPage() {
           <p className="text-slate-500 dark:text-slate-400 font-medium animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150">
             Đang làm mới danh sách khách hàng...
           </p>
+        </div>
+      )}
+
+      {/* Free Limit Reached Popup */}
+      {showLimitPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl scale-in-center">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <UserPlus className="w-8 h-8 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2 text-center">Đã Đạt Giới Hạn</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
+              Kho lưu trữ bản Miễn Phí của bạn đã đầy (10 khách hàng). Hãy nâng cấp PRO chỉ với giá 1 ly cafe (99K/tháng) để thêm khách không giới hạn!
+            </p>
+            <div className="space-y-3">
+              <button 
+                onClick={() => router.push('/profile')}
+                className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/25 transition-all active:scale-[0.98]"
+              >
+                Nâng Cấp PRO Ngay
+              </button>
+              <button 
+                onClick={() => setShowLimitPopup(false)}
+                className="w-full py-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-2xl transition-all"
+              >
+                Để Sau
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
