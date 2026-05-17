@@ -138,12 +138,15 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
       </div>
 
       {/* Ưu tiên xử lý */}
-      {priorities.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-sm font-black text-slate-800 dark:text-white">Ưu tiên xử lý</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-sm font-black text-slate-800 dark:text-white">Ưu tiên xử lý</h2>
+          {priorities.length > 0 && (
             <button onClick={() => setActiveTab && setActiveTab('leads')} className="text-[10px] text-primary-500 font-bold flex items-center hover:text-primary-600 transition-colors">Xem tất cả <ChevronRight className="w-3 h-3 ml-0.5" /></button>
-          </div>
+          )}
+        </div>
+        
+        {priorities.length > 0 ? (
           <div className="space-y-2.5">
             {priorities.map((p, i) => (
               <div key={i} className="flex items-center justify-between group">
@@ -159,7 +162,7 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
                     )}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">{p.user.email.split('@')[0]}</h4>
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-white leading-tight">{p.user?.fullName || p.user.email.split('@')[0]}</h4>
                     <p className="text-[9px] font-medium text-slate-500">{p.count} {p.label}</p>
                   </div>
                 </div>
@@ -172,8 +175,16 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 text-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            </div>
+            <p className="text-xs font-bold text-slate-800 dark:text-white">Team đang làm rất tốt!</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Không có tác vụ nào cần xử lý gấp lúc này.</p>
+          </div>
+        )}
+      </div>
 
       {/* Theo hành trình */}
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-4 border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
