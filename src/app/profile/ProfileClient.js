@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { upgradeToPro, updateProfileInfo, updateDefaultSnoozeHours, requestTopUp } from "@/actions/user";
+import { upgradeToPro, updateProfileInfo, updateProfileSettings, requestTopUp, getUserTransactions, upgradeTeamPro } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown, History, CheckCircle2, Clock } from "lucide-react";
 
 export default function ProfileClient({ initialProfile, settings = {} }) {
   const router = useRouter();
@@ -14,12 +14,13 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
   const [error, setError] = useState(null);
 
   // Theme & BG State
-  const [theme, setTheme] = useState("system");
-  const [bgPattern, setBgPattern] = useState("none");
+  const [theme, setTheme] = useState(profile?.theme || "system");
+  const [bgPattern, setBgPattern] = useState(profile?.bgPattern || "none");
 
   // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(profile?.fullName || "");
+  const [editPhone, setEditPhone] = useState(profile?.phone || "");
   const [isSavingInfo, setIsSavingInfo] = useState(false);
 
   // Accordion State
@@ -33,32 +34,37 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
 
   // Settings State (persisted in localStorage + DB)
   const [snoozeHours, setSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
-  const [followUpDays, setFollowUpDays] = useState(3);
-  const [queueSize, setQueueSize] = useState(10);
-  const [confirmSnooze, setConfirmSnooze] = useState(false);
+  const [followUpDays, setFollowUpDays] = useState(profile?.defaultFollowUpDays || 3);
+  const [queueSize, setQueueSize] = useState(profile?.queueSize || 10);
+  const [confirmSnooze, setConfirmSnooze] = useState(profile?.confirmSnooze ?? false);
   const [settingsSaved, setSettingsSaved] = useState("");
 
+  // Transaction Logs
+  const [showTxLogs, setShowTxLogs] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTx, setLoadingTx] = useState(false);
+
+  // Team Upgrade State
+  const [teamSeats, setTeamSeats] = useState(profile?.ownedTeam?.maxMembers || 5);
+
+  const fetchTransactions = async () => {
+    setLoadingTx(true);
+    try {
+      const txs = await getUserTransactions();
+      setTransactions(txs);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingTx(false);
+    }
+  };
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "system";
-    const savedBg = localStorage.getItem("bgPattern") || "none";
-    const savedFollowUp = localStorage.getItem("defaultFollowUpDays");
-    const savedQueue = localStorage.getItem("queueSize");
-    const savedConfirm = localStorage.getItem("confirmSnooze");
-
-    setTheme(savedTheme);
-    setBgPattern(savedBg);
-    if (savedFollowUp) setFollowUpDays(Number(savedFollowUp));
-    if (savedQueue) setQueueSize(Number(savedQueue));
-    if (savedConfirm) setConfirmSnooze(savedConfirm === "true");
-  }, []);
-
-  const changeTheme = (newTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    // Apply theme
     const root = document.documentElement;
-    if (newTheme === "dark") {
+    if (theme === "dark") {
       root.classList.add("dark");
-    } else if (newTheme === "light") {
+    } else if (theme === "light") {
       root.classList.remove("dark");
     } else {
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -67,23 +73,22 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
         root.classList.remove("dark");
       }
     }
+    
+    // Apply bg
+    document.body.style.backgroundImage = "";
+    document.body.style.backgroundSize = "";
+    document.body.classList.remove("bg-dots", "bg-grid", "bg-building-1", "bg-building-2", "bg-building-3");
+    if (bgPattern !== "none") {
+      document.body.classList.add(`bg-${bgPattern}`);
+    }
+  }, [theme, bgPattern]);
+
+  const changeTheme = (newTheme) => {
+    setTheme(newTheme);
   };
 
   const changeBg = (newBg) => {
     setBgPattern(newBg);
-    localStorage.setItem("bgPattern", newBg);
-    
-    // Clear old inline styles if any
-    document.body.style.backgroundImage = "";
-    document.body.style.backgroundSize = "";
-    
-    // Remove existing background classes
-    document.body.classList.remove("bg-dots", "bg-grid", "bg-building-1", "bg-building-2", "bg-building-3");
-    
-    // Add new background class if not none
-    if (newBg !== "none") {
-      document.body.classList.add(`bg-${newBg}`);
-    }
   };
 
   const handleLogout = async () => {
@@ -93,26 +98,41 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
   };
 
   const handleUpgrade = async () => {
-    if (!confirm("Xác nhận đăng ký gói PRO 1 tháng với giá 99,000 CR?")) return;
-    
-    setIsUpgrading(true);
-    setError(null);
-    try {
-      await upgradeToPro(1);
-      alert("Nâng cấp thành công! Chúc bạn chốt sale hiệu quả.");
-      router.refresh(); 
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsUpgrading(false);
+    if (profile.ownedTeam) {
+      if (!confirm(`Xác nhận đăng ký gói TEAM PRO 1 tháng cho ${teamSeats} nhân viên với giá ${new Intl.NumberFormat('vi-VN').format(teamSeats * 99000)} CR?`)) return;
+      setIsUpgrading(true);
+      setError(null);
+      try {
+        await upgradeTeamPro(1, teamSeats);
+        alert("Nâng cấp Team thành công!");
+        router.refresh();
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsUpgrading(false);
+      }
+    } else {
+      if (!confirm("Xác nhận đăng ký gói PRO 1 tháng với giá 99,000 CR?")) return;
+      
+      setIsUpgrading(true);
+      setError(null);
+      try {
+        await upgradeToPro(1);
+        alert("Nâng cấp thành công!");
+        router.refresh(); 
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsUpgrading(false);
+      }
     }
   };
 
   const handleSaveInfo = async () => {
     setIsSavingInfo(true);
     try {
-      await updateProfileInfo({ fullName: editName });
-      setProfile(p => ({ ...p, fullName: editName }));
+      await updateProfileInfo({ fullName: editName, phone: editPhone });
+      setProfile(p => ({ ...p, fullName: editName, phone: editPhone }));
       setIsEditing(false);
     } catch (err) {
       setError("Lỗi cập nhật thông tin.");
@@ -146,11 +166,23 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
   const saveSettings = async () => {
     setSettingsSaved("");
     try {
-      await updateDefaultSnoozeHours(Number(snoozeHours));
-      localStorage.setItem("defaultFollowUpDays", String(followUpDays));
-      localStorage.setItem("queueSize", String(queueSize));
-      localStorage.setItem("confirmSnooze", String(confirmSnooze));
-      setProfile(p => ({ ...p, defaultSnoozeHours: Number(snoozeHours) }));
+      await updateProfileSettings({
+        defaultSnoozeHours: Number(snoozeHours),
+        defaultFollowUpDays: Number(followUpDays),
+        queueSize: Number(queueSize),
+        confirmSnooze: confirmSnooze,
+        theme,
+        bgPattern
+      });
+      setProfile(p => ({ 
+        ...p, 
+        defaultSnoozeHours: Number(snoozeHours),
+        defaultFollowUpDays: Number(followUpDays),
+        queueSize: Number(queueSize),
+        confirmSnooze,
+        theme,
+        bgPattern
+      }));
       setSettingsSaved("✓ Đã lưu cài đặt");
       setTimeout(() => setSettingsSaved(""), 2500);
     } catch (err) {
@@ -235,22 +267,27 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               <div className="relative z-10 flex justify-between items-start mb-6">
                 <div>
                   <h2 className="text-sm font-semibold text-indigo-100 uppercase tracking-widest mb-1 flex items-center gap-2">
-                    Hồ sơ 
+                    {profile.ownedTeam ? "Trưởng phòng" : profile.teamMembership ? "Nhân viên Sale" : "Hồ sơ cá nhân"}
                     <button onClick={() => setIsEditing(true)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
                   </h2>
-                  <p className="font-bold text-2xl truncate">{profile.fullName || "Chuyên viên tư vấn"}</p>
+                  <p className="font-bold text-2xl truncate">{profile.fullName || "Chưa cập nhật tên"}</p>
                   <p className="text-sm opacity-80 mt-0.5">{profile.email}</p>
+                  {(profile.ownedTeam || profile.teamMembership) && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/20 rounded-lg text-xs font-bold text-white">
+                      <Users className="w-3.5 h-3.5" /> Thuộc Team: {profile.ownedTeam?.name || profile.teamMembership?.team?.name}
+                    </div>
+                  )}
                 </div>
-                {profile.isPro && (
-                  <span className="flex items-center gap-1 bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
+                {(profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive) && (
+                  <span className="flex items-center gap-1 bg-gradient-to-r from-amber-200 to-yellow-400 text-yellow-900 text-xs font-black px-3 py-1.5 rounded-full shadow-sm shrink-0">
                     <Crown className="w-3.5 h-3.5" /> PRO
                   </span>
                 )}
               </div>
               
-              <div className="relative z-10 flex justify-between items-end">
-                <div>
-                  <p className="text-xs text-indigo-100 uppercase tracking-wider mb-1">Số dư hiện tại</p>
+              <div className="relative z-10 flex justify-between items-end mt-4">
+                <div onClick={() => { setShowTxLogs(true); fetchTransactions(); }} className="cursor-pointer group">
+                  <p className="text-xs text-indigo-100 uppercase tracking-wider mb-1 flex items-center gap-1 group-hover:text-white transition-colors">Số dư hiện tại <History className="w-3 h-3" /></p>
                   <p className="text-4xl font-black tracking-tight">{new Intl.NumberFormat('vi-VN').format(profile.balance)} <span className="text-lg font-bold opacity-80">CR</span></p>
                 </div>
                 <button 
@@ -268,8 +305,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </div>
             )}
 
-            <div className="space-y-4">
-              {/* ===== TOP UP SECTION ===== */}
+            {(!profile.teamMembership || profile.role === 'admin') && (
               <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50">
               
               {topUpSuccess ? (
@@ -351,8 +387,9 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                 </div>
               )}
               </SectionItem>
+            )}
 
-              {/* ===== SETTINGS SECTION ===== */}
+            {/* ===== SETTINGS SECTION ===== */}
               <SectionItem id="settings" icon={Settings} title="Cài đặt CRM" description="Quy trình & thời gian chăm sóc" iconColor="text-blue-500" iconBg="bg-blue-50">
               
               <div className="space-y-6">
@@ -496,38 +533,79 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </SectionItem>
 
               {/* ===== PRO UPGRADE SECTION ===== */}
-              <SectionItem id="pro" icon={Rocket} title="Gói SalesPush PRO" description="Mở khóa giới hạn & Dùng AI" iconColor="text-amber-500" iconBg="bg-amber-50">
-              
-              {profile.isPro ? (
-                <div className="relative z-10">
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Bạn đang sử dụng gói Pro. Khách hàng không giới hạn, dùng AI thả ga.</p>
-                  <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
-                    Hạn dùng: {new Date(profile.proUntil).toLocaleDateString('vi-VN')}
+              {(!profile.teamMembership || profile.role === 'admin') && (
+                <SectionItem id="pro" icon={Rocket} title={profile.ownedTeam ? "Gói TEAM PRO" : "Gói Cá Nhân PRO"} description={profile.ownedTeam ? "Mở khóa AI cho toàn đội nhóm" : "Mở khóa AI cho cá nhân"} iconColor="text-amber-500" iconBg="bg-amber-50">
+                
+                {profile.ownedTeam ? (
+                  <div className="relative z-10">
+                    {profile.ownedTeam.isActive ? (
+                      <>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Team đang sử dụng gói Pro cho {profile.ownedTeam.maxMembers} nhân sự.</p>
+                        <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
+                          Hạn dùng: {new Date(profile.ownedTeam.validUntil).toLocaleDateString('vi-VN')}
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Đăng ký gói PRO để cấp quyền dùng AI cho tất cả nhân viên trong Team.</p>
+                    )}
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Số lượng nhân sự (Seats)</label>
+                      <input 
+                        type="number" 
+                        min="1" 
+                        max="50" 
+                        value={teamSeats}
+                        onChange={(e) => setTeamSeats(parseInt(e.target.value) || 1)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold"
+                      />
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">Thành tiền: {new Intl.NumberFormat('vi-VN').format(teamSeats * 99000)} CR / tháng</p>
+                    </div>
+
+                    <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
+                      {isUpgrading ? "Đang xử lý..." : profile.ownedTeam.isActive ? "Gia hạn thêm 1 tháng" : "Nâng cấp Team ngay"}
+                    </button>
                   </div>
-                  <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-2xl transition-all active:scale-95">
-                    {isUpgrading ? "Đang xử lý..." : "Gia hạn thêm 1 tháng (99K CR)"}
-                  </button>
-                </div>
-              ) : (
-                <div className="relative z-10">
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Mở khóa tính năng thêm khách hàng bằng AI, không giới hạn lưu trữ.</p>
-                  <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
-                    {isUpgrading ? "Đang xử lý..." : "Nâng cấp ngay (99K CR/tháng)"}
-                  </button>
-                </div>
+                ) : profile.isPro ? (
+                  <div className="relative z-10">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Bạn đang sử dụng gói Pro. Khách hàng không giới hạn, dùng AI thả ga.</p>
+                    <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
+                      Hạn dùng: {new Date(profile.proUntil).toLocaleDateString('vi-VN')}
+                    </div>
+                    <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold rounded-2xl transition-all active:scale-95">
+                      {isUpgrading ? "Đang xử lý..." : "Gia hạn thêm 1 tháng (99K CR)"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative z-10">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Mở khóa tính năng thêm khách hàng bằng AI, không giới hạn lưu trữ.</p>
+                    <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
+                      {isUpgrading ? "Đang xử lý..." : "Nâng cấp ngay (99K CR/tháng)"}
+                    </button>
+                  </div>
+                )}
+                </SectionItem>
               )}
-              </SectionItem>
 
               {/* ===== MENU ACTIONS ===== */}
 
-              {profile.role === 'admin' && (
-                <ActionItem 
-                  icon={ShieldCheck} 
-                  title="Trang Quản trị Admin" 
-                  description="Duyệt tiền và hệ thống" 
-                  onClick={() => router.push('/admin')} 
-                />
-              )}
+              <div className="space-y-4">
+                {profile.ownedTeam && (
+                  <ActionItem 
+                    icon={Users} 
+                    title="Quản lý Đội nhóm" 
+                    description="Quản lý nhân viên, chiến dịch" 
+                    onClick={() => router.push('/team')} 
+                  />
+                )}
+                {profile.role === 'admin' && (
+                  <ActionItem 
+                    icon={ShieldCheck} 
+                    title="Trang Quản trị Admin" 
+                    description="Duyệt tiền và hệ thống" 
+                    onClick={() => router.push('/admin')} 
+                  />
+                )}
 
               <ActionItem 
                 icon={LogOut} 
@@ -541,7 +619,48 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
         ) : null}
       </main>
 
-      {/* Edit Profile Modal - Only Name */}
+      {/* Transaction Logs Modal */}
+      {showTxLogs && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={() => setShowTxLogs(false)}>
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[80vh] animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Lịch sử giao dịch</h2>
+              <button onClick={() => setShowTxLogs(false)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 custom-scrollbar space-y-3">
+              {loadingTx ? (
+                <div className="text-center py-10 text-slate-500">Đang tải...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center py-10 text-slate-500 text-sm">Chưa có giao dịch nào</div>
+              ) : (
+                transactions.map(tx => (
+                  <div key={tx.id} className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl ${tx.type === 'TOPUP' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                        {tx.type === 'TOPUP' ? <Wallet className="w-4 h-4" /> : <Rocket className="w-4 h-4" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-white">{tx.note || tx.type}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${tx.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-600'}`}>{tx.status}</span>
+                          <span className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(tx.createdAt).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`font-black text-sm ${tx.amount > 0 ? 'text-emerald-500' : 'text-slate-700 dark:text-white'}`}>
+                      {tx.amount > 0 ? '+' : ''}{new Intl.NumberFormat('vi-VN').format(tx.amount)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
           <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
@@ -561,6 +680,16 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
                   placeholder="Nhập tên của bạn..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Số điện thoại</label>
+                <input 
+                  type="text" 
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 font-medium text-slate-900 dark:text-white"
+                  placeholder="0901234567"
                 />
               </div>
 

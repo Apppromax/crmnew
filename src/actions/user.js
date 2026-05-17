@@ -13,7 +13,15 @@ async function requireUser() {
 export async function getUserProfile() {
   const userId = await requireUser();
   const profile = await prisma.profile.findUnique({
-    where: { id: userId }
+    where: { id: userId },
+    include: {
+      ownedTeam: true,
+      teamMembership: {
+        include: {
+          team: true
+        }
+      }
+    }
   });
   return profile;
 }
@@ -63,22 +71,88 @@ export async function upgradeToPro(months = 1) {
   return { success: true, proUntil: result.proUntil };
 }
 
-export async function updateProfileInfo({ fullName }) {
+export async function updateProfileInfo({ fullName, phone }) {
   const userId = await requireUser();
   await prisma.profile.update({
     where: { id: userId },
-    data: { fullName }
+    data: { fullName, phone }
   });
   return { success: true };
 }
 
-export async function updateDefaultSnoozeHours(hours) {
+export async function updateProfileSettings(data) {
   const userId = await requireUser();
   await prisma.profile.update({
     where: { id: userId },
-    data: { defaultSnoozeHours: hours }
+    data: {
+      defaultSnoozeHours: data.defaultSnoozeHours,
+      defaultFollowUpDays: data.defaultFollowUpDays,
+      queueSize: data.queueSize,
+      confirmSnooze: data.confirmSnooze,
+      theme: data.theme,
+      bgPattern: data.bgPattern
+    }
   });
   return { success: true };
+}
+
+export async function getUserTransactions() {
+  const userId = await requireUser();
+  const tx = await prisma.transaction.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    take: 20
+  });
+  return tx;
+}
+
+export async function upgradeTeamPro(months = 1, seats = 5) {
+  const userId = await requireUser();
+  const PRICE_PER_SEAT_MONTH = 99000;
+  const totalCost = PRICE_PER_SEAT_MONTH * seats * months;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const profile = await tx.profile.findUnique({ where: { id: userId }, include: { ownedTeam: true } });
+    if (!profile) throw new Error("User not found");
+    if (!profile.ownedTeam) throw new Error("Bạn không phải là trưởng phòng");
+
+    if (profile.balance < totalCost) {
+      throw new Error("Số dư không đủ. Vui lòng nạp thêm Credits.");
+    }
+
+    const team = profile.ownedTeam;
+    const now = new Date();
+    let newValidUntil = team.validUntil && team.validUntil > now ? new Date(team.validUntil) : now;
+    newValidUntil.setMonth(newValidUntil.getMonth() + months);
+
+    await tx.profile.update({
+      where: { id: userId },
+      data: { balance: profile.balance - totalCost },
+    });
+
+    const updatedTeam = await tx.team.update({
+      where: { id: team.id },
+      data: {
+        isActive: true,
+        validUntil: newValidUntil,
+        maxMembers: seats
+      }
+    });
+
+    await tx.transaction.create({
+      data: {
+        userId,
+        amount: -totalCost,
+        type: "SPEND",
+        note: `Đăng ký gói TEAM PRO ${months} tháng (${seats} users)`,
+        status: "COMPLETED",
+      },
+    });
+
+    return updatedTeam;
+  });
+
+  return { success: true, validUntil: result.validUntil };
 }
 
 export async function requestTopUp(amount, bankRef) {

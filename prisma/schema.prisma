@@ -17,6 +17,12 @@ model Profile {
   isPro     Boolean  @default(false)
   proUntil  DateTime? @map("pro_until")
   defaultSnoozeHours Int @default(4) @map("default_snooze_hours")
+  defaultFollowUpDays Int @default(3) @map("default_follow_up_days")
+  queueSize  Int @default(10) @map("queue_size")
+  confirmSnooze Boolean @default(false) @map("confirm_snooze")
+  theme      String @default("system")
+  bgPattern  String @default("none") @map("bg_pattern")
+  phone      String?
   createdAt DateTime @default(now()) @map("created_at")
 
   customers    Customer[]
