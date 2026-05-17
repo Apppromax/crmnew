@@ -110,6 +110,7 @@ src/
 - ✅ Phase 15: Tag System & Dashboard Extension (Custom Tags, Tag Filter, KPI Dashboard, Sales Funnel Chart, Bug Fixes)
 - ✅ Phase 16: Monetization & UX Polish (Global Loading Suspense, Quick Care Workflow, Profile Accordion Layout, Premium Glass Logo, Custom Sort, Admin Approval)
 - ✅ Phase 17: Taxonomy Standardization & Multi-step Workflow (Độ Nét Gốc taxonomy: Rất Nét, Tiềm Năng, Quan Tâm, Tham Khảo, Chưa Rõ; UpdateCareSheet multi-step modal, Thêm trạng thái Chưa liên lạc được)
+- ✅ Phase 18: Architecture Audit & Billing Refactor (Database-backed Settings, Team Subscription Logic, Transaction History, Free Tier 10-customer limit)
 
 ## 📝 License
 
