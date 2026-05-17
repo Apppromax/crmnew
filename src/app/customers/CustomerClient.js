@@ -369,16 +369,16 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                   } flex items-center gap-3.5 cursor-pointer active:scale-[0.98] transition-all`}
                 >
                   {/* Left: Avatar */}
-                  <div className={`w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0 ${avatarColor}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold shrink-0 ${avatarColor}`}>
                     {initials}
                   </div>
 
                   {/* Middle: Info */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
                     {/* Row 1: Name + Heat */}
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-900 dark:text-white truncate text-base">{c.name}</h3>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
+                    <div className="flex items-center gap-2 min-w-0 w-full">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-[15px] truncate min-w-0">{c.name || "Khách hàng"}</h3>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
                         c.heatLevel === 'Rất Nét' ? 'bg-red-50 text-red-600' :
                         c.heatLevel === 'Tiềm Năng' ? 'bg-orange-50 text-orange-600' :
                         c.heatLevel === 'Quan Tâm' ? 'bg-amber-50 text-amber-600' :
@@ -390,31 +390,31 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                     </div>
 
                     {/* Row 2: Phone + Demand */}
-                    <div className="flex items-center gap-2 text-xs text-slate-500 truncate mt-0.5">
+                    <div className="flex items-center gap-2 text-[13px] text-slate-500 mt-0.5 min-w-0 w-full">
                       <span className="font-medium shrink-0">{c.phone}</span>
                       {(c.area || c.demand) && (
                         <>
-                          <span className="text-slate-300">•</span>
-                          <span className="truncate">{c.area || c.demand}</span>
+                          <span className="text-slate-300 shrink-0">•</span>
+                          <span className="truncate min-w-0">{c.area || c.demand}</span>
                         </>
                       )}
                     </div>
 
                     {/* Row 3: Journey Bar */}
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-[1px] shrink-0">
+                    <div className="flex items-center gap-2 mt-1 min-w-0 w-full">
+                      <div className="flex w-[84px] h-1.5 rounded-full overflow-hidden gap-[2px] shrink-0">
                         {JOURNEY_OPTIONS.map((_, idx) => {
                           const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
                           return (
                             <div 
                               key={idx} 
-                              className={`flex-1 h-full ${idx <= currentIdx ? 'bg-primary-400' : 'bg-transparent'}`}
+                              className={`flex-1 h-full rounded-full ${idx <= currentIdx ? 'bg-blue-500' : 'bg-blue-100 dark:bg-blue-900/30'}`}
                             />
                           );
                         })}
                       </div>
-                      <span className="text-[10px] font-medium text-slate-500 truncate flex items-center">
-                        {Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0]))) + 1}/{JOURNEY_OPTIONS.length} <span className="mx-1 text-slate-300">•</span> {(c.journeyStage || "1.").split(". ")[1]}
+                      <span className="text-[11px] text-slate-500 truncate min-w-0">
+                        {Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0]))) + 1}/{JOURNEY_OPTIONS.length} <span className="mx-0.5 text-slate-300">•</span> {(c.journeyStage || "1.").split(". ")[1]}
                       </span>
                     </div>
                   </div>
@@ -422,32 +422,24 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                   {/* Right: Status + Next FollowUp */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     <div className="flex flex-col items-end gap-1.5 justify-center h-full">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <span className={`text-[10px] font-bold ${c.status === 'Mất khách' ? '' : 'px-2 py-0.5 rounded-full'} ${
                         c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
                         c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
-                        c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
-                        c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
+                        c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-600' :
+                        c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-600' :
                         c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
                         c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
-                        'bg-red-50 text-red-600'
+                        'text-red-600' // Mất khách has no bg
                       }`}>
                         {c.status}
                       </span>
                       
-                      {c.nextFollowUp ? (
-                        <div className="flex flex-col items-end mt-1">
-                          <span className="text-[9px] text-slate-400 font-medium mb-0.5">Hẹn tiếp theo</span>
-                          <div className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300">
-                            <Calendar className="w-3 h-3 text-primary-400" />
+                      {c.nextFollowUp && (
+                        <div className="flex flex-col items-end mt-0.5">
+                          <span className="text-[9px] text-slate-400 mb-0.5">Hẹn tiếp theo</span>
+                          <div className="flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
                             {new Date(c.nextFollowUp).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' })}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-end mt-1 opacity-0">
-                          <span className="text-[9px] font-medium mb-0.5">Hẹn tiếp theo</span>
-                          <div className="flex items-center gap-1 text-xs font-bold">
-                            <Calendar className="w-3 h-3" />
-                            --/--
                           </div>
                         </div>
                       )}
