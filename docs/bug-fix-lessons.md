@@ -282,3 +282,23 @@
 - **Fix**: Gom toàn bộ vào `prisma.$transaction([])`.
 - **Rule**: Khi thực thi một Workflow có nhiều bước thay đổi dữ liệu liên đới, LUÔN LUÔN dùng Transaction. Nó không chỉ nhanh hơn (1 connection, 1 lượt TCP roundtrip) mà còn an toàn (Atomic).
 
+---
+
+## 🟢 Phase 19: Layout Density & Privacy Refinements (2026-05-16)
+
+### Vấn đề 31: Màn hình Team Dashboard quá lỏng lẻo, tốn diện tích trên Mobile
+- **Lỗi**: Các phần padding/margin quá lớn (`p-6`, `space-y-6`), kích thước chữ quá to, khiến Trưởng phòng chỉ xem được 1-2 khối thông tin trên màn hình điện thoại mà phải lướt nhiều.
+- **Fix**: Giảm tổng thể padding xuống `p-3` hoặc `p-4`, giảm margin, thu nhỏ font chữ (`text-xs`, `text-[10px]`) và icon (`w-9`), áp dụng thiết kế thẻ nén (compact UI) cho toàn bộ Team Dashboard.
+- **Rule**: Bảng điều khiển (Dashboard) dành cho Quản lý cần đề cao **Information Density** (Mật độ thông tin). Thiết kế "app-like" trên Mobile phải nén các elements lại để tối đa hóa số lượng insight hiện trên một màn hình mà không cần cuộn.
+
+### Vấn đề 32: Trưởng phòng thấy số điện thoại của khách hàng đã giao
+- **Lỗi**: Tab "Điều phối" hiện TẤT CẢ khách hàng của Team, khiến Trưởng phòng xem được luôn thông tin chi tiết (tên, số điện thoại) của khách mà họ đã phân bổ cho các Sales bên dưới.
+- **Yêu cầu**: Trưởng phòng chỉ cần giữ quyền phân bổ khách chưa giao. Không được xem chi tiết thông tin sau khi khách đã thuộc về Sale khác.
+- **Fix**: Trong `LeadDistribution.js`, tạo một biến lọc `distributableCustomers` chỉ giữ lại các khách hàng chưa được phân bổ (`!c.userId`) hoặc thuộc sở hữu của chính Trưởng phòng (`c.userId === leaderUserId`). Các khách hàng khác sẽ không còn xuất hiện trên danh sách của Leader. Các chỉ số thống kê tổng (đã chốt, đang chăm) vẫn hiện đầy đủ.
+- **Rule**: Nguyên tắc Least Privilege (Quyền hạn tối thiểu) ở cấp giao diện: User không được nhìn thấy các thông tin chi tiết mà họ không còn thẩm quyền tương tác (phân bổ), dù họ có là Leader. Dữ liệu tổng hợp (Aggregated Data) để làm báo cáo là đủ.
+
+### Vấn đề 33: Build Fail (Expected ',' got 'ident') do thay thế JSX thiếu Wrapper Div
+- **Lỗi**: Vercel thông báo `Expected ',', got 'ident'` ở thẻ `<div>` trong `TeamDashboardClient.js` và huỷ quá trình Build.
+- **Nguyên nhân**: Khi thay thế một khối JSX, đã vô tình làm mất thẻ bọc cha ngoài cùng `<div className="... flex flex-col min-h-...">`. React bắt buộc một component chỉ return 1 top-level element duy nhất. Do thiếu div cha, cấu trúc bị trình biên dịch hiểu nhầm là lỗi cú pháp.
+- **Fix**: Khôi phục lại `<div className="...">` bao ngoài toàn bộ JSX trả về.
+- **Rule**: Khi replace / modify JSX qua công cụ tự động hoặc copy-paste, luôn luôn đảm bảo Root Element (Thẻ Cha) không bị mất.
