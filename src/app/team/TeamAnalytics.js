@@ -15,6 +15,12 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
   const today = new Date();
   const todayAppointments = customers.filter(c => c.nextFollowUp && isSameDay(new Date(c.nextFollowUp), today)).length;
 
+  const activeCustomers = customers.filter(c => c.status === "Đang chăm" || c.status === "Đang chờ");
+  const overdueCustomers = activeCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today);
+  const overallFollowUpRate = activeCustomers.length > 0 
+    ? Math.round(((activeCustomers.length - overdueCustomers.length) / activeCustomers.length) * 100) 
+    : 100;
+
   // 2. Journey Stats
   const journeyMapping = [
     { key: "1. Phá băng và tư vấn ban đầu", label: "Phá băng", icon: Handshake },
@@ -27,7 +33,7 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
 
   // 3. Priority Handling (Ưu tiên xử lý)
   const priorities = members.map(m => {
-    const memberCustomers = customers.filter(c => c.assignedToId === m.userId);
+    const memberCustomers = customers.filter(c => c.userId === m.userId);
     
     const overdue = memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today && c.status !== "Đã chốt" && c.status !== "Bỏ qua");
     const hot = memberCustomers.filter(c => c.heatLevel?.includes("Rất Nét") || c.heatLevel?.includes("Chốt Ngay") || c.journeyStage?.includes("Dồn Chốt"));
@@ -43,9 +49,14 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
   // 4. Leaderboard
   const leaderboard = members.map(m => {
     const p = stats.memberPerformance[m.userId] || { total: 0, active: 0, closed: 0 };
-    const hotCount = customers.filter(c => c.assignedToId === m.userId && (c.heatLevel?.includes("Rất Nét") || c.journeyStage?.includes("Dồn Chốt"))).length;
-    // mock follow up rate for UI based on active customers to show variance
-    const followUpRate = p.active > 0 ? Math.min(100, Math.floor(70 + (p.closed * 2) + Math.random() * 15)) : 100;
+    const hotCount = customers.filter(c => c.userId === m.userId && (c.heatLevel?.includes("Rất Nét") || c.journeyStage?.includes("Dồn Chốt"))).length;
+    
+    // Real follow up rate
+    const memberActive = customers.filter(c => c.userId === m.userId && (c.status === "Đang chăm" || c.status === "Đang chờ"));
+    const memberOverdue = memberActive.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today);
+    const followUpRate = memberActive.length > 0 
+      ? Math.round(((memberActive.length - memberOverdue.length) / memberActive.length) * 100)
+      : 100;
     
     return { ...m, ...p, hotCount, followUpRate };
   }).sort((a, b) => b.closed - a.closed || b.active - a.active);
@@ -119,10 +130,9 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="w-9 h-9 rounded-full border-[3px] border-primary-500 border-r-slate-100 dark:border-r-slate-700 flex items-center justify-center mb-1.5 relative">
-               <span className="text-[9px] font-black text-primary-600 dark:text-primary-400">82%</span>
+               <span className="text-[9px] font-black text-primary-600 dark:text-primary-400">{overallFollowUpRate}%</span>
             </div>
             <span className="text-[8px] text-slate-500 mt-0.5 font-medium leading-tight mb-0.5">Follow-up đúng hạn</span>
-            <span className="text-[8px] font-bold text-emerald-500">↑ 6%</span>
           </div>
         </div>
       </div>
