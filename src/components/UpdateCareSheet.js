@@ -387,7 +387,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                 </button>
                 <button
                   onClick={handleComplete}
-                  disabled={isCompleting || (!selectedDate && !nextAction && statusAction !== 'Chưa liên lạc được')}
+                  disabled={isCompleting || !selectedDate}
                   className={`flex-1 py-4 rounded-2xl text-white text-sm font-bold shadow-lg flex items-center justify-center gap-2 transition-all ${
                     isCompleting
                       ? 'bg-emerald-500 shadow-emerald-500/25 scale-95'
