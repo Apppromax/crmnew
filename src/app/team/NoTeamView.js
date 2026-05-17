@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createTeam, joinTeam } from "@/actions/team";
-import { Crown, KeyRound, Loader2, Zap, Users, BarChart3, ShieldCheck, ChevronRight } from "lucide-react";
+import { Crown, KeyRound, Loader2, Zap, Users, BarChart3, ShieldCheck, ChevronRight, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
 export default function NoTeamView() {
@@ -63,8 +64,13 @@ export default function NoTeamView() {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider mb-6 backdrop-blur-md">
-            <Crown className="w-3.5 h-3.5 text-amber-400" /> Bản giới hạn cho B2B
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="p-2 -ml-2 rounded-lg hover:bg-white/10 transition-colors">
+              <ArrowLeft className="w-6 h-6 text-white" />
+            </Link>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-md">
+              <Crown className="w-3.5 h-3.5 text-amber-400" /> Bản giới hạn cho B2B
+            </div>
           </div>
           
           <h1 className="text-4xl font-black text-white leading-tight mb-4">

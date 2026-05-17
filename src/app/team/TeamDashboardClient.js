@@ -1,7 +1,7 @@
 "use client";
-
+import Link from "next/link";
 import React, { useState, useTransition } from "react";
-import { ShieldAlert, ShieldCheck, User, Database, PieChart, Users, Star, LayoutDashboard, UserCheck, Settings, Loader2 } from "lucide-react";
+import { ShieldAlert, ShieldCheck, User, Database, PieChart, Users, Star, LayoutDashboard, UserCheck, Settings, Loader2, ArrowLeft } from "lucide-react";
 import LeadDistribution from "./LeadDistribution";
 import TeamAnalytics from "./TeamAnalytics";
 import MemberPerformanceModal from "./MemberPerformanceModal";
@@ -20,7 +20,10 @@ export default function TeamDashboardClient({ team, role, members, customers, st
       <div className="space-y-6 animate-in fade-in duration-500 pb-24 md:pb-8">
         <div className="relative overflow-hidden rounded-2xl glass p-5 md:p-6 text-slate-800 dark:text-white shadow-lg">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/30 rounded-full blur-2xl"></div>
-          <div className="relative z-10">
+          <div className="relative z-10 flex items-center gap-3">
+            <Link href="/" className="p-2 -ml-2 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors">
+              <ArrowLeft className="w-6 h-6 text-slate-800 dark:text-white" />
+            </Link>
             <h1 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm">
               {team.name}
             </h1>
@@ -44,9 +47,14 @@ export default function TeamDashboardClient({ team, role, members, customers, st
     <div className="animate-in fade-in duration-500 pb-24 md:pb-8 flex flex-col h-full min-h-[calc(100vh-100px)]">
       {/* HEADER EXACTLY LIKE MOCKUP */}
       <div className="flex items-center justify-between pt-1 mb-3 relative z-10">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Team</h1>
-          <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tổng quan nhanh hiệu suất team hôm nay</p>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="p-2 -ml-2 rounded-lg hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors">
+            <ArrowLeft className="w-6 h-6 text-slate-800 dark:text-white" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Dashboard Team</h1>
+            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Tổng quan nhanh hiệu suất team hôm nay</p>
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={() => window.location.reload()} className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all shrink-0">
