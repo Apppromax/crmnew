@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -213,11 +214,29 @@ export async function getTeamCustomers(teamId) {
     throw new Error("Unauthorized access to team customers");
   }
 
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: { projectTags: true }
+  });
+
+  const hasProjectTags = team?.projectTags && team.projectTags.length > 0;
+
   const customers = await prisma.customer.findMany({
     where: {
       OR: [
-        { teamId },
-        { userId: userId, teamId: null }
+        { 
+          teamId,
+          userId: { not: userId },
+          ...(hasProjectTags ? { tags: { hasSome: team.projectTags } } : {})
+        },
+        { 
+          teamId, 
+          userId: userId 
+        },
+        { 
+          userId: userId, 
+          teamId: null 
+        }
       ]
     },
     select: {
@@ -286,12 +305,30 @@ export async function getTeamStats(teamId) {
     throw new Error("Unauthorized access to team stats");
   }
 
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: { projectTags: true }
+  });
+
+  const hasProjectTags = team?.projectTags && team.projectTags.length > 0;
+
   // 1. Lấy toàn bộ khách của team (Bao gồm cả khách cá nhân của Leader chưa phân bổ)
   const customers = await prisma.customer.findMany({
     where: {
       OR: [
-        { teamId },
-        { userId: userId, teamId: null }
+        { 
+          teamId,
+          userId: { not: userId },
+          ...(hasProjectTags ? { tags: { hasSome: team.projectTags } } : {})
+        },
+        { 
+          teamId, 
+          userId: userId 
+        },
+        { 
+          userId: userId, 
+          teamId: null 
+        }
       ]
     },
     select: { status: true, heatLevel: true, userId: true }
@@ -422,5 +459,26 @@ export async function leaveTeam() {
     where: { userId }
   });
 
+  return { success: true };
+}
+
+// Cập nhật Tag Dự án cho Team (Dành cho Leader)
+export async function updateTeamProjectTags(teamId, tags) {
+  const userId = await requireUser();
+  
+  const membership = await prisma.teamMember.findUnique({
+    where: { userId },
+  });
+  
+  if (!membership || membership.teamId !== teamId || membership.role !== "LEADER") {
+    throw new Error("Chỉ Leader mới có quyền cập nhật tag dự án.");
+  }
+
+  await prisma.team.update({
+    where: { id: teamId },
+    data: { projectTags: tags }
+  });
+
+  revalidatePath("/team");
   return { success: true };
 }

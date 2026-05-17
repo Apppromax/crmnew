@@ -149,6 +149,7 @@ model Team {
   isActive   Boolean  @default(false) @map("is_active")
   validUntil DateTime? @map("valid_until")
   maxMembers Int      @default(5) @map("max_members")
+  projectTags String[] @default([]) @map("project_tags")
   
   members    TeamMember[]
   customers  Customer[]

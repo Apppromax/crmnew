@@ -1,15 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShieldAlert, ShieldCheck, User, Database, PieChart, Users, Star, LayoutDashboard, UserCheck } from "lucide-react";
+import React, { useState, useTransition } from "react";
+import { ShieldAlert, ShieldCheck, User, Database, PieChart, Users, Star, LayoutDashboard, UserCheck, Settings, Loader2 } from "lucide-react";
 import LeadDistribution from "./LeadDistribution";
 import TeamAnalytics from "./TeamAnalytics";
 import MemberPerformanceModal from "./MemberPerformanceModal";
+import { updateTeamProjectTags } from "@/actions/team";
 
 export default function TeamDashboardClient({ team, role, members, customers, stats }) {
   const isLeader = role === "LEADER";
-  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'members', 'leads'
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'members', 'leads', 'settings'
   const [selectedMember, setSelectedMember] = useState(null);
+  
+  const [isPending, startTransition] = useTransition();
+  const [tagsInput, setTagsInput] = useState(team.projectTags?.join(", ") || "");
 
   if (!isLeader) {
     return (
@@ -63,6 +67,9 @@ export default function TeamDashboardClient({ team, role, members, customers, st
         <button onClick={() => setActiveTab("overview")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Tổng Quan</button>
         <button onClick={() => setActiveTab("members")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'members' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Nhân Sự (Mã: {team.inviteCode})</button>
         <button onClick={() => setActiveTab("leads")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap ${activeTab === 'leads' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>Điều Phối</button>
+        <button onClick={() => setActiveTab("settings")} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all whitespace-nowrap flex items-center gap-1 ${activeTab === 'settings' ? 'bg-slate-800 text-white dark:bg-white dark:text-slate-900 shadow-md' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 shadow-sm'}`}>
+          <Settings className="w-3 h-3" /> Cài đặt
+        </button>
       </div>
 
       {/* TAB CONTENT */}
@@ -160,6 +167,57 @@ export default function TeamDashboardClient({ team, role, members, customers, st
         {activeTab === "leads" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
             <LeadDistribution members={members} initialCustomers={customers} teamId={team.id} />
+          </div>
+        )}
+
+        {activeTab === "settings" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-4">
+            <div className="p-4 md:p-6 glass rounded-2xl">
+              <h2 className="text-lg font-black text-slate-800 dark:text-white mb-2 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary-500" />
+                Cài đặt Team
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                Cấu hình các tag dự án cho Team. Khi Sales chọn các tag này, dữ liệu khách hàng sẽ được đẩy về cho bạn (Trưởng phòng) xem và quản lý.
+              </p>
+
+              <div className="space-y-4 max-w-md">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Tags Dự Án (Cách nhau bằng dấu phẩy)
+                  </label>
+                  <input
+                    type="text"
+                    value={tagsInput}
+                    onChange={(e) => setTagsInput(e.target.value)}
+                    placeholder="VD: Vinhomes, Dự án A, BĐS Nghỉ dưỡng..."
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1.5">
+                    Nếu để trống, bạn sẽ thấy tất cả khách hàng của Sales trong team. Nếu nhập, bạn chỉ thấy khách có tag khớp với các tag này.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    startTransition(async () => {
+                      const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
+                      try {
+                        await updateTeamProjectTags(team.id, tags);
+                        alert("Cập nhật tag dự án thành công!");
+                      } catch (err) {
+                        alert(err.message);
+                      }
+                    });
+                  }}
+                  disabled={isPending}
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Lưu Cài Đặt
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

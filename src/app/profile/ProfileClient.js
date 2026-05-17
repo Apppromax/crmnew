@@ -519,12 +519,6 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </SectionItem>
 
               {/* ===== MENU ACTIONS ===== */}
-              <ActionItem 
-                icon={Users} 
-                title="Đội Nhóm (B2B)" 
-                description="Quản lý và phân bổ khách hàng" 
-                onClick={() => router.push('/team')} 
-              />
 
               {profile.role === 'admin' && (
                 <ActionItem 
