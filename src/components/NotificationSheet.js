@@ -15,7 +15,7 @@ export default function NotificationSheet({ isOpen, onClose }) {
   }, [isOpen]);
 
   const loadNotifications = async () => {
-    setLoading(true);
+    if (notifications.length === 0) setLoading(true);
     const res = await getNotifications();
     if (res.notifications) {
       setNotifications(res.notifications);
@@ -63,7 +63,7 @@ export default function NotificationSheet({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm">
       <div 
-        className="w-full sm:w-[400px] h-full bg-transparent flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
+        className="w-full sm:w-[400px] h-full bg-[#F4F8FB] dark:bg-slate-950 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
       >
         <div className="pt-safe px-5 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
           <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function NotificationSheet({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="flex justify-between items-center px-5 py-3 bg-white/50 dark:bg-slate-900/50 backdrop-blur">
+        <div className="flex justify-between items-center px-5 py-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
           <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">Mới nhất</span>
           <button onClick={handleMarkAllRead} className="text-xs font-bold text-primary-600 dark:text-primary-400 flex items-center gap-1 hover:text-primary-700 transition-colors">
             <CheckCheck className="w-4 h-4" /> Đánh dấu đã đọc
@@ -98,7 +98,9 @@ export default function NotificationSheet({ isOpen, onClose }) {
                   onClick={() => handleNotificationClick(n)}
                   className={`p-4 flex gap-3 cursor-pointer transition-colors ${!n.isRead ? 'bg-primary-50/50 dark:bg-primary-900/10' : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
-                  <div className="mt-1 shrink-0 p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">{getIcon(n.type)}</div>
+                  <div className="mt-1 shrink-0 w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
+                    {getIcon(n.type)}
+                  </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start gap-2">
                       <h4 className={`text-sm ${!n.isRead ? 'font-bold text-slate-900 dark:text-white' : 'font-semibold text-slate-700 dark:text-slate-300'}`}>

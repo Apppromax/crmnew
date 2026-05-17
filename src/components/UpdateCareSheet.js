@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Mic, Check, Phone, ArrowRight, Activity, Calendar } from 'lucide-react';
+import { X, Mic, Check, Phone, ArrowRight, Activity, Calendar, Square } from 'lucide-react';
 
 function getQuickDates() {
   const now = new Date();
@@ -68,7 +68,63 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
   const [isCompleting, setIsCompleting] = useState(false);
   const textareaRef = useRef(null);
   const quickDates = getQuickDates();
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'vi-VN';
+
+      recognitionRef.current.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + ' ';
+          }
+        }
+        if (finalTranscript) {
+          setNote(prev => prev + (prev && !prev.endsWith(' ') ? ' ' : '') + finalTranscript);
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+    }
+    
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e) {}
+      }
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          setIsListening(true);
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        alert("Trình duyệt của bạn không hỗ trợ nhận diện giọng nói (khuyên dùng Chrome/Safari).");
+      }
+    }
+  };
   useEffect(() => {
     if (isOpen && customer) {
       setStep(1);
@@ -185,8 +241,11 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                         rows={6}
                         className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 transition-all"
                       />
-                      <button className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-md active:scale-95 transition-transform">
-                        <Mic className="w-3.5 h-3.5" />
+                      <button 
+                        onClick={toggleListening}
+                        className={`absolute bottom-3 right-3 w-8 h-8 rounded-full text-white flex items-center justify-center shadow-md active:scale-95 transition-transform ${isListening ? 'bg-red-500 animate-pulse' : 'bg-primary-500'}`}
+                      >
+                        {isListening ? <Square className="w-3.5 h-3.5" fill="currentColor" /> : <Mic className="w-3.5 h-3.5" />}
                       </button>
                     </div>
                   </div>
@@ -266,12 +325,12 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                 <label className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-500 mb-3">
                   <Calendar className="w-4 h-4" /> Hẹn giờ chăm tiếp theo
                 </label>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 mb-2 -mx-1 px-1">
                   {quickDates.map((chip) => (
                     <button
                       key={chip.label}
                       onClick={() => setSelectedDate(selectedDate?.getTime() === chip.date.getTime() ? null : chip.date)}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                      className={`shrink-0 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
                         selectedDate?.getTime() === chip.date.getTime()
                           ? 'bg-primary-500 text-white shadow-md shadow-primary-500/25 ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -280,6 +339,19 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
                       {chip.label}
                     </button>
                   ))}
+                </div>
+                <div className="relative">
+                  <input 
+                    type="datetime-local" 
+                    value={selectedDate ? new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${selectedDate ? 'text-slate-900 dark:text-white' : 'text-transparent'}`}
+                  />
+                  {!selectedDate && (
+                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 font-medium">
+                      Chọn ngày giờ...
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -17,7 +17,7 @@ import {
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
-import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw } from "lucide-react";
+import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw, Users } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -55,7 +55,7 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, successParam }) {
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, successParam, hasTeam }) {
   const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
   const [counts, setCounts] = useState(initialCounts);
   const [loading, setLoading] = useState(false);
@@ -238,6 +238,15 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {hasTeam && (
+              <Link
+                href="/team"
+                title="Tính năng Team"
+                className="w-11 h-11 rounded-full bg-indigo-50 dark:bg-indigo-500/10 shadow-sm flex items-center justify-center relative active:scale-95 transition-transform"
+              >
+                <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </Link>
+            )}
             <button 
               onClick={handleRestoreQueue}
               disabled={isPending}
@@ -325,7 +334,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
           <div className="flex justify-center mt-8 pb-4">
             <Link
               href="/add"
-              className="flex items-center gap-2 px-6 py-3.5 bg-slate-900 dark:bg-primary-600 rounded-full text-white shadow-xl shadow-slate-900/20 dark:shadow-primary-600/20 active:scale-95 transition-transform"
+              className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-full text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
             >
               <Plus className="w-5 h-5" />
               <span className="text-sm font-bold pr-1">Thêm khách mới</span>

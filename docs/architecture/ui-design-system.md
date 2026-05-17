@@ -55,6 +55,8 @@ Mọi component tiêu chuẩn có thể được xem trước tại trang: **`/d
 8. **InteractionTimeline**: Tab "Lịch sử" trong modal khách hàng, merge data từ bảng `Interaction` và `Note`, hiển thị dạng timeline dọc với icon phân biệt (note/interaction) và dòng kết nối.
 9. **ScheduleActionModal**: Bottom sheet xuất hiện khi click lịch hẹn, hiển thị thông tin khách + nút Gọi/Zalo/Xem chi tiết.
 10. **JourneyProgressBar & Contextual Actions** *(mới)*: Thanh tiến trình hành trình khách hàng nằm ngang ở tab Thông tin. Tích hợp tính năng hiển thị Hint (Gợi ý đặc điểm) khi nhấn vào bước, cùng Droplist đề xuất hành động theo từng giai đoạn, giúp Sale dễ dàng chốt sale và tự động log lịch sử chăm sóc.
+11. **Condensed Customer List Card** *(mới)*: Giao diện thẻ khách hàng trong kho danh sách được thu gọn tối đa thành 3 dòng liên tiếp bằng flexbox để tăng mật độ hiển thị trên màn hình mobile mà vẫn giữ nguyên đầy đủ thông tin (Badge, Tags, Hành trình).
+12. **Inline UpdateCareSheet Workflow** *(mới)*: Tích hợp trực tiếp màn hình cập nhật chăm sóc (3 bước) vào màn hình Lịch hẹn, kèm theo logic "Đánh dấu xong" để làm mờ (dim out) các khách đã hoàn thành mà không làm biến mất dữ liệu khỏi danh sách hiển thị hôm nay.
 
 ## Animations
 | Tên Class | Hiệu ứng | Thời gian |

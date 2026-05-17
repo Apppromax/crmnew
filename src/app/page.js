@@ -3,6 +3,7 @@ import Dashboard from "@/components/Dashboard";
 import LandingPage from "@/components/LandingPage";
 
 import { getSmartQueue, getCustomerCount } from "@/actions/customers";
+import { getTeamContext } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
 
@@ -14,10 +15,11 @@ export default async function Home({ searchParams }) {
     return <LandingPage />;
   }
 
-  const [queue, counts] = await Promise.all([
+  const [queue, counts, teamCtx] = await Promise.all([
     getSmartQueue(),
     getCustomerCount(),
+    getTeamContext(),
   ]);
 
-  return <Dashboard initialQueue={queue} initialCounts={counts} successParam={searchParams?.success} />;
+  return <Dashboard initialQueue={queue} initialCounts={counts} successParam={searchParams?.success} hasTeam={teamCtx?.hasTeam} />;
 }

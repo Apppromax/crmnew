@@ -357,16 +357,17 @@ export default function CustomerClient({ initialCustomers }) {
               <div 
                 key={c.id} 
                 onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
-                className={`bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border ${
+                className={`bg-white dark:bg-slate-900 p-3.5 rounded-xl shadow-sm border ${
                   c.snoozedUntil && new Date(c.snoozedUntil) > new Date() 
                   ? 'border-purple-200 dark:border-purple-900/50 opacity-80' 
                   : 'border-slate-100 dark:border-slate-800'
-                } flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`}
+                } flex flex-col gap-1.5 cursor-pointer active:scale-[0.98] transition-transform`}
               >
-                <div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                {/* Row 1: Name + Heat + Status */}
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                     {c.name}
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                       c.heatLevel === 'Rất Nét' ? 'bg-red-100 text-red-700' :
                       c.heatLevel === 'Tiềm Năng' ? 'bg-orange-100 text-orange-700' :
                       c.heatLevel === 'Quan Tâm' ? 'bg-amber-100 text-amber-700' :
@@ -376,11 +377,35 @@ export default function CustomerClient({ initialCustomers }) {
                       {c.heatLevel}
                     </span>
                   </h3>
-                  <p className="text-sm text-slate-500 mt-1">{c.phone}</p>
-                  {c.demand && <p className="text-xs text-slate-400 mt-1 truncate max-w-[200px]">{c.demand}</p>}
-                  
-                  {/* Journey Progress Bar */}
-                  <div className="mt-2.5 flex items-center gap-1.5 w-48">
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                      c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
+                      c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
+                      c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
+                      c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
+                      c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
+                      c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
+                      'bg-red-50 text-red-600'
+                    }`}>
+                      {c.status}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row 2: Phone + Demand */}
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <span className="shrink-0 font-medium">{c.phone}</span>
+                  {c.demand && (
+                    <>
+                      <span className="text-slate-300 dark:text-slate-700">•</span>
+                      <span className="text-xs text-slate-400 truncate">{c.demand}</span>
+                    </>
+                  )}
+                </div>
+                
+                {/* Row 3: Journey + Tags */}
+                <div className="flex items-center justify-between gap-3 mt-1">
+                  <div className="flex flex-1 items-center gap-1.5 w-full max-w-[140px]">
                     <div className="flex-1 flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
                       {JOURNEY_OPTIONS.map((_, idx) => {
                         const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
@@ -393,37 +418,22 @@ export default function CustomerClient({ initialCustomers }) {
                         );
                       })}
                     </div>
-                    <span className="text-[9px] font-bold text-slate-500 shrink-0">
+                    <span className="text-[9px] font-bold text-slate-500 shrink-0 truncate max-w-[90px]">
                       {(c.journeyStage || "1.").split(". ")[1]}
                     </span>
                   </div>
 
-                  {c.tags && c.tags.length > 0 && (
-                    <div className="flex gap-1 mt-1.5 flex-wrap">
-                      {c.tags.slice(0, 3).map(t => (
-                        <span key={t} className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20">{t}</span>
-                      ))}
-                      {c.tags.length > 3 && <span className="text-[9px] font-bold text-slate-400">+{c.tags.length - 3}</span>}
-                    </div>
-                  )}
-                </div>
-                <div className="text-right flex flex-col items-end gap-2">
-                  <span className={`text-xs font-medium px-2 py-1 rounded-md ${
-                    c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
-                    c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
-                    c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
-                    c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
-                    c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
-                    c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
-                    'bg-red-50 text-red-600'
-                  }`}>
-                    {c.status}
-                  </span>
-                  {c.snoozedUntil && new Date(c.snoozedUntil) > new Date() && (
-                    <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20">
-                      Đang tạm hoãn
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {c.snoozedUntil && new Date(c.snoozedUntil) > new Date() && (
+                      <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 mr-1">
+                        Hoãn
+                      </span>
+                    )}
+                    {c.tags && c.tags.slice(0, 2).map(t => (
+                      <span key={t} className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20 truncate max-w-[65px]">{t}</span>
+                    ))}
+                    {c.tags && c.tags.length > 2 && <span className="text-[9px] font-bold text-slate-400">+{c.tags.length - 2}</span>}
+                  </div>
                 </div>
               </div>
             ))}
@@ -528,55 +538,56 @@ export default function CustomerClient({ initialCustomers }) {
               ) : modalTab === 'info' ? (
                 /* ===== VIEW MODE ===== */
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-xl">
-                      {selectedCustomer.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{selectedCustomer.name}</h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-sm text-slate-500 flex items-center gap-1">
-                          <Phone className="w-3.5 h-3.5" />
-                          {selectedCustomer.phone}
-                        </p>
-                        {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
-                          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 whitespace-nowrap">
-                            Tạm hoãn đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
-                          </span>
-                        )}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-bold text-xl shrink-0">
+                        {selectedCustomer.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-lg text-slate-900 dark:text-white truncate">{selectedCustomer.name}</h3>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <p className="text-sm text-slate-500 flex items-center gap-1 shrink-0">
+                            <Phone className="w-3.5 h-3.5" />
+                            {selectedCustomer.phone}
+                          </p>
+                          {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
+                            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 whitespace-nowrap">
+                              Tạm hoãn đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex gap-3 pt-2">
-                    <a 
-                      href={selectedCustomer.phone ? `tel:${selectedCustomer.phone.replace(/[^0-9+]/g, '')}` : '#'} 
-                      onClick={(e) => {
-                        if (!selectedCustomer.phone) {
-                          e.preventDefault();
-                          alert('Khách hàng này chưa có số điện thoại!');
-                        }
-                      }}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
-                    >
-                      <Phone className="w-4 h-4 fill-current" /> Gọi Điện
-                    </a>
-                    <a 
-                      href={selectedCustomer.phone ? `https://zalo.me/${selectedCustomer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
-                      target={selectedCustomer.phone ? "_blank" : "_self"} 
-                      rel="noopener noreferrer" 
-                      onClick={(e) => {
-                        if (!selectedCustomer.phone) {
-                          e.preventDefault();
-                          alert('Khách hàng này chưa có số điện thoại!');
-                        }
-                      }}
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20"
-                    >
-                      <span className="font-black text-sm">Zalo</span> Nhắn Tin
-                    </a>
+                    <div className="flex gap-2 shrink-0">
+                      <a 
+                        href={selectedCustomer.phone ? `tel:${selectedCustomer.phone.replace(/[^0-9+]/g, '')}` : '#'} 
+                        onClick={(e) => {
+                          if (!selectedCustomer.phone) {
+                            e.preventDefault();
+                            alert('Khách hàng này chưa có số điện thoại!');
+                          }
+                        }}
+                        className="w-10 h-10 shrink-0 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center transition-all active:scale-95"
+                      >
+                        <Phone className="w-4 h-4 fill-current" />
+                      </a>
+                      <a 
+                        href={selectedCustomer.phone ? `https://zalo.me/${selectedCustomer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
+                        target={selectedCustomer.phone ? "_blank" : "_self"} 
+                        rel="noopener noreferrer" 
+                        onClick={(e) => {
+                          if (!selectedCustomer.phone) {
+                            e.preventDefault();
+                            alert('Khách hàng này chưa có số điện thoại!');
+                          }
+                        }}
+                        className="w-10 h-10 shrink-0 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center transition-all font-black text-[10px] active:scale-95"
+                      >
+                        Zalo
+                      </a>
+                    </div>
                   </div>
-
                   {/* Status and Metrics Grid */}
                   <div className="grid grid-cols-2 gap-2 mt-4">
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
@@ -590,7 +601,7 @@ export default function CustomerClient({ initialCustomers }) {
                   </div>
                   
                   <div className="flex items-center gap-2 mt-2 px-1">
-                      <p className="text-[10px] uppercase text-slate-400">Độ Nét Gốc (Ban đầu):</p>
+                      <p className="text-[10px] uppercase text-slate-400">Mức độ nét:</p>
                       <p className="font-bold text-xs text-slate-600 dark:text-slate-300">{selectedCustomer.heatLevel || "Chưa Rõ"}</p>
                   </div>
 
@@ -684,47 +695,44 @@ export default function CustomerClient({ initialCustomers }) {
                       </div>
                     </div>
 
-                    {/* Info Fields */}
-                    <div className="space-y-3 pt-1">
-                      {selectedCustomer.area && (
-                        <div className="flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Khu vực quan tâm</p>
-                            <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.area}</p>
-                          </div>
-                        </div>
-                      )}
-                      
+                    {/* Info Fields - Table Layout */}
+                    <div className="space-y-3 pt-2">
                       {selectedCustomer.budget && (
-                        <div className="flex items-start gap-2">
-                          <span className="text-slate-400 font-bold text-sm w-4 text-center shrink-0">₫</span>
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ngân sách dự kiến</p>
-                            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{selectedCustomer.budget}</p>
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <span className="text-slate-400 font-bold w-4 text-center">₫</span> Ngân sách dự kiến
+                          </p>
+                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 text-right">{selectedCustomer.budget}</p>
                         </div>
                       )}
 
-                      {selectedCustomer.finance && (
-                        <div className="flex items-start gap-2">
-                          <Activity className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tình trạng tài chính</p>
-                            <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.finance}</p>
-                          </div>
+                      {selectedCustomer.area && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400" /> Khu vực quan tâm
+                          </p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white text-right">{selectedCustomer.area}</p>
                         </div>
                       )}
 
                       {selectedCustomer.timeline && (
-                        <div className="flex items-start gap-2">
-                          <Target className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                          <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Thời gian dự kiến mua</p>
-                            <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedCustomer.timeline}</p>
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <Target className="w-3.5 h-3.5 text-slate-400" /> Thời gian dự kiến
+                          </p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white text-right">{selectedCustomer.timeline}</p>
                         </div>
                       )}
+
+                      {selectedCustomer.finance && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <Activity className="w-3.5 h-3.5 text-slate-400" /> Tình trạng tài chính
+                          </p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white text-right">{selectedCustomer.finance}</p>
+                        </div>
+                      )}
+                    </div>
 
                       {selectedCustomer.demand && (
                         <div className="flex items-start gap-2 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
@@ -740,9 +748,6 @@ export default function CustomerClient({ initialCustomers }) {
                       <div className="flex flex-col gap-1 pt-2">
                         <p className="text-[10px] text-slate-400">
                           Tạo ngày: {formatDate(selectedCustomer.createdAt)}
-                        </p>
-                        <p className="text-[10px] text-slate-400">
-                          ID Khách hàng: {selectedCustomer.id.substring(0, 8).toUpperCase()}
                         </p>
                         {(selectedCustomer.channel || selectedCustomer.source) && (
                           <p className="text-[10px] font-bold text-primary-500">

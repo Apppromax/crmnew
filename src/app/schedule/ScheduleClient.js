@@ -8,6 +8,7 @@ import { vi } from "date-fns/locale";
 import { Phone, X, MapPin, CheckCircle2, Clock, Target, FileText, ChevronDown, ChevronUp, AlertCircle, CalendarClock, Flame, Snowflake, ThermometerSun, Check, PenLine, ArrowLeft } from "lucide-react";
 import { completeCustomerAction, updateCustomer } from "@/actions/customers";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import UpdateCareSheet from "@/components/UpdateCareSheet";
 
 // Helper for heat colors strictly matching FocusCard.js
 const heatConfig = {
@@ -74,7 +75,7 @@ const getHeatStyle = (level) => {
   return heatConfig["Chưa Rõ"];
 };
 
-const SwipeableCard = ({ item, onClick, onComplete, onReschedule }) => {
+const SwipeableCard = ({ item, onClick, onComplete, onReschedule, isCompleted }) => {
   const x = useMotionValue(0);
   const opacityLeft = useTransform(x, [-100, -50, 0], [1, 0, 0]);
   const opacityRight = useTransform(x, [0, 50, 100], [0, 0, 1]);
@@ -108,7 +109,7 @@ const SwipeableCard = ({ item, onClick, onComplete, onReschedule }) => {
         onDragEnd={handleDragEnd}
         style={{ x }}
         onClick={() => onClick(item)}
-        className={`relative z-10 w-full p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-[1.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform`}
+        className={`relative z-10 w-full p-5 backdrop-blur-md rounded-[1.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform ${isCompleted ? 'bg-slate-50/50 dark:bg-slate-900/30 opacity-60 grayscale-[0.5]' : 'bg-white/80 dark:bg-slate-900/80'}`}
       >
         <div className="flex-1 min-w-0 pr-3">
           <div className="flex items-center gap-2 mb-1">
@@ -142,6 +143,8 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const router = useRouter();
   const [schedule, setSchedule] = useState(initialSchedule || []);
   const [overdue, setOverdue] = useState(initialOverdue || []);
+  const [completedIds, setCompletedIds] = useState(new Set());
+  const [isCareSheetOpen, setIsCareSheetOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   const [selectedItem, setSelectedItem] = useState(null);
   const [isPending, startTransition] = useTransition();
@@ -157,9 +160,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
     startTransition(async () => {
       try {
         await completeCustomerAction({ customerId: item.id, note: "Đã liên hệ theo lịch trình" });
-        // Remove from local state immediately
-        setSchedule(prev => prev.filter(c => c.id !== item.id));
-        setOverdue(prev => prev.filter(c => c.id !== item.id));
+        setCompletedIds(prev => new Set([...prev, item.id]));
         setSelectedItem(null);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 2000);
@@ -168,6 +169,15 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
         alert(err.message);
       }
     });
+  };
+
+  const handleCareComplete = () => {
+    setIsCareSheetOpen(false);
+    if (selectedItem) {
+      setCompletedIds(prev => new Set([...prev, selectedItem.id]));
+    }
+    setSelectedItem(null);
+    router.refresh();
   };
 
   const handleReschedule = (item, days) => {
@@ -332,7 +342,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                     
                     <div className="pt-6 space-y-3">
                       {group.items.map(c => (
-                        <SwipeableCard key={c.id} item={c} onClick={setSelectedItem} onComplete={handleComplete} onReschedule={handleReschedule} />
+                        <SwipeableCard key={c.id} item={c} onClick={setSelectedItem} onComplete={handleComplete} onReschedule={handleReschedule} isCompleted={completedIds.has(c.id)} />
                       ))}
                     </div>
                   </div>
@@ -388,7 +398,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                   </div>
                   <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
                   <div className="text-center flex-1">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Độ Nét Gốc</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Mức độ nét</p>
                     <span className={`text-xs font-semibold ${getHeatStyle(selectedItem.heatLevel).text}`}>{getHeatStyle(selectedItem.heatLevel).label}</span>
                   </div>
                   <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
@@ -444,38 +454,42 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                 {!isRescheduling ? (
                   <div className="space-y-2">
                     <button 
-                      onClick={() => handleComplete(selectedItem)}
-                      disabled={isPending}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-60"
+                      onClick={() => setIsCareSheetOpen(true)}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                     >
-                      {isPending ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                          Đang xử lý...
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-4 h-4" /> Đã xong lịch hẹn
-                        </>
-                      )}
+                      <PenLine className="w-4 h-4" /> Cập nhật chăm khách
                     </button>
-                    
-                    <button 
-                      onClick={() => {
-                        setIsRescheduling(true);
-                        setRescheduleDateStr("");
-                      }}
-                      disabled={isPending} 
-                      className="w-full py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <Clock className="w-4 h-4" /> Dời lịch hẹn
-                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleComplete(selectedItem)}
+                        disabled={isPending || completedIds.has(selectedItem.id)}
+                        className={`flex-1 py-3.5 rounded-2xl border text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm ${completedIds.has(selectedItem.id) ? 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}
+                      >
+                        {isPending ? (
+                          <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                        {completedIds.has(selectedItem.id) ? "Đã xong" : "Đánh dấu xong"}
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          setIsRescheduling(true);
+                          setRescheduleDateStr("");
+                        }}
+                        disabled={isPending} 
+                        className="flex-1 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        <Clock className="w-4 h-4" /> Dời lịch
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                     <div className="mb-4">
                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chọn thời gian dời lịch</label>
-                      <div className="flex gap-2 flex-wrap mb-3">
+                      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 mb-1 -mx-1 px-1">
                         {getQuickDates().map((chip) => (
                           <button
                             key={chip.label}
@@ -484,7 +498,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                               const tzOffset = new Date().getTimezoneOffset() * 60000;
                               setRescheduleDateStr(new Date(chip.date.getTime() - tzOffset).toISOString().slice(0, 16));
                             }}
-                            className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
+                            className={`shrink-0 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
                           >
                             {chip.label}
                           </button>
@@ -529,6 +543,13 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
       </AnimatePresence>
 
       <BottomNav activeTab="schedule" />
+
+      <UpdateCareSheet 
+        isOpen={isCareSheetOpen}
+        customer={selectedItem}
+        onClose={() => setIsCareSheetOpen(false)}
+        onComplete={handleCareComplete}
+      />
     </div>
   );
 }

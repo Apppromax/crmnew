@@ -243,6 +243,21 @@ export default function AddCustomerPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans pb-24">
+      {/* Success Overlay */}
+      {saveSuccess && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#F4F8FB] dark:bg-slate-950 animate-in fade-in duration-300">
+          <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/40 animate-celebration">
+            <Check className="w-12 h-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2 animate-in slide-in-from-bottom-4 fade-in duration-500">
+            Thành công!
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150">
+            Đang làm mới danh sách khách hàng...
+          </p>
+        </div>
+      )}
+
       {/* Status Popup Overlay */}
       {showStatusPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
@@ -361,7 +376,7 @@ export default function AddCustomerPage() {
 
             <div className="mb-6">
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Hẹn giờ chăm tiếp theo <span className="text-red-500">*</span></label>
-              <div className="flex gap-2 flex-wrap mb-3">
+              <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 mb-1 -mx-1 px-1">
                 {getQuickDates().map((chip) => (
                   <button
                     key={chip.label}
@@ -370,7 +385,7 @@ export default function AddCustomerPage() {
                       const tzOffset = new Date().getTimezoneOffset() * 60000;
                       setFinalDateString(new Date(chip.date.getTime() - tzOffset).toISOString().slice(0, 16));
                     }}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
+                    className={`shrink-0 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
                   >
                     {chip.label}
                   </button>
@@ -549,7 +564,7 @@ export default function AddCustomerPage() {
                   <ScrollChipSelect label="Mục đích mua" value={manualPurpose} onChange={setManualPurpose} options={PURPOSE_OPTIONS} />
                   <ScrollChipSelect label="Khu vực quan tâm" value={manualArea} onChange={setManualArea} options={AREA_OPTIONS} />
                   <ScrollChipSelect label="Thời gian dự kiến mua" value={manualTimeline} onChange={setManualTimeline} options={TIMELINE_OPTIONS} />
-                  <ScrollChipSelect label="Độ Nét Gốc" value={manualHeatLevel} onChange={setManualHeatLevel} options={HEAT_LEVEL_OPTIONS} />
+                  <ScrollChipSelect label="Mức độ nét" value={manualHeatLevel} onChange={setManualHeatLevel} options={HEAT_LEVEL_OPTIONS} />
 
                   <div className="col-span-2">
                     <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
