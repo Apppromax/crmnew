@@ -269,10 +269,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
         </div>
 
         {/* Stats Chips */}
-        <div className="flex gap-2 mt-4 overflow-x-auto hide-scrollbar pb-1">
-          <Link href="/add" className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold shrink-0 flex items-center gap-1 shadow-sm active:scale-95 transition-transform">
-            <Plus className="w-3.5 h-3.5" /> Thêm mới
-          </Link>
+        <div className="flex gap-2 mt-3 overflow-x-auto hide-scrollbar">
           <div className="px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 text-xs font-semibold shrink-0">🔥 {counts.hot} nóng</div>
           <div className="px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold shrink-0">🌡️ {counts.warm} ấm</div>
           <div className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-500/10 text-slate-500 dark:text-slate-400 text-xs font-semibold shrink-0">Tổng: {counts.total}</div>
@@ -282,7 +279,7 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
 
 
       {/* Main Queue */}
-      <main className="px-5 pt-5 max-w-lg md:max-w-4xl mx-auto w-full">
+      <main className="px-4 pt-4 max-w-lg md:max-w-4xl mx-auto w-full">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -327,6 +324,19 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 </div>
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Nút thêm khách ở giữa */}
+        {!loading && (
+          <div className="flex justify-center mt-5 pb-2">
+            <Link
+              href="/add"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-full text-white shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="text-sm font-bold pr-1">Thêm khách mới</span>
+            </Link>
           </div>
         )}
         

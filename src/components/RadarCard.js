@@ -113,7 +113,7 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
   return (
     <div
       ref={cardRef}
-      className={`glass rounded-2xl p-4 select-none cursor-pointer transition-all`}
+      className={`glass rounded-2xl p-3 pb-2 select-none cursor-pointer transition-all`}
       style={{ touchAction: 'pan-y' }}
       // Touch events
       onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
@@ -139,8 +139,8 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 mb-2 pointer-events-none">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm">
+      <div className="flex items-center gap-2 mb-1.5 pointer-events-none">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-300 to-primary-500 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm">
           {customer.name?.charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
@@ -153,7 +153,7 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
 
       <div className="flex flex-col gap-2 pointer-events-none">
         {/* Journey Progress Bar */}
-        <div className="flex flex-col gap-1 mt-1">
+        <div className="flex flex-col gap-0.5 mt-0.5">
           <div className="flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
             {JOURNEY_OPTIONS.map((_, idx) => {
               const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((customer.journeyStage || "1.").split(".")[0])));

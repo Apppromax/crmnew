@@ -130,15 +130,15 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
       onMouseLeave={() => handleEnd()}
     >
       {/* Top: Avatar + Name + Heat Badge */}
-      <div className="p-5 pb-3">
+      <div className="p-4 pb-2">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3.5">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shrink-0 shadow-lg shadow-primary-500/20">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shrink-0 shadow-lg shadow-primary-500/20">
               {customer.name?.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight">{customer.name}</h3>
-              <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white leading-tight">{customer.name}</h3>
+              <a href={`tel:${customer.phone?.replace(/\s/g, '')}`} className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                 <Phone className="w-3.5 h-3.5" />
                 {customer.phone}
               </a>
@@ -156,7 +156,7 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
       </div>
 
       {/* Reason + Next Step */}
-      <div className="px-5 pb-3 space-y-2.5">
+      <div className="px-4 pb-2 space-y-1.5">
         <div className="flex items-start gap-2 text-sm">
           <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-slate-600 dark:text-slate-300 leading-snug">{customer.reason}</p>
@@ -168,8 +168,8 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
       </div>
 
       {/* Journey Progress Bar */}
-      <div className="px-5 pb-4">
-        <div className="flex flex-col gap-1.5 mt-1">
+      <div className="px-4 pb-3">
+        <div className="flex flex-col gap-1.5 mt-0.5">
           <div className="flex items-center justify-between">
             <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Hành trình</p>
             <span className="text-[11px] font-bold text-primary-600 dark:text-primary-400 truncate">
@@ -194,16 +194,16 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
 
 
       {/* Action Button */}
-      <div className="px-5 pb-5 pt-2 flex gap-2">
+      <div className="px-4 pb-4 pt-1 flex gap-2">
         <button
           onClick={() => onAction?.(customer)}
-          className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
         >
           <PenLine className="w-4 h-4" />
           Cập nhật trạng thái
         </button>
-        <a href={customer.phone ? `tel:${customer.phone.replace(/[^0-9+]/g, '')}` : '#'} onClick={(e) => e.stopPropagation()} className="w-12 h-[52px] shrink-0 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center transition-all">
-          <Phone className="w-5 h-5 fill-current" />
+        <a href={customer.phone ? `tel:${customer.phone.replace(/[^0-9+]/g, '')}` : '#'} onClick={(e) => e.stopPropagation()} className="w-12 h-11 shrink-0 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center transition-all">
+          <Phone className="w-4 h-4 fill-current" />
         </a>
         <a 
           href={customer.phone ? `https://zalo.me/${customer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
@@ -216,14 +216,14 @@ export default function FocusCard({ customer, onAction, onSnooze }) {
               alert('Khách hàng này chưa có số điện thoại!');
             }
           }} 
-          className="w-12 h-[52px] shrink-0 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center transition-all font-black text-[11px]"
+          className="w-12 h-11 shrink-0 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center transition-all font-black text-[11px]"
         >
           Zalo
         </a>
       </div>
 
       {/* Swipe Hint */}
-      <div className="text-center pb-3 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-2">
+      <div className="text-center pb-2 -mt-1 flex items-center justify-center text-[10px] text-slate-400 dark:text-slate-500 gap-2">
         <div className="flex items-center gap-1">
           <ArrowLeft className="w-3 h-3" />
           <span>Tạm hoãn</span>
