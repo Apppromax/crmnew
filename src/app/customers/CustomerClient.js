@@ -376,9 +376,9 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                   {/* Middle: Info */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
                     {/* Row 1: Name + Heat */}
-                    <div className="flex items-center gap-2 min-w-0 w-full">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-[15px] truncate min-w-0">{c.name || "Khách hàng"}</h3>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                    <div className="flex items-start gap-2 w-full">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-[15px] leading-tight break-words line-clamp-2">{c.name || "Khách hàng"}</h3>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5 ${
                         c.heatLevel === 'Rất Nét' ? 'bg-red-50 text-red-600' :
                         c.heatLevel === 'Tiềm Năng' ? 'bg-orange-50 text-orange-600' :
                         c.heatLevel === 'Quan Tâm' ? 'bg-amber-50 text-amber-600' :
