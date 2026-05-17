@@ -159,7 +159,9 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
   const handleComplete = (item) => {
     startTransition(async () => {
       try {
-        await completeCustomerAction({ customerId: item.id, note: "Đã liên hệ theo lịch trình" });
+        await completeCustomerAction({ customerId: item.id, note: "Đã liên hệ theo lịch trình", nextFollowUp: null });
+        setSchedule(prev => prev.filter(c => c.id !== item.id));
+        setOverdue(prev => prev.filter(c => c.id !== item.id));
         setCompletedIds(prev => new Set([...prev, item.id]));
         setSelectedItem(null);
         setShowSuccess(true);
@@ -308,7 +310,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                 {overdue.map(c => (
                   <div key={c.id} className="relative pl-10">
                     <div className="absolute left-2.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-slate-950 z-10" />
-                    <SwipeableCard item={c} onClick={setSelectedItem} onComplete={handleComplete} onReschedule={handleReschedule} />
+                    <SwipeableCard item={c} onClick={(item) => { setSelectedItem(item); setIsCareSheetOpen(true); }} onComplete={handleComplete} onReschedule={handleReschedule} />
                   </div>
                 ))}
               </div>
@@ -342,7 +344,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
                     
                     <div className="pt-6 space-y-3">
                       {group.items.map(c => (
-                        <SwipeableCard key={c.id} item={c} onClick={setSelectedItem} onComplete={handleComplete} onReschedule={handleReschedule} isCompleted={completedIds.has(c.id)} />
+                        <SwipeableCard key={c.id} item={c} onClick={(item) => { setSelectedItem(item); setIsCareSheetOpen(true); }} onComplete={handleComplete} onReschedule={handleReschedule} isCompleted={completedIds.has(c.id)} />
                       ))}
                     </div>
                   </div>
@@ -353,194 +355,7 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
         </AnimatePresence>
       </main>
 
-      {/* Detail Modal (Aligned with CompletionSheet / FocusCard style) */}
-      <AnimatePresence>
-        {selectedItem && (
-          <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
-            {/* Backdrop */}
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => { setSelectedItem(null); setIsRescheduling(false); setRescheduleDateStr(""); }}
-              className="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/60 backdrop-blur-sm"
-            />
-            {/* Sheet Content */}
-            <motion.div 
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl pb-safe z-10"
-            >
-              {/* Drag Handle */}
-              <div className="flex justify-center pt-3 pb-2 sm:hidden">
-                <div className="h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700" />
-              </div>
-
-              <div className="px-5 pt-2 sm:pt-6 pb-8">
-                {/* Header Profile */}
-                <div className="flex items-start justify-between mb-5">
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shrink-0 shadow-lg shadow-primary-500/20">
-                      {selectedItem.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-xl text-slate-800 dark:text-white leading-tight">{selectedItem.name}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{selectedItem.phone}</p>
-                    </div>
-                  </div>
-                  <button onClick={() => { setSelectedItem(null); setIsRescheduling(false); setRescheduleDateStr(""); }} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Status/Heat info row like FocusCard */}
-                <div className="border-y border-slate-100 dark:border-slate-700/50 py-3 flex items-center justify-between mb-5">
-                  <div className="text-center flex-1">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Trạng thái</p>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{selectedItem.status}</span>
-                  </div>
-                  <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
-                  <div className="text-center flex-1">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Mức độ nét</p>
-                    <span className={`text-xs font-semibold ${getHeatStyle(selectedItem.heatLevel).text}`}>{getHeatStyle(selectedItem.heatLevel).label}</span>
-                  </div>
-                  <div className="w-px h-8 bg-slate-100 dark:bg-slate-700/50" />
-                  <div className="text-center flex-1">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-1">Thời gian hẹn</p>
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                       {selectedItem.nextFollowUp ? format(new Date(selectedItem.nextFollowUp), 'HH:mm') : '--'}
-                    </span>
-                  </div>
-                </div>
-
-                {selectedItem.demand && (
-                   <div className="flex items-start gap-2 text-sm mb-6 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
-                      <FileText className="w-4 h-4 text-primary-500 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-[10px] text-slate-400 uppercase tracking-wide mb-1 font-semibold">Ghi chú nhu cầu</p>
-                        <p className="text-slate-600 dark:text-slate-300 leading-snug">{selectedItem.demand}</p>
-                      </div>
-                   </div>
-                )}
-
-                {/* Quick Actions identical to CompletionSheet */}
-                <div className="flex gap-2 mb-4">
-                  <a 
-                    href={selectedItem.phone ? `tel:${selectedItem.phone.replace(/[^0-9+]/g, '')}` : '#'} 
-                    onClick={(e) => {
-                      if (!selectedItem.phone) {
-                        e.preventDefault();
-                        alert('Khách hàng này chưa có số điện thoại!');
-                      }
-                    }}
-                    className="flex-1 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-600 dark:text-emerald-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-emerald-100 dark:border-emerald-500/20"
-                  >
-                    <Phone className="w-4 h-4 fill-current" /> Gọi điện
-                  </a>
-                  <a 
-                    href={selectedItem.phone ? `https://zalo.me/${selectedItem.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
-                    target={selectedItem.phone ? "_blank" : "_self"}
-                    rel="noopener noreferrer" 
-                    onClick={(e) => {
-                      if (!selectedItem.phone) {
-                        e.preventDefault();
-                        alert('Khách hàng này chưa có số điện thoại!');
-                      }
-                    }}
-                    className="flex-1 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all border border-blue-100 dark:border-blue-500/20"
-                  >
-                    Nhắn Zalo
-                  </a>
-                </div>
-
-                {/* Primary Action Button like FocusCard */}
-                {!isRescheduling ? (
-                  <div className="space-y-2">
-                    <button 
-                      onClick={() => setIsCareSheetOpen(true)}
-                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-bold shadow-lg shadow-primary-500/25 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-                    >
-                      <PenLine className="w-4 h-4" /> Cập nhật chăm khách
-                    </button>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleComplete(selectedItem)}
-                        disabled={isPending || completedIds.has(selectedItem.id)}
-                        className={`flex-1 py-3.5 rounded-2xl border text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm ${completedIds.has(selectedItem.id) ? 'bg-emerald-50 border-emerald-200 text-emerald-600 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'}`}
-                      >
-                        {isPending ? (
-                          <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Check className="w-4 h-4" />
-                        )}
-                        {completedIds.has(selectedItem.id) ? "Đã xong" : "Đánh dấu xong"}
-                      </button>
-                      
-                      <button 
-                        onClick={() => {
-                          setIsRescheduling(true);
-                          setRescheduleDateStr("");
-                        }}
-                        disabled={isPending} 
-                        className="flex-1 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
-                      >
-                        <Clock className="w-4 h-4" /> Dời lịch
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                    <div className="mb-4">
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Chọn thời gian dời lịch</label>
-                      <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2 mb-1 -mx-1 px-1">
-                        {getQuickDates().map((chip) => (
-                          <button
-                            key={chip.label}
-                            type="button"
-                            onClick={() => {
-                              const tzOffset = new Date().getTimezoneOffset() * 60000;
-                              setRescheduleDateStr(new Date(chip.date.getTime() - tzOffset).toISOString().slice(0, 16));
-                            }}
-                            className={`shrink-0 whitespace-nowrap px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`}
-                          >
-                            {chip.label}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="relative">
-                        <input 
-                          type="datetime-local" 
-                          value={rescheduleDateStr}
-                          onChange={(e) => setRescheduleDateStr(e.target.value)}
-                          className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/50 ${rescheduleDateStr ? 'text-slate-900 dark:text-white' : 'text-transparent'}`}
-                        />
-                        {!rescheduleDateStr && (
-                          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 font-medium">
-                            Chọn ngày giờ...
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-3">
-                      <button 
-                        onClick={() => setIsRescheduling(false)}
-                        className="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors"
-                      >
-                        Quay lại
-                      </button>
-                      <button 
-                        onClick={handleRescheduleSubmit}
-                        disabled={isPending || !rescheduleDateStr}
-                        className="flex-1 py-3.5 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 shadow-lg shadow-primary-500/25"
-                      >
-                        {isPending ? "Đang lưu..." : "Xác nhận dời"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Bỏ Detail Modal, khi ấn vào khách sẽ mở UpdateCareSheet trực tiếp theo yêu cầu của user */}
 
       <BottomNav activeTab="schedule" />
 

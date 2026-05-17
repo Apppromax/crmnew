@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, X, CheckCheck, Flame, Clock, AlertTriangle, Info } from "lucide-react";
 import { getNotifications, markAsRead } from "@/actions/notifications";
 
 export default function NotificationSheet({ isOpen, onClose }) {
+  const router = useRouter();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +35,11 @@ export default function NotificationSheet({ isOpen, onClose }) {
       await markAsRead(notif.id);
       setNotifications(notifications.map(n => n.id === notif.id ? { ...n, isRead: true } : n));
     }
-    // Cập nhật sau: Nếu có actionUrl thì điều hướng tới đó
+    
+    if (notif.actionUrl) {
+      onClose(); // Đóng sheet trước khi chuyển trang
+      router.push(notif.actionUrl);
+    }
   };
 
   const getIcon = (type) => {

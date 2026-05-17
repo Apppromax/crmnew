@@ -194,10 +194,40 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
 
         <div className="px-5 pb-8 overflow-y-auto custom-scrollbar flex-1">
           {/* Header */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-start justify-between mb-5">
             <div>
               <h3 className="text-xl font-black text-slate-800 dark:text-white">Cập nhật chăm khách</h3>
               <p className="text-sm font-semibold text-primary-600 dark:text-primary-400 mt-0.5">{customer.name} - {customer.phone}</p>
+              
+              {/* Quick Actions */}
+              <div className="flex gap-2 mt-3">
+                <a 
+                  href={customer.phone ? `tel:${customer.phone.replace(/[^0-9+]/g, '')}` : '#'} 
+                  onClick={(e) => {
+                    if (!customer.phone) {
+                      e.preventDefault();
+                      alert('Khách hàng này chưa có số điện thoại!');
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center gap-1.5 font-bold text-xs border border-emerald-100 dark:border-emerald-500/20"
+                >
+                  <Phone className="w-3 h-3 fill-current" /> Gọi điện
+                </a>
+                <a 
+                  href={customer.phone ? `https://zalo.me/${customer.phone.replace(/[^0-9]/g, '').replace(/^84/, '0')}` : '#'} 
+                  target={customer.phone ? "_blank" : "_self"}
+                  rel="noopener noreferrer" 
+                  onClick={(e) => {
+                    if (!customer.phone) {
+                      e.preventDefault();
+                      alert('Khách hàng này chưa có số điện thoại!');
+                    }
+                  }}
+                  className="px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center font-bold text-xs border border-blue-100 dark:border-blue-500/20"
+                >
+                  Nhắn Zalo
+                </a>
+              </div>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">
               <X className="w-4 h-4" />

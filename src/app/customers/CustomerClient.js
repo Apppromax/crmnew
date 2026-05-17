@@ -353,96 +353,112 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
             <p className="text-slate-500 dark:text-slate-400">Không tìm thấy khách hàng nào</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {sortedCustomers.map((c) => (
-              <div 
-                key={c.id} 
-                onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
-                className={`bg-white dark:bg-slate-900 p-3.5 rounded-xl shadow-sm border ${
-                  c.snoozedUntil && new Date(c.snoozedUntil) > new Date() 
-                  ? 'border-purple-200 dark:border-purple-900/50 opacity-80' 
-                  : 'border-slate-100 dark:border-slate-800'
-                } flex flex-col gap-1.5 cursor-pointer active:scale-[0.98] transition-transform`}
-              >
-                {/* Row 1: Name + Heat + Status */}
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
-                    {c.name}
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                      c.heatLevel === 'Rất Nét' ? 'bg-red-100 text-red-700' :
-                      c.heatLevel === 'Tiềm Năng' ? 'bg-orange-100 text-orange-700' :
-                      c.heatLevel === 'Quan Tâm' ? 'bg-amber-100 text-amber-700' :
-                      c.heatLevel === 'Tham Khảo' ? 'bg-blue-100 text-blue-700' :
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {c.heatLevel}
-                    </span>
-                  </h3>
-                  <div className="flex flex-col items-end shrink-0">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
-                      c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
-                      c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
-                      c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
-                      c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
-                      c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
-                      'bg-red-50 text-red-600'
-                    }`}>
-                      {c.status}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Row 2: Phone + Demand */}
-                <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <span className="shrink-0 font-medium">{c.phone}</span>
-                  {c.demand && (
-                    <>
-                      <span className="text-slate-300 dark:text-slate-700">•</span>
-                      <span className="text-xs text-slate-400 truncate">{c.demand}</span>
-                    </>
-                  )}
-                </div>
-                
-                {/* Row 3: Journey + Tags */}
-                <div className="flex items-center justify-between gap-3 mt-1">
-                  <div className="flex flex-1 items-center gap-1.5 w-full max-w-[140px]">
-                    <div className="flex-1 flex h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-0.5">
-                      {JOURNEY_OPTIONS.map((_, idx) => {
-                        const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
-                        const opacities = ['opacity-20', 'opacity-30', 'opacity-40', 'opacity-60', 'opacity-80', 'opacity-90', 'opacity-100'];
-                        return (
-                          <div 
-                            key={idx} 
-                            className={`h-full flex-1 ${idx <= currentIdx ? 'bg-primary-500 ' + (opacities[idx] || 'opacity-100') : 'bg-transparent'}`}
-                          />
-                        );
-                      })}
-                    </div>
-                    <span className="text-[9px] font-bold text-slate-500 shrink-0 truncate max-w-[90px]">
-                      {(c.journeyStage || "1.").split(". ")[1]}
-                    </span>
+          <div className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
+            {sortedCustomers.map((c) => {
+              const colors = ['bg-blue-100 text-blue-700', 'bg-emerald-100 text-emerald-700', 'bg-amber-100 text-amber-700', 'bg-red-100 text-red-700', 'bg-purple-100 text-purple-700', 'bg-pink-100 text-pink-700', 'bg-indigo-100 text-indigo-700'];
+              const charCode = c.name.charCodeAt(0) || 0;
+              const avatarColor = colors[charCode % colors.length];
+              const initials = c.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+              
+              return (
+                <div 
+                  key={c.id} 
+                  onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
+                  className={`px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                    c.snoozedUntil && new Date(c.snoozedUntil) > new Date() ? 'opacity-70 bg-slate-50 dark:bg-slate-900/50' : ''
+                  } flex items-center gap-3.5 cursor-pointer active:scale-[0.98] transition-all`}
+                >
+                  {/* Left: Avatar */}
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center text-base font-bold shrink-0 ${avatarColor}`}>
+                    {initials}
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    {c.snoozedUntil && new Date(c.snoozedUntil) > new Date() && (
-                      <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 mr-1">
-                        Hoãn
+                  {/* Middle: Info */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+                    {/* Row 1: Name + Heat */}
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-slate-900 dark:text-white truncate text-base">{c.name}</h3>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
+                        c.heatLevel === 'Rất Nét' ? 'bg-red-50 text-red-600' :
+                        c.heatLevel === 'Tiềm Năng' ? 'bg-orange-50 text-orange-600' :
+                        c.heatLevel === 'Quan Tâm' ? 'bg-amber-50 text-amber-600' :
+                        c.heatLevel === 'Tham Khảo' ? 'bg-blue-50 text-blue-600' :
+                        'bg-slate-100 text-slate-500'
+                      }`}>
+                        {c.heatLevel}
                       </span>
-                    )}
-                    {c.tags && c.tags.slice(0, 2).map(t => {
-                      const isTeamTag = teamTags.includes(t);
-                      return (
-                        <span key={t} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border truncate max-w-[65px] ${isTeamTag ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-primary-100 dark:border-primary-500/20'}`}>
-                          {t}
-                        </span>
-                      )
-                    })}
-                    {c.tags && c.tags.length > 2 && <span className="text-[9px] font-bold text-slate-400">+{c.tags.length - 2}</span>}
+                    </div>
+
+                    {/* Row 2: Phone + Demand */}
+                    <div className="flex items-center gap-2 text-xs text-slate-500 truncate mt-0.5">
+                      <span className="font-medium shrink-0">{c.phone}</span>
+                      {(c.area || c.demand) && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span className="truncate">{c.area || c.demand}</span>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Row 3: Journey Bar */}
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden gap-[1px] shrink-0">
+                        {JOURNEY_OPTIONS.map((_, idx) => {
+                          const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
+                          return (
+                            <div 
+                              key={idx} 
+                              className={`flex-1 h-full ${idx <= currentIdx ? 'bg-primary-400' : 'bg-transparent'}`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <span className="text-[10px] font-medium text-slate-500 truncate flex items-center">
+                        {Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0]))) + 1}/{JOURNEY_OPTIONS.length} <span className="mx-1 text-slate-300">•</span> {(c.journeyStage || "1.").split(". ")[1]}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right: Status + Next FollowUp */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex flex-col items-end gap-1.5 justify-center h-full">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
+                        c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
+                        c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-700' :
+                        c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-700' :
+                        c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
+                        c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
+                        'bg-red-50 text-red-600'
+                      }`}>
+                        {c.status}
+                      </span>
+                      
+                      {c.nextFollowUp ? (
+                        <div className="flex flex-col items-end mt-1">
+                          <span className="text-[9px] text-slate-400 font-medium mb-0.5">Hẹn tiếp theo</span>
+                          <div className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <Calendar className="w-3 h-3 text-primary-400" />
+                            {new Date(c.nextFollowUp).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-end mt-1 opacity-0">
+                          <span className="text-[9px] font-medium mb-0.5">Hẹn tiếp theo</span>
+                          <div className="flex items-center gap-1 text-xs font-bold">
+                            <Calendar className="w-3 h-3" />
+                            --/--
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-slate-300 dark:text-slate-600 ml-1">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>

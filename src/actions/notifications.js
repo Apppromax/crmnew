@@ -14,18 +14,20 @@ export async function getNotifications() {
   try {
     const userId = await requireUser();
 
-    // Auto-cleanup: xóa noti cũ hơn 5 ngày
+    // Chạy song song cả việc lấy thông báo và dọn rác để tăng tốc độ phản hồi
     const fiveDaysAgo = new Date();
     fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
-    await prisma.notification.deleteMany({
-      where: { userId, createdAt: { lt: fiveDaysAgo } }
-    });
-
-    const notifications = await prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+    
+    const [notifications] = await Promise.all([
+      prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+      }),
+      prisma.notification.deleteMany({
+        where: { userId, createdAt: { lt: fiveDaysAgo } }
+      })
+    ]);
     return { notifications };
   } catch (err) {
     return { error: err.message };
@@ -99,6 +101,7 @@ export async function triggerSmartAlerts() {
           title: "🔥 Khách Rất Nét đang bị bỏ quên!",
           body: `VIP ${lead.name} đã không có tương tác nào trong 3 ngày qua. Hãy nhấc máy gọi ngay!`,
           type: "ALERT",
+          actionUrl: "/customers",
         }));
       if (newNotifsData.length > 0) {
         await prisma.notification.createMany({ data: newNotifsData });
@@ -117,6 +120,7 @@ export async function triggerSmartAlerts() {
           title: "⏰ Lịch hẹn hôm nay",
           body: `Tới giờ chăm sóc ${lead.name} rồi. Nhấn vào để xem chi tiết!`,
           type: "REMINDER",
+          actionUrl: "/schedule",
         }));
       if (newRemindersData.length > 0) {
         await prisma.notification.createMany({ data: newRemindersData });
