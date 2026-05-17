@@ -364,21 +364,29 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                 <div 
                   key={c.id} 
                   onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
-                  className={`px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                  className={`px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
                     c.snoozedUntil && new Date(c.snoozedUntil) > new Date() ? 'opacity-70 bg-slate-50 dark:bg-slate-900/50' : ''
                   } flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all`}
                 >
-                  {/* Left: Avatar */}
-                  <div className={`w-[42px] h-[42px] rounded-full flex items-center justify-center text-[15px] font-bold shrink-0 ${avatarColor}`}>
-                    {initials}
+                  {/* Left: Journey Ring (Replaces Avatar) */}
+                  <div className="relative w-[42px] h-[42px] shrink-0 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90 absolute top-0 left-0" viewBox="0 0 42 42">
+                      <circle cx="21" cy="21" r="17" fill="none" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="3.5" />
+                      <circle cx="21" cy="21" r="17" fill="none" className="stroke-blue-500 transition-all duration-500" strokeWidth="3.5" strokeDasharray={106.8} strokeDashoffset={106.8 - (((currentIdx + 1) / totalSteps) * 106.8)} strokeLinecap="round" />
+                    </svg>
+                    <div className="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 absolute inset-0">
+                      <span className="text-[11px] font-black leading-none">{currentIdx + 1}</span>
+                      <div className="w-3 h-px bg-blue-200 dark:bg-blue-800/80 my-[1px]"></div>
+                      <span className="text-[9px] font-bold leading-none">{totalSteps}</span>
+                    </div>
                   </div>
 
                   {/* Middle: Info */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
                     {/* Row 1: Name + Heat */}
-                    <div className="flex items-center gap-1.5 min-w-0 w-full">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-[14px] truncate min-w-0">{c.name || "Khách hàng"}</h3>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                    <div className="flex items-start gap-1.5 min-w-0 w-full">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-[14px] leading-tight break-words line-clamp-2">{c.name || "Khách hàng"}</h3>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] ${
                         c.heatLevel === 'Rất Nét' ? 'bg-red-50 text-red-600' :
                         c.heatLevel === 'Tiềm Năng' ? 'bg-orange-50 text-orange-600' :
                         c.heatLevel === 'Quan Tâm' ? 'bg-amber-50 text-amber-600' :
@@ -390,7 +398,7 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                     </div>
 
                     {/* Row 2: Phone + Demand */}
-                    <div className="flex items-center gap-1.5 text-[12px] text-slate-500 mt-0.5 min-w-0 w-full">
+                    <div className="flex items-center gap-1.5 text-[12px] text-slate-500 min-w-0 w-full">
                       <span className="font-medium shrink-0">{c.phone}</span>
                       {(c.area || c.demand) && (
                         <>
@@ -400,22 +408,10 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                       )}
                     </div>
 
-                    {/* Row 3: Journey Bar */}
-                    <div className="flex items-center gap-2 mt-1 min-w-0 w-full">
-                      <div className="flex w-[84px] h-1.5 rounded-full overflow-hidden gap-[2px] shrink-0">
-                        {JOURNEY_OPTIONS.map((_, idx) => {
-                          const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
-                          return (
-                            <div 
-                              key={idx} 
-                              className={`flex-1 h-full rounded-full ${idx <= currentIdx ? 'bg-blue-500' : 'bg-blue-100 dark:bg-blue-900/30'}`}
-                            />
-                          );
-                        })}
-                      </div>
-                      <span className="text-[11px] text-slate-500 truncate min-w-0">
-                        {Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0]))) + 1}/{JOURNEY_OPTIONS.length} <span className="mx-0.5 text-slate-300">•</span> {(c.journeyStage || "1.").split(". ")[1]}
-                      </span>
+                    {/* Row 3: Journey Stage Text */}
+                    <div className="flex items-start gap-1.5 mt-0.5 min-w-0 w-full text-[11.5px] text-slate-600 dark:text-slate-400">
+                      <Target className="w-3 h-3 text-blue-500 shrink-0 mt-[2px]" />
+                      <span className="leading-tight break-words">{c.journeyStage ? c.journeyStage.split(". ")[1] : "Chưa cập nhật"}</span>
                     </div>
                   </div>
 
