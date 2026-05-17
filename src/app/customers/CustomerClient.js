@@ -50,9 +50,10 @@ const JOURNEY_DETAILS = {
   }
 };
 
-export default function CustomerClient({ initialCustomers }) {
+export default function CustomerClient({ initialCustomers, allTagsData }) {
   const router = useRouter();
   const [localCustomers, setLocalCustomers] = useState(initialCustomers);
+  const teamTags = allTagsData?.teamTags || [];
 
   useEffect(() => {
     setLocalCustomers(initialCustomers);
@@ -429,9 +430,14 @@ export default function CustomerClient({ initialCustomers }) {
                         Hoãn
                       </span>
                     )}
-                    {c.tags && c.tags.slice(0, 2).map(t => (
-                      <span key={t} className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20 truncate max-w-[65px]">{t}</span>
-                    ))}
+                    {c.tags && c.tags.slice(0, 2).map(t => {
+                      const isTeamTag = teamTags.includes(t);
+                      return (
+                        <span key={t} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border truncate max-w-[65px] ${isTeamTag ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-primary-100 dark:border-primary-500/20'}`}>
+                          {t}
+                        </span>
+                      )
+                    })}
                     {c.tags && c.tags.length > 2 && <span className="text-[9px] font-bold text-slate-400">+{c.tags.length - 2}</span>}
                   </div>
                 </div>
@@ -761,20 +767,43 @@ export default function CustomerClient({ initialCustomers }) {
                   <div className="mt-1">
                     <p className="text-[10px] font-bold uppercase text-slate-400 mb-2 flex items-center gap-1"><Map className="w-3 h-3" /> Dự án / Khu vực (Tags)</p>
                     <div className="flex flex-wrap gap-1.5 mb-2">
-                      {(selectedCustomer.tags || []).map(tag => (
-                        <span key={tag} className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20">
-                          {tag}
-                          <button onClick={async () => {
-                            const newTags = (selectedCustomer.tags || []).filter(t => t !== tag);
-                            await updateCustomerTags(selectedCustomer.id, newTags);
-                            setSelectedCustomer({ ...selectedCustomer, tags: newTags });
-                          }} className="hover:text-red-500 transition-colors ml-0.5"><X className="w-3 h-3" /></button>
-                        </span>
-                      ))}
+                      {(selectedCustomer.tags || []).map(tag => {
+                        const isTeamTag = teamTags.includes(tag);
+                        return (
+                          <span key={tag} className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg border ${isTeamTag ? 'bg-indigo-500 text-white border-indigo-600 shadow-sm' : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-primary-100 dark:border-primary-500/20'}`}>
+                            {tag}
+                            <button onClick={async () => {
+                              const newTags = (selectedCustomer.tags || []).filter(t => t !== tag);
+                              await updateCustomerTags(selectedCustomer.id, newTags);
+                              setSelectedCustomer({ ...selectedCustomer, tags: newTags });
+                              setLocalCustomers(prev => prev.map(c => c.id === selectedCustomer.id ? { ...c, tags: newTags } : c));
+                            }} className={`transition-colors ml-0.5 ${isTeamTag ? 'hover:text-white/70' : 'hover:text-red-500'}`}><X className="w-3 h-3" /></button>
+                          </span>
+                        );
+                      })}
                       {(!selectedCustomer.tags || selectedCustomer.tags.length === 0) && (
                         <span className="text-xs text-slate-400 italic">Chưa gắn vào dự án nào</span>
                       )}
                     </div>
+
+                    {teamTags.filter(t => !(selectedCustomer.tags || []).includes(t)).length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {teamTags.filter(t => !(selectedCustomer.tags || []).includes(t)).map(tag => (
+                          <button
+                            key={tag}
+                            onClick={async () => {
+                              const updated = [...new Set([...(selectedCustomer.tags || []), tag])];
+                              await updateCustomerTags(selectedCustomer.id, updated);
+                              setSelectedCustomer({ ...selectedCustomer, tags: updated });
+                              setLocalCustomers(prev => prev.map(c => c.id === selectedCustomer.id ? { ...c, tags: updated } : c));
+                            }}
+                            className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-bold transition-colors"
+                          >
+                            + {tag}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -785,6 +814,7 @@ export default function CustomerClient({ initialCustomers }) {
                             const updated = [...new Set([...(selectedCustomer.tags || []), newTag.trim()])];
                             await updateCustomerTags(selectedCustomer.id, updated);
                             setSelectedCustomer({ ...selectedCustomer, tags: updated });
+                            setLocalCustomers(prev => prev.map(c => c.id === selectedCustomer.id ? { ...c, tags: updated } : c));
                             setNewTag("");
                           }
                         }}
@@ -797,6 +827,7 @@ export default function CustomerClient({ initialCustomers }) {
                           const updated = [...new Set([...(selectedCustomer.tags || []), newTag.trim()])];
                           await updateCustomerTags(selectedCustomer.id, updated);
                           setSelectedCustomer({ ...selectedCustomer, tags: updated });
+                          setLocalCustomers(prev => prev.map(c => c.id === selectedCustomer.id ? { ...c, tags: updated } : c));
                           setNewTag("");
                         }}
                         className="px-3 py-1.5 bg-primary-500 text-white rounded-lg text-xs font-bold hover:bg-primary-600 active:scale-95 transition-all"

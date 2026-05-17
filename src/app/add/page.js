@@ -123,9 +123,17 @@ export default function AddCustomerPage() {
   const [manualTags, setManualTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [availableTags, setAvailableTags] = useState([]);
+  const [teamTags, setTeamTags] = useState([]);
 
   useEffect(() => {
-    getAllTags().then(tags => setAvailableTags(tags)).catch(console.error);
+    getAllTags().then(res => {
+      if (Array.isArray(res)) {
+        setAvailableTags(res);
+      } else {
+        setAvailableTags(res.personalTags || []);
+        setTeamTags(res.teamTags || []);
+      }
+    }).catch(console.error);
   }, []);
 
   // Detailed Info (shown after "Đã Tư Vấn")
@@ -496,12 +504,15 @@ export default function AddCustomerPage() {
                   Dự án / Khu vực (Tags)
                 </label>
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  {manualTags.map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-500/20">
-                      {tag}
-                      <button type="button" onClick={() => setManualTags(manualTags.filter(t => t !== tag))} className="hover:text-red-500 transition-colors ml-0.5"><X className="w-3 h-3" /></button>
-                    </span>
-                  ))}
+                  {manualTags.map(tag => {
+                    const isTeamTag = teamTags.includes(tag);
+                    return (
+                      <span key={tag} className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg border ${isTeamTag ? 'bg-indigo-500 text-white border-indigo-600 shadow-sm' : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 border-primary-100 dark:border-primary-500/20'}`}>
+                        {tag}
+                        <button type="button" onClick={() => setManualTags(manualTags.filter(t => t !== tag))} className={`transition-colors ml-0.5 ${isTeamTag ? 'hover:text-white/70' : 'hover:text-red-500'}`}><X className="w-3 h-3" /></button>
+                      </span>
+                    )
+                  })}
                 </div>
                 <div className="relative">
                   <input
@@ -533,11 +544,21 @@ export default function AddCustomerPage() {
                     Thêm
                   </button>
                 </div>
-                {availableTags.filter(t => !manualTags.includes(t)).length > 0 && (
+                {(availableTags.filter(t => !manualTags.includes(t) && !teamTags.includes(t)).length > 0 || teamTags.filter(t => !manualTags.includes(t)).length > 0) && (
                   <div className="mt-3">
-                    <p className="text-xs text-slate-500 mb-2 font-medium">Gợi ý từ dữ liệu cũ:</p>
+                    <p className="text-xs text-slate-500 mb-2 font-medium">Gợi ý từ dữ liệu cũ & Team:</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {availableTags.filter(t => !manualTags.includes(t)).map(tag => (
+                      {teamTags.filter(t => !manualTags.includes(t)).map(tag => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => setManualTags([...manualTags, tag])}
+                          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/30 dark:text-indigo-400 rounded-lg text-xs font-bold transition-colors border border-indigo-200 dark:border-indigo-500/30 shadow-sm"
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                      {availableTags.filter(t => !manualTags.includes(t) && !teamTags.includes(t)).map(tag => (
                         <button
                           key={tag}
                           type="button"

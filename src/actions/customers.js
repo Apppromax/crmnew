@@ -342,7 +342,28 @@ export async function getAllTags() {
   });
   const tagSet = new Set();
   customers.forEach(c => c.tags.forEach(t => tagSet.add(t)));
-  return Array.from(tagSet).sort();
+  const personalTags = Array.from(tagSet).sort();
+
+  let teamTags = [];
+  const membership = await prisma.teamMember.findUnique({
+    where: { userId },
+    include: { team: { select: { projectTags: true } } }
+  });
+  
+  if (membership?.team?.projectTags) {
+    teamTags = membership.team.projectTags;
+  }
+
+  const ownedTeam = await prisma.team.findUnique({
+    where: { ownerId: userId },
+    select: { projectTags: true }
+  });
+  
+  if (ownedTeam?.projectTags) {
+    teamTags = [...new Set([...teamTags, ...ownedTeam.projectTags])];
+  }
+
+  return { personalTags, teamTags };
 }
 
 export async function getCustomerCount() {
