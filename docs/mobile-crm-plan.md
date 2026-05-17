@@ -102,3 +102,9 @@ Tài liệu này xác định các bước phát triển ứng dụng CRM theo q
 - [x] **Step 4: Swipe Direction Locking**: Lập trình thuật toán theo dõi quỹ đạo ngón tay trong 5px đầu tiên để khóa hướng vuốt. Tự động vô hiệu hóa vuốt ngang nếu phát hiện hành vi cuộn dọc (scroll), chấm dứt tình trạng vô tình gạt trúng thẻ.
 - [x] **Step 5: Bottom Navigation Spacing**: Khắc phục lỗi hiển thị "lửng lơ" của BottomNav trên Android/Desktop do thuộc tính `pb-safe` thêm padding cứng. Loại bỏ khoảng trắng thừa và giảm padding bên trong để thanh điều hướng mỏng và bám sát mép viền dưới một cách tinh tế.
 - [x] **Step 6: JSX Syntax Error Debugging**: Dọn dẹp và đóng gói lại các thẻ JSX (`</div>`, `<>`) bị hỏng trong quá trình refactor tính năng Theme Selector, đảm bảo hệ thống build ổn định trên Vercel.
+
+### Phase 11: Workflow Streamlining & High-Density UI (✅ Hoàn thành)
+- [x] **Step 1: Direct Action Workflow (Schedule)**: Tối ưu hóa phễu thao tác trong Tab Lịch hẹn. Loại bỏ Modal chi tiết trung gian, cho phép mở thẳng Form "Cập nhật chăm khách" khi click vào thẻ. Chuyển nút Gọi điện / Zalo lên header để truy cập nhanh.
+- [x] **Step 2: Schedule State Fix**: Sửa lỗi "Đánh dấu xong" trên lịch hẹn bằng cách bổ sung payload `nextFollowUp: null` và gỡ bỏ thẻ khỏi local state tức thì, tạo cảm giác phản hồi nhanh (zero-latency).
+- [x] **Step 3: High-Density Customer List**: Cấu trúc lại giao diện "Kho khách hàng" từ dạng Grid thẻ sang dạng Flat List liền mạch với divide line siêu mỏng. Tối giản margin/padding để hiển thị được nhiều khách hàng nhất trên cùng một màn hình điện thoại mà vẫn giữ thiết kế sạch sẽ, rõ ràng.
+- [x] **Step 4: Smart Notifications**: Tối ưu API lấy thông báo bằng cách chạy song song (`Promise.all`) với tiến trình dọn dẹp (cleanup). Tích hợp `actionUrl` vào `Smart Alerts` để có thể tự động điều hướng người dùng thẳng tới tính năng cần xử lý khi ấn vào thông báo.
