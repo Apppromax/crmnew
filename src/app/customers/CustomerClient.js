@@ -52,6 +52,12 @@ const JOURNEY_DETAILS = {
 
 export default function CustomerClient({ initialCustomers }) {
   const router = useRouter();
+  const [localCustomers, setLocalCustomers] = useState(initialCustomers);
+
+  useEffect(() => {
+    setLocalCustomers(initialCustomers);
+  }, [initialCustomers]);
+
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterHeat, setFilterHeat] = useState("All");
@@ -77,7 +83,7 @@ export default function CustomerClient({ initialCustomers }) {
   const [careFollowUpOption, setCareFollowUpOption] = useState("1d");
   const [isCaring, setIsCaring] = useState(false);
   const [isUpdateCareOpen, setIsUpdateCareOpen] = useState(false);
-  const filteredCustomers = initialCustomers.filter((c) => {
+  const filteredCustomers = localCustomers.filter((c) => {
     const term = search.toLowerCase();
     const matchSearch = 
       (c.name && c.name.toLowerCase().includes(term)) ||
@@ -110,7 +116,7 @@ export default function CustomerClient({ initialCustomers }) {
   });
 
   // Collect all unique tags for filter dropdown
-  const allTags = [...new Set(initialCustomers.flatMap(c => c.tags || []))].sort();
+  const allTags = [...new Set(localCustomers.flatMap(c => c.tags || []))].sort();
 
   const formatDate = (isoString) => {
     if (!isoString) return "Chưa cập nhật";
@@ -142,6 +148,7 @@ export default function CustomerClient({ initialCustomers }) {
     try {
       const updated = await updateCustomer(selectedCustomer.id, editData);
       setSelectedCustomer(updated);
+      setLocalCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
       setIsEditing(false);
       setSaveMsg("✓ Đã lưu");
       setTimeout(() => setSaveMsg(""), 2000);
@@ -215,6 +222,7 @@ export default function CustomerClient({ initialCustomers }) {
     setIsDeleting(true);
     try {
       await deleteCustomer(selectedCustomer.id);
+      setLocalCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
       closeModal();
       router.refresh();
     } catch (err) {
@@ -268,10 +276,10 @@ export default function CustomerClient({ initialCustomers }) {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-black text-slate-800 dark:text-white">Kho khách hàng</h1>
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-500 hidden sm:inline">{initialCustomers.length} người</span>
+            <span className="text-sm font-medium text-slate-500 hidden sm:inline">{localCustomers.length} người</span>
             <button 
               onClick={() => router.push("/add")}
-              className="h-9 px-3 rounded-full bg-primary-600 text-white shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform hover:bg-primary-700 font-bold text-sm"
+              className="h-9 px-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 active:scale-95 transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-emerald-500/30 font-bold text-sm"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Thêm khách</span>
