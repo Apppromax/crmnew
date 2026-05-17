@@ -732,7 +732,6 @@ export default function CustomerClient({ initialCustomers }) {
                           <p className="text-sm font-bold text-slate-900 dark:text-white text-right">{selectedCustomer.finance}</p>
                         </div>
                       )}
-                    </div>
 
                       {selectedCustomer.demand && (
                         <div className="flex items-start gap-2 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
