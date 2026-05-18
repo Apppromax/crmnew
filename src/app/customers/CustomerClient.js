@@ -360,6 +360,9 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
               const avatarColor = colors[charCode % colors.length];
               const initials = c.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
               
+              const totalSteps = JOURNEY_OPTIONS.length;
+              const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
+              
               return (
                 <div 
                   key={c.id} 
