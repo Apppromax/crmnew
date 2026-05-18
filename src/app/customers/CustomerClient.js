@@ -144,17 +144,23 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
   };
 
   const handleSave = async () => {
+    // 1. Optimistic Update (Zero-latency)
+    const optimisticData = { ...selectedCustomer, ...editData };
+    setSelectedCustomer(optimisticData);
+    setLocalCustomers(prev => prev.map(c => c.id === optimisticData.id ? optimisticData : c));
+    setIsEditing(false);
+    setSaveMsg("✓ Đã lưu");
+    setTimeout(() => setSaveMsg(""), 2000);
+
+    // 2. Background API Call
     setIsSaving(true);
-    setSaveMsg("");
     try {
       const updated = await updateCustomer(selectedCustomer.id, editData);
-      setSelectedCustomer(updated);
+      // Background sync just to be safe
       setLocalCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
-      setIsEditing(false);
-      setSaveMsg("✓ Đã lưu");
-      setTimeout(() => setSaveMsg(""), 2000);
     } catch (err) {
-      setSaveMsg("Lỗi: " + err.message);
+      // Revert or notify if failed
+      alert("Lỗi đồng bộ dữ liệu: " + err.message);
     } finally {
       setIsSaving(false);
     }
@@ -890,26 +896,36 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
         onClose={() => setIsUpdateCareOpen(false)}
         onComplete={async (data) => {
           try {
-            await completeCustomerAction(data);
+            // 1. Optimistic Update (Zero-latency)
             setIsUpdateCareOpen(false);
             setSaveMsg("✓ Đã lưu thông tin chăm sóc");
             setTimeout(() => setSaveMsg(""), 3000);
             
             // Update local state
-            setSelectedCustomer(prev => ({
-              ...prev,
-              status: data.status || prev.status,
-              journeyStage: data.journeyStage || prev.journeyStage,
-              nextFollowUp: data.nextFollowUp || prev.nextFollowUp,
-            }));
+            setSelectedCustomer(prev => {
+              if (!prev) return prev;
+              const updated = {
+                ...prev,
+                status: data.status || prev.status,
+                journeyStage: data.journeyStage || prev.journeyStage,
+                nextFollowUp: data.nextFollowUp !== undefined ? data.nextFollowUp : prev.nextFollowUp,
+              };
+              
+              // Also update the list view
+              setLocalCustomers(list => list.map(c => c.id === updated.id ? updated : c));
+              return updated;
+            });
             
             // Reload history if on history tab
-            if (modalTab === 'history') {
+            if (modalTab === 'history' && selectedCustomer) {
               loadHistory(selectedCustomer.id);
             }
+
+            // 2. Background API Call
+            await completeCustomerAction(data);
           } catch (err) {
             console.error(err);
-            setSaveMsg("❌ Có lỗi xảy ra, vui lòng thử lại");
+            alert("❌ Có lỗi xảy ra khi lưu: " + err.message);
           }
         }}
       />
