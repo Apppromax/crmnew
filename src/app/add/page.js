@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createCustomer, getAllTags } from "@/actions/customers";
-import { X, Check, Calendar, PhoneOff, UserPlus, FileText, ChevronRight, Activity } from "lucide-react";
+import { X, Calendar, PhoneOff, UserPlus, FileText, ChevronRight, Activity } from "lucide-react";
 
 const LOCAL_JOURNEY_OPTIONS = [
   "1. Phá băng và tư vấn ban đầu",
@@ -157,7 +157,6 @@ export default function AddCustomerPage() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Free Tier Limit Popup
   const [showLimitPopup, setShowLimitPopup] = useState(false);
@@ -184,17 +183,17 @@ export default function AddCustomerPage() {
   };
 
   const handleSaveWithFollowUp = async () => {
-    setIsSaving(true);
-    setSaveSuccess(true);
     setShowStatusPopup(false);
     
     const parts = [];
     if (manualSource) parts.push(`Nguồn: ${manualSource}`);
     const fullNote = parts.join("\n");
 
-    // Fire API and navigation concurrently — don't wait for API before navigating
-    let navTimer = setTimeout(() => router.push("/"), 500);
+    // Navigate IMMEDIATELY — user sees instant transition
+    sessionStorage.setItem('sp_save_toast', '1');
+    router.push("/");
 
+    // Fire API in background
     try {
       await createCustomer({ 
         name: manualName, 
@@ -205,15 +204,10 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(followUpDate)
       });
     } catch (err) {
-      clearTimeout(navTimer); // Cancel navigation on error
-      setSaveSuccess(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
+        sessionStorage.removeItem('sp_save_toast');
         setShowLimitPopup(true);
-      } else {
-        setError("Lỗi lưu khách hàng.");
       }
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -231,9 +225,7 @@ export default function AddCustomerPage() {
       return;
     }
     
-    setIsSaving(true);
     setError(null);
-    setSaveSuccess(true);
     setShowFinalPopup(false);
 
     const parts = [];
@@ -242,9 +234,11 @@ export default function AddCustomerPage() {
     if (manualNote) parts.push(`Ghi chú: ${manualNote}`);
     const fullNote = parts.join("\n");
 
-    // Fire API and navigation concurrently — don't wait for API before navigating
-    let navTimer = setTimeout(() => router.push("/"), 500);
+    // Navigate IMMEDIATELY — user sees instant transition
+    sessionStorage.setItem('sp_save_toast', '1');
+    router.push("/");
 
+    // Fire API in background
     try {
       await createCustomer({ 
         name: manualName, 
@@ -261,34 +255,16 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(finalDateString)
       });
     } catch (err) {
-      clearTimeout(navTimer); // Cancel navigation on error
-      setSaveSuccess(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
+        sessionStorage.removeItem('sp_save_toast');
         setShowLimitPopup(true);
-      } else {
-        setError("Lỗi lưu khách hàng thủ công.");
       }
-    } finally {
-      setIsSaving(false);
     }
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F4F8FB] dark:bg-slate-950 font-sans pb-24">
-      {/* Success Overlay */}
-      {saveSuccess && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#F4F8FB] dark:bg-slate-950 animate-in fade-in duration-300">
-          <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-emerald-500/40 animate-celebration">
-            <Check className="w-12 h-12 text-white" />
-          </div>
-          <h2 className="text-3xl font-black text-slate-800 dark:text-white mb-2 animate-in slide-in-from-bottom-4 fade-in duration-500">
-            Thành công!
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium animate-in slide-in-from-bottom-4 fade-in duration-500 delay-150">
-            Đang làm mới danh sách khách hàng...
-          </p>
-        </div>
-      )}
+
 
       {/* Free Limit Reached Popup */}
       {showLimitPopup && (

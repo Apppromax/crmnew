@@ -7,7 +7,7 @@ import { getTeamContext } from "@/actions/team";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({ searchParams }) {
+export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -21,5 +21,5 @@ export default async function Home({ searchParams }) {
     getTeamContext(),
   ]);
 
-  return <Dashboard initialQueue={queue} initialCounts={counts} successParam={searchParams?.success} hasTeam={teamCtx?.hasTeam} />;
+  return <Dashboard initialQueue={queue} initialCounts={counts} hasTeam={teamCtx?.hasTeam} />;
 }

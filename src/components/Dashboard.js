@@ -17,7 +17,7 @@ import {
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
-import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw, Users } from "lucide-react";
+import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw, Users, Check } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -55,7 +55,7 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, successParam, hasTeam }) {
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, hasTeam }) {
   const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
   const [counts, setCounts] = useState(initialCounts);
   const [loading, setLoading] = useState(false);
@@ -66,19 +66,21 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   const [isPending, startTransition] = useTransition();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [showSuccessToast, setShowSuccessToast] = useState(successParam === '1');
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const router = useRouter();
 
   const dismissedIds = React.useRef(new Set());
 
   useEffect(() => {
-    if (successParam === '1') {
-      // Xóa param khỏi URL để không hiện lại nếu user refresh
-      window.history.replaceState({}, '', '/');
+    // Read toast flag from sessionStorage (set by /add page on save)
+    const toast = sessionStorage.getItem('sp_save_toast');
+    if (toast) {
+      sessionStorage.removeItem('sp_save_toast');
+      setShowSuccessToast(true);
       const t = setTimeout(() => setShowSuccessToast(false), 3000);
       return () => clearTimeout(t);
     }
-  }, [successParam]);
+  }, []);
 
   const loadQueue = useCallback(async () => {
     try {
