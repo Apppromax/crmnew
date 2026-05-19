@@ -32,7 +32,12 @@ export async function getTeamContext({ includeData = false } = {}) {
     const result = {
       hasTeam: true,
       role: "LEADER",
-      team: ownedTeam
+      team: {
+        ...ownedTeam,
+        createdAt: ownedTeam.createdAt?.toISOString() || null,
+        updatedAt: ownedTeam.updatedAt?.toISOString() || null,
+        validUntil: ownedTeam.validUntil?.toISOString() || null,
+      }
     };
 
     // Fetch members + customers in parallel if requested (avoids 2 extra requireUser calls)
@@ -66,8 +71,14 @@ export async function getTeamContext({ includeData = false } = {}) {
         })
       ]);
 
-      result.members = members;
-      result.customers = customers;
+      result.members = members.map(m => ({
+        ...m,
+        joinedAt: m.joinedAt?.toISOString() || null
+      }));
+      result.customers = customers.map(c => ({
+        ...c,
+        nextFollowUp: c.nextFollowUp?.toISOString() || null
+      }));
     }
 
     return result;
@@ -89,7 +100,12 @@ export async function getTeamContext({ includeData = false } = {}) {
     return {
       hasTeam: true,
       role: membership.role,
-      team: membership.team
+      team: {
+        ...membership.team,
+        createdAt: membership.team.createdAt?.toISOString() || null,
+        updatedAt: membership.team.updatedAt?.toISOString() || null,
+        validUntil: membership.team.validUntil?.toISOString() || null,
+      }
     };
   }
 
