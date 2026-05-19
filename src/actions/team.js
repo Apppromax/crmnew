@@ -16,7 +16,8 @@ function generateInviteCode() {
 }
 
 // Lấy thông tin Team hiện tại của user (Dù là Leader hay Member)
-export async function getTeamContext() {
+// Khi includeData=true (leader dashboard), fetch members + customers song song để tránh 3x auth calls
+export async function getTeamContext({ includeData = false } = {}) {
   const userId = await requireUser();
   
   // Kiểm tra xem có đang sở hữu team nào không
@@ -28,11 +29,49 @@ export async function getTeamContext() {
   });
 
   if (ownedTeam) {
-    return {
+    const result = {
       hasTeam: true,
       role: "LEADER",
       team: ownedTeam
     };
+
+    // Fetch members + customers in parallel if requested (avoids 2 extra requireUser calls)
+    if (includeData) {
+      const hasProjectTags = ownedTeam.projectTags && ownedTeam.projectTags.length > 0;
+      
+      const [members, customers] = await Promise.all([
+        prisma.teamMember.findMany({
+          where: { teamId: ownedTeam.id },
+          include: { user: { select: { email: true, role: true } } },
+          orderBy: { joinedAt: "asc" }
+        }),
+        prisma.customer.findMany({
+          where: {
+            OR: [
+              { 
+                teamId: ownedTeam.id,
+                userId: { not: userId },
+                ...(hasProjectTags ? { tags: { hasSome: ownedTeam.projectTags } } : {})
+              },
+              { teamId: ownedTeam.id, userId },
+              { userId, teamId: null }
+            ]
+          },
+          select: {
+            id: true, userId: true, name: true, phone: true,
+            status: true, heatLevel: true, journeyStage: true,
+            clarityScore: true, nextFollowUp: true, tags: true,
+            assignedToId: true,
+          },
+          orderBy: { createdAt: "desc" }
+        })
+      ]);
+
+      result.members = members;
+      result.customers = customers;
+    }
+
+    return result;
   }
 
   // Kiểm tra xem có đang là member của team nào không
@@ -50,7 +89,7 @@ export async function getTeamContext() {
   if (membership) {
     return {
       hasTeam: true,
-      role: membership.role, // Thường là "MEMBER"
+      role: membership.role,
       team: membership.team
     };
   }
