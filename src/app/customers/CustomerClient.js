@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomerTags, completeCustomerAction } from "@/actions/customers";
 import BottomNav from "@/components/BottomNav";
 import UpdateCareSheet from "@/components/UpdateCareSheet";
-import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map } from "lucide-react";
+import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map, Users } from "lucide-react";
 
 const STATUS_OPTIONS = ["Mới", "Chưa liên lạc được", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
 const HEAT_OPTIONS = ["Rất Nét", "Tiềm Năng", "Quan Tâm", "Tham Khảo", "Chưa Rõ"];
@@ -50,7 +50,7 @@ const JOURNEY_DETAILS = {
   }
 };
 
-export default function CustomerClient({ initialCustomers, allTagsData }) {
+export default function CustomerClient({ initialCustomers, allTagsData, currentUserId }) {
   const router = useRouter();
   const [localCustomers, setLocalCustomers] = useState(initialCustomers);
   const teamTags = allTagsData?.teamTags || [];
@@ -77,6 +77,7 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
   // Tag state
   const [filterTag, setFilterTag] = useState("All");
   const [newTag, setNewTag] = useState("");
+  const [filterOwnership, setFilterOwnership] = useState("All"); // All | Personal | Team
   // Sort state
   const [sortBy, setSortBy] = useState("newest");
   // Care state
@@ -93,7 +94,14 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
     const matchStatus = filterStatus === "All" || c.status === filterStatus;
     const matchHeat = filterHeat === "All" || c.heatLevel === filterHeat;
     const matchTag = filterTag === "All" || (c.tags && c.tags.includes(filterTag));
-    return matchSearch && matchStatus && matchHeat && matchTag;
+    
+    let matchOwnership = true;
+    if (currentUserId) {
+      if (filterOwnership === "Personal") matchOwnership = c.userId === currentUserId;
+      if (filterOwnership === "Team") matchOwnership = c.userId !== currentUserId;
+    }
+
+    return matchSearch && matchStatus && matchHeat && matchTag && matchOwnership;
   });
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
@@ -314,6 +322,20 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
         
         {/* Filters and Sorting */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+          {currentUserId && (
+            <>
+              <select 
+                value={filterOwnership}
+                onChange={(e) => setFilterOwnership(e.target.value)}
+                className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-400 outline-none focus:border-primary-500"
+              >
+                <option value="All">Tất cả khách</option>
+                <option value="Personal">Khách của tôi</option>
+                <option value="Team">Khách đội nhóm</option>
+              </select>
+              <div className="w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            </>
+          )}
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -408,6 +430,12 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
                       }`}>
                         {c.heatLevel}
                       </span>
+                      {currentUserId && c.userId !== currentUserId && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-purple-50 text-purple-600 border border-purple-100 dark:border-purple-800 flex items-center gap-1">
+                          <Users className="w-2.5 h-2.5" />
+                          {c.profile?.fullName || c.profile?.email?.split('@')[0] || "Đội nhóm"}
+                        </span>
+                      )}
                     </div>
 
                     {/* Row 2: Phone + Demand */}

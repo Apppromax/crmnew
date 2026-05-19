@@ -105,14 +105,14 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                 const now = new Date();
                 const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
                 
-                const hasClosingSoon = customers.some(c => c.assignedToId === m.userId && (
+                const hasClosingSoon = customers.some(c => c.userId === m.userId && (
                   c.heatLevel?.includes("Rất Nét") || 
                   c.heatLevel?.includes("Chốt Ngay") || 
                   c.journeyStage?.includes("Dồn Chốt") || 
                   c.journeyStage?.includes("Chốt Cọc")
                 ));
                 
-                const hasUpcomingAppt = customers.some(c => c.assignedToId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) > now && new Date(c.nextFollowUp) <= in48h);
+                const hasUpcomingAppt = customers.some(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) > now && new Date(c.nextFollowUp) <= in48h);
 
                 return (
                   <div key={m.id} className="group flex flex-col p-4 rounded-2xl glass hover:border-primary-400/50 transition-all">

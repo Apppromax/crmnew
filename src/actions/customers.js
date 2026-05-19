@@ -83,9 +83,36 @@ export async function getSmartQueue() {
 
 export async function getAllCustomers() {
   const userId = await requireUser();
-  const customers = await prisma.customer.findMany({
+  
+  const membership = await prisma.teamMember.findUnique({
     where: { userId },
+    include: { team: true }
+  });
+
+  let whereClause = { userId };
+
+  if (membership && membership.role === "LEADER") {
+    const team = membership.team;
+    const hasProjectTags = team.projectTags && team.projectTags.length > 0;
+    whereClause = {
+      OR: [
+        { 
+          teamId: team.id,
+          userId: { not: userId },
+          ...(hasProjectTags ? { tags: { hasSome: team.projectTags } } : {})
+        },
+        { teamId: team.id, userId },
+        { userId, teamId: null }
+      ]
+    };
+  }
+
+  const customers = await prisma.customer.findMany({
+    where: whereClause,
     orderBy: { createdAt: "desc" },
+    include: {
+      profile: { select: { email: true, fullName: true } }
+    }
   });
 
   return customers.map((c) => enrichStatus({

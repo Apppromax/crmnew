@@ -61,7 +61,6 @@ export async function getTeamContext({ includeData = false } = {}) {
             id: true, userId: true, name: true, phone: true,
             status: true, heatLevel: true, journeyStage: true,
             clarityScore: true, nextFollowUp: true, tags: true,
-            assignedToId: true,
           },
           orderBy: { createdAt: "desc" }
         })
