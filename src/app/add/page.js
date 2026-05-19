@@ -185,14 +185,17 @@ export default function AddCustomerPage() {
 
   const handleSaveWithFollowUp = async () => {
     setIsSaving(true);
-    setSaveSuccess(true); // Optimistically show success immediately
+    setSaveSuccess(true);
     setShowStatusPopup(false);
     
-    try {
-      const parts = [];
-      if (manualSource) parts.push(`Nguồn: ${manualSource}`);
-      const fullNote = parts.join("\n");
+    const parts = [];
+    if (manualSource) parts.push(`Nguồn: ${manualSource}`);
+    const fullNote = parts.join("\n");
 
+    // Fire API and navigation concurrently — don't wait for API before navigating
+    let navTimer = setTimeout(() => router.push("/"), 500);
+
+    try {
       await createCustomer({ 
         name: manualName, 
         phone: manualPhone, 
@@ -201,9 +204,9 @@ export default function AddCustomerPage() {
         status: pendingStatus,
         nextFollowUp: parseLocalToISO(followUpDate)
       });
-      router.push("/?success=1");
     } catch (err) {
-      setSaveSuccess(false); // Hide on error
+      clearTimeout(navTimer); // Cancel navigation on error
+      setSaveSuccess(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
         setShowLimitPopup(true);
       } else {
@@ -230,16 +233,19 @@ export default function AddCustomerPage() {
     
     setIsSaving(true);
     setError(null);
-    setSaveSuccess(true); // Optimistically show success immediately
+    setSaveSuccess(true);
     setShowFinalPopup(false);
 
-    try {
-      const parts = [];
-      if (manualSource) parts.push(`Nguồn: ${manualSource}`);
-      if (manualPurpose) parts.push(`Mục đích: ${manualPurpose}`);
-      if (manualNote) parts.push(`Ghi chú: ${manualNote}`);
-      const fullNote = parts.join("\n");
+    const parts = [];
+    if (manualSource) parts.push(`Nguồn: ${manualSource}`);
+    if (manualPurpose) parts.push(`Mục đích: ${manualPurpose}`);
+    if (manualNote) parts.push(`Ghi chú: ${manualNote}`);
+    const fullNote = parts.join("\n");
 
+    // Fire API and navigation concurrently — don't wait for API before navigating
+    let navTimer = setTimeout(() => router.push("/"), 500);
+
+    try {
       await createCustomer({ 
         name: manualName, 
         phone: manualPhone, 
@@ -254,9 +260,9 @@ export default function AddCustomerPage() {
         journeyStage: finalJourney,
         nextFollowUp: parseLocalToISO(finalDateString)
       });
-      router.push("/?success=1");
     } catch (err) {
-      setSaveSuccess(false); // Hide on error
+      clearTimeout(navTimer); // Cancel navigation on error
+      setSaveSuccess(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
         setShowLimitPopup(true);
       } else {
