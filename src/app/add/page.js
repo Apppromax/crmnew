@@ -185,6 +185,9 @@ export default function AddCustomerPage() {
 
   const handleSaveWithFollowUp = async () => {
     setIsSaving(true);
+    setSaveSuccess(true); // Optimistically show success immediately
+    setShowStatusPopup(false);
+    
     try {
       const parts = [];
       if (manualSource) parts.push(`Nguồn: ${manualSource}`);
@@ -198,15 +201,15 @@ export default function AddCustomerPage() {
         status: pendingStatus,
         nextFollowUp: parseLocalToISO(followUpDate)
       });
-      setSaveSuccess(true);
       router.push("/?success=1");
     } catch (err) {
+      setSaveSuccess(false); // Hide on error
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
-        setShowStatusPopup(false);
         setShowLimitPopup(true);
       } else {
         setError("Lỗi lưu khách hàng.");
       }
+    } finally {
       setIsSaving(false);
     }
   };
@@ -227,6 +230,9 @@ export default function AddCustomerPage() {
     
     setIsSaving(true);
     setError(null);
+    setSaveSuccess(true); // Optimistically show success immediately
+    setShowFinalPopup(false);
+
     try {
       const parts = [];
       if (manualSource) parts.push(`Nguồn: ${manualSource}`);
@@ -248,16 +254,15 @@ export default function AddCustomerPage() {
         journeyStage: finalJourney,
         nextFollowUp: parseLocalToISO(finalDateString)
       });
-      setSaveSuccess(true);
-      setShowFinalPopup(false);
       router.push("/?success=1");
     } catch (err) {
+      setSaveSuccess(false); // Hide on error
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
-        setShowFinalPopup(false);
         setShowLimitPopup(true);
       } else {
         setError("Lỗi lưu khách hàng thủ công.");
       }
+    } finally {
       setIsSaving(false);
     }
   };
