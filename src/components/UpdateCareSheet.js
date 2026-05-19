@@ -168,17 +168,16 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
 
   const handleComplete = () => {
     setIsCompleting(true);
-    setTimeout(() => {
-      onComplete?.({
-        customerId: customer.id,
-        note,
-        nextFollowUp: selectedDate?.toISOString() || null,
-        status: statusAction === 'Chưa liên lạc được' ? 'Chưa liên lạc được' : (statusAction === 'Đã Tư Vấn' ? 'Đang chăm' : undefined),
-        journeyStage: isNewOrUnreachable ? undefined : journeyStage,
-        journeyProgress: isNewOrUnreachable ? undefined : journeyProgress,
-        nextAction,
-      });
-    }, 200);
+    // Fire callback immediately — no artificial delay. Animation runs in parallel.
+    onComplete?.({
+      customerId: customer.id,
+      note,
+      nextFollowUp: selectedDate?.toISOString() || null,
+      status: statusAction === 'Chưa liên lạc được' ? 'Chưa liên lạc được' : (statusAction === 'Đã Tư Vấn' ? 'Đang chăm' : undefined),
+      journeyStage: isNewOrUnreachable ? undefined : journeyStage,
+      journeyProgress: isNewOrUnreachable ? undefined : journeyProgress,
+      nextAction,
+    });
   };
 
   return (

@@ -98,8 +98,14 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   }, []);
 
   const loadNotifications = useCallback(async () => {
-    // Kích hoạt thông minh AI Alert ngầm
-    await triggerSmartAlerts();
+    // Debounce: chỉ trigger smart alerts tối đa 1 lần/15 phút
+    const DEBOUNCE_KEY = 'sp_alert_ts';
+    const DEBOUNCE_MS = 15 * 60 * 1000; // 15 phút
+    const lastRun = parseInt(sessionStorage.getItem(DEBOUNCE_KEY) || '0', 10);
+    if (Date.now() - lastRun > DEBOUNCE_MS) {
+      sessionStorage.setItem(DEBOUNCE_KEY, String(Date.now()));
+      triggerSmartAlerts(); // Fire-and-forget, không await
+    }
     const res = await getNotifications();
     if (res.notifications) {
       setUnreadNotifCount(res.notifications.filter(n => !n.isRead).length);
@@ -107,9 +113,9 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
   }, []);
 
   useEffect(() => {
-    loadQueue();
+    // Không gọi loadQueue() — initialQueue đã được fetch ở server page.js
     loadNotifications();
-  }, [loadQueue, loadNotifications]);
+  }, [loadNotifications]);
 
   const focusCustomer = queue[0] || null;
   const radarCustomers = queue.slice(1, 3);

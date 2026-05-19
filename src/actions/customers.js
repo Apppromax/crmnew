@@ -203,27 +203,27 @@ export async function clearAllSnoozes() {
 export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand, tags, status, nextFollowUp, journeyStage }) {
   const userId = await requireUser();
 
-  // Kiểm tra xem user có thuộc team nào không
-  const membership = await prisma.teamMember.findUnique({
-    where: { userId }
-  });
+  // Parallel fetch: team membership + profile (independent queries)
+  const [membership, profile] = await Promise.all([
+    prisma.teamMember.findUnique({ where: { userId } }),
+    prisma.profile.findUnique({
+      where: { id: userId },
+      include: {
+        ownedTeam: true,
+        teamMembership: { include: { team: true } }
+      }
+    }),
+  ]);
   const teamId = membership ? membership.teamId : null;
 
   // FREE TIER LIMIT LOGIC
-  const profile = await prisma.profile.findUnique({
-    where: { id: userId },
-    include: {
-      ownedTeam: true,
-      teamMembership: { include: { team: true } }
-    }
-  });
-
   const trialPeriodDays = 60; // 2 months trial
   const trialEndDate = new Date(profile.createdAt.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
   const isTrial = new Date() < trialEndDate;
 
   const isPro = profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive || isTrial;
   
+  // Skip count() cho trial/pro users — chỉ check khi thực sự cần
   if (!isPro) {
     const customerCount = await prisma.customer.count({ where: { userId } });
     if (customerCount >= 10) {

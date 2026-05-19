@@ -183,28 +183,31 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
       setSaveMsg("Vui lòng nhập nội dung chăm sóc");
       return;
     }
+
+    const nextDate = new Date();
+    if (careFollowUpOption.endsWith('h')) {
+      nextDate.setHours(nextDate.getHours() + parseInt(careFollowUpOption));
+    } else {
+      nextDate.setDate(nextDate.getDate() + parseInt(careFollowUpOption));
+    }
+
+    // 1. Optimistic UI — hiện success ngay lập tức
+    setSaveMsg("✓ Đã cập nhật trạng thái");
+    setCareNote("");
     setIsCaring(true);
-    setSaveMsg("");
+    setTimeout(() => setSaveMsg(""), 2000);
+
+    // 2. Background API call
     try {
-      const nextDate = new Date();
-      if (careFollowUpOption.endsWith('h')) {
-        nextDate.setHours(nextDate.getHours() + parseInt(careFollowUpOption));
-      } else {
-        nextDate.setDate(nextDate.getDate() + parseInt(careFollowUpOption));
-      }
-      
       await completeCustomerAction({
         customerId: selectedCustomer.id,
         note: careNote,
         nextFollowUp: nextDate.toISOString(),
       });
-      setSaveMsg("✓ Đã cập nhật trạng thái");
-      setCareNote("");
       // Refresh timeline if loaded
       if (timeline.length > 0) {
         loadHistory(selectedCustomer.id);
       }
-      setTimeout(() => setSaveMsg(""), 2000);
     } catch (err) {
       setSaveMsg("Lỗi: " + err.message);
     } finally {
@@ -228,10 +231,11 @@ export default function CustomerClient({ initialCustomers, allTagsData }) {
     if (!selectedCustomer) return;
     setIsDeleting(true);
     try {
-      await deleteCustomer(selectedCustomer.id);
+      // Optimistic: xóa khỏi list ngay
       setLocalCustomers(prev => prev.filter(c => c.id !== selectedCustomer.id));
       closeModal();
-      router.refresh();
+      // Background API call — không cần router.refresh() vì localCustomers đã cập nhật
+      await deleteCustomer(selectedCustomer.id);
     } catch (err) {
       setSaveMsg("Lỗi xóa: " + err.message);
     } finally {
