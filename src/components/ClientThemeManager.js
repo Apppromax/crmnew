@@ -23,6 +23,13 @@ export function ClientThemeManager() {
     if (savedBg !== "none") {
       document.body.classList.add(`bg-${savedBg}`);
     }
+
+    // Register Service Worker for PWA
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.error("Service Worker registration failed:", err);
+      });
+    }
   }, []);
 
   return null;

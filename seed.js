@@ -30,9 +30,9 @@ function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function rInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 async function main() {
-  console.log("Tìm tài khoản chientran64 và tuanlinh.hoang28...");
+  console.log("Tìm tài khoản chientran64 và tuanlinh.hoang286...");
   const chien = await prisma.profile.findUnique({ where: { email: 'chientran64@gmail.com' } });
-  const linh = await prisma.profile.findUnique({ where: { email: 'tuanlinh.hoang28@gmail.com' } });
+  const linh = await prisma.profile.findUnique({ where: { email: 'tuanlinh.hoang286@gmail.com' } });
 
   if (!chien || !linh) {
     console.log("Không tìm thấy 2 tài khoản quản lý!");
