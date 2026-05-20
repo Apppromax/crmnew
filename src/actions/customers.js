@@ -96,13 +96,14 @@ export async function getAllCustomers() {
     const hasProjectTags = team.projectTags && team.projectTags.length > 0;
     whereClause = {
       OR: [
+        // Khách trong team pool (của các member khác)
         { 
           teamId: team.id,
           userId: { not: userId },
           ...(hasProjectTags ? { tags: { hasSome: team.projectTags } } : {})
         },
-        { teamId: team.id, userId },
-        { userId, teamId: null }
+        // Khách của chính leader (cả cá nhân lẫn team)
+        { userId }
       ]
     };
   }
@@ -241,7 +242,9 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       }
     }),
   ]);
-  const teamId = membership ? membership.teamId : null;
+  // Không auto-gán teamId cho khách cá nhân.
+  // Chỉ gán teamId khi Leader phân bổ khách vào team pool.
+  const teamId = null;
 
   // FREE TIER LIMIT LOGIC
   const trialPeriodDays = 60; // 2 months trial
