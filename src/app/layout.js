@@ -10,7 +10,23 @@ const inter = Inter({
 export const metadata = {
   title: "SalesPush CRM — Chăm đúng khách, đúng lúc",
   description: "CRM thông minh cho sale bất động sản. Quản lý giỏ khách bằng Smart Card, tập trung chăm đúng khách vào đúng thời điểm.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "SalesPush CRM",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0ea5e9",
 };
 
 export default function RootLayout({ children }) {
