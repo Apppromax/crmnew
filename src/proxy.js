@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-export async function middleware(request) {
+export async function proxy(request) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -33,8 +33,8 @@ export async function middleware(request) {
   } = await supabase.auth.getUser()
 
   // Define public routes
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register')
-  const isPublicRoute = isAuthRoute || request.nextUrl.pathname === '/'
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register') || request.nextUrl.pathname.startsWith('/auth/confirm')
+  const isPublicRoute = isAuthRoute || request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/api/auth')
   
   if (!user && !isPublicRoute) {
     // Redirect unauthenticated users to login page
