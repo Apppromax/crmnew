@@ -66,6 +66,8 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
   const [selectedDate, setSelectedDate] = useState(null);
   const [nextAction, setNextAction] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
+  const [prevCustomerId, setPrevCustomerId] = useState(null);
+  const [prevIsOpen, setPrevIsOpen] = useState(false);
   const textareaRef = useRef(null);
   const quickDates = getQuickDates();
   const [isListening, setIsListening] = useState(false);
@@ -125,7 +127,9 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
       }
     }
   };
-  useEffect(() => {
+  if (isOpen !== prevIsOpen || (customer && customer.id !== prevCustomerId)) {
+    setPrevIsOpen(isOpen);
+    setPrevCustomerId(customer ? customer.id : null);
     if (isOpen && customer) {
       setStep(1);
       setNote('');
@@ -135,13 +139,18 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
       setSelectedDate(null);
       setNextAction('');
       setIsCompleting(false);
-      
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen && customer) {
       const isNew = customer.status === 'Mới' || customer.status === 'Chưa liên lạc được';
       if (!isNew) {
-        setTimeout(() => textareaRef.current?.focus(), 400);
+        const t = setTimeout(() => textareaRef.current?.focus(), 400);
+        return () => clearTimeout(t);
       }
     }
-  }, [isOpen, customer?.id]);
+  }, [isOpen, customer]);
 
   if (!isOpen || !customer) return null;
 

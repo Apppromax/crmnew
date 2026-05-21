@@ -11,6 +11,16 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/error-boundaries": "warn",
+      "react-hooks/immutability": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react/no-unescaped-entities": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

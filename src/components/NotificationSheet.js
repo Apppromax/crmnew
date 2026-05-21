@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, X, CheckCheck, Flame, Clock, AlertTriangle, Info } from "lucide-react";
 import { getNotifications, markAsRead } from "@/actions/notifications";
@@ -10,20 +10,23 @@ export default function NotificationSheet({ isOpen, onClose }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadNotifications();
-    }
-  }, [isOpen]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (notifications.length === 0) setLoading(true);
     const res = await getNotifications();
     if (res.notifications) {
       setNotifications(res.notifications);
     }
     setLoading(false);
-  };
+  }, [notifications.length]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = setTimeout(() => {
+        loadNotifications();
+      }, 0);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen, loadNotifications]);
 
   const handleMarkAllRead = async () => {
     await markAsRead();

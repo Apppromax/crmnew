@@ -112,13 +112,14 @@ class UXAuditor:
         filename = os.path.basename(filepath)
 
         # Pre-calculate common flags
-        has_long_text = bool(re.search(r'<p|<div.*class=.*text|article|<span.*text', content, re.IGNORECASE))
-        has_form = bool(re.search(r'<form|<input|password|credit|card|payment', content, re.IGNORECASE))
-        complex_elements = len(re.findall(r'<input|<select|<textarea|<option', content, re.IGNORECASE))
+        is_css = filepath.endswith('.css')
+        has_long_text = False if is_css else bool(re.search(r'<p|<div.*class=.*text|article|<span.*text', content, re.IGNORECASE))
+        has_form = False if is_css else bool(re.search(r'<form|<input|<select|<textarea', content, re.IGNORECASE))
+        complex_elements = 0 if is_css else len(re.findall(r'<input|<select|<textarea|<option', content, re.IGNORECASE))
 
         # --- 1. PSYCHOLOGY LAWS ---
         # Hick's Law
-        nav_items = len(re.findall(r'<NavLink|<Link|<a\s+href|nav-item', content, re.IGNORECASE))
+        nav_items = 0 if is_css else len(re.findall(r'<NavLink|<Link|<a\s+href|nav-item', content, re.IGNORECASE))
         if nav_items > 7:
             self.issues.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max 7)")
         
@@ -132,7 +133,7 @@ class UXAuditor:
             self.warnings.append(f"[Miller's Law] {filename}: Complex form ({form_fields} fields)")
             
         # Von Restorff
-        if 'button' in content.lower() and not re.search(r'primary|bg-primary|Button.*primary|variant=["\']primary', content, re.IGNORECASE):
+        if not is_css and 'button' in content.lower() and not re.search(r'primary|bg-primary|Button.*primary|variant=["\']primary', content, re.IGNORECASE):
             self.warnings.append(f"[Von Restorff] {filename}: No primary CTA")
 
         # Serial Position Effect - Important items at beginning/end
@@ -187,7 +188,7 @@ class UXAuditor:
                 self.warnings.append(f"[Trust] {filename}: No social proof detected. Consider adding testimonials, ratings, or 'Trusted by' logos.")
 
         # Authority indicators
-        has_footer = bool(re.search(r'footer|<footer', content, re.IGNORECASE))
+        has_footer = False if is_css else bool(re.search(r'footer|<footer', content, re.IGNORECASE))
         if has_footer:
             authority = re.findall(r'certif|award|media|press|featured|as seen in', content, re.IGNORECASE)
             if len(authority) == 0:
@@ -668,7 +669,7 @@ class UXAuditor:
                 self.warnings.append(f"[Motion] {filename}: Many animations ({total_animations}). Ensure majority serve functional purpose (feedback, guidance), not decoration.")
 
         # --- 7. ACCESSIBILITY ---
-        if re.search(r'<img(?![^>]*alt=)[^>]*>', content):
+        if not is_css and re.search(r'<img(?![^>]*alt=)[^>]*>', content):
             self.issues.append(f"[Accessibility] {filename}: Missing img alt text")
 
     def audit_directory(self, directory: str) -> None:

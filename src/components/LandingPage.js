@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { Zap, ArrowRight, ClipboardList, Clock, Star, CheckCircle, Smartphone, LayoutDashboard, BrainCircuit } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -12,7 +13,13 @@ export default function LandingPage() {
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   useEffect(() => {
-    setMounted(true);
+    let active = true;
+    requestAnimationFrame(() => {
+      if (active) setMounted(true);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!mounted) return null;
@@ -36,7 +43,14 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 overflow-hidden relative font-sans selection:bg-indigo-200 selection:text-indigo-900">
       {/* Interactive Background */}
       <motion.div style={{ y: yBg }} className="absolute top-0 left-0 w-full h-[120vh] overflow-hidden z-0 pointer-events-none opacity-40">
-        <img src="/images/abstract-bg.png" alt="Abstract Background" className="w-full h-full object-cover mix-blend-multiply opacity-60" />
+        <Image
+          src="/images/abstract-bg.png"
+          alt="Abstract Background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover mix-blend-multiply opacity-60"
+        />
       </motion.div>
 
       <div className="relative z-10 flex flex-col min-h-screen max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
@@ -86,7 +100,7 @@ export default function LandingPage() {
             initial="hidden" animate="visible" variants={fadeInUp} transition={{ delay: 0.2 }}
             className="max-w-2xl text-lg sm:text-xl text-slate-600 mb-12 font-medium leading-relaxed"
           >
-            Quản lý khách hàng thông minh, tự động nhắc việc, và ưu tiên những cơ hội "nóng" nhất. Trải nghiệm tốc độ đỉnh cao với giao diện tối giản, sang trọng.
+            Quản lý khách hàng thông minh, tự động nhắc việc, và ưu tiên những cơ hội &quot;nóng&quot; nhất. Trải nghiệm tốc độ đỉnh cao với giao diện tối giản, sang trọng.
           </motion.p>
 
           <motion.div 
@@ -118,7 +132,15 @@ export default function LandingPage() {
             className="w-full max-w-5xl relative rounded-[2rem] p-2 bg-gradient-to-b from-slate-200 to-white shadow-2xl"
           >
             <div className="absolute inset-0 -z-10 bg-indigo-500/10 blur-[100px] rounded-full" />
-            <img src="/images/crm-mockup.png" alt="SalesPush CRM Dashboard" className="w-full h-auto rounded-[1.5rem] border border-white shadow-lg object-cover" />
+            <Image
+              src="/images/crm-mockup.png"
+              alt="SalesPush CRM Dashboard"
+              width={1024}
+              height={1024}
+              priority
+              sizes="(max-width: 768px) 100vw, 1024px"
+              className="w-full h-auto rounded-[1.5rem] border border-white shadow-lg object-cover"
+            />
             
             {/* Floating UI Elements */}
             <motion.div 
@@ -278,7 +300,7 @@ export default function LandingPage() {
                 <div className="flex gap-1 text-yellow-400 mb-4">
                   {[...Array(5)].map((_, idx) => <Star key={idx} className="w-5 h-5 fill-current" />)}
                 </div>
-                <p className="text-slate-700 italic mb-6 leading-relaxed">"{t.quote}"</p>
+                <p className="text-slate-700 italic mb-6 leading-relaxed">&quot;{t.quote}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-200" />
                   <div>

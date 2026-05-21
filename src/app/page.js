@@ -1,6 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
-import Dashboard from "@/components/Dashboard";
-import LandingPage from "@/components/LandingPage";
+import nextDynamic from "next/dynamic";
+
+const Dashboard = nextDynamic(() => import("@/components/Dashboard"), {
+  loading: () => (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="animate-pulse text-slate-400 font-semibold">Đang tải...</div>
+    </div>
+  ),
+});
+
+const LandingPage = nextDynamic(() => import("@/components/LandingPage"), {
+  loading: () => (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="animate-pulse text-slate-400 font-semibold">Đang tải...</div>
+    </div>
+  ),
+});
 
 import { getSmartQueue, getCustomerCount } from "@/actions/customers";
 import { getTeamContext } from "@/actions/team";
