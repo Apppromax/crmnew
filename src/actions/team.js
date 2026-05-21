@@ -334,13 +334,40 @@ export async function assignCustomer(customerId, targetUserId) {
   });
 
   if (!customer) throw new Error("Customer not found or you don't have permission to assign this customer.");
+
+  // Lấy projectTags của Team
+  const team = await prisma.team.findUnique({
+    where: { id: membership.teamId },
+    select: { name: true, projectTags: true }
+  });
+
+  let updatedTags = customer.tags || [];
+  let teamProjectTags = team?.projectTags || [];
+
+  if (teamProjectTags.length === 0) {
+    // Nếu chưa cấu hình nhãn dự án, tự động tạo từ tên Team hoặc mặc định là "Chung"
+    const defaultTag = team?.name ? team.name.trim() : "Chung";
+    teamProjectTags = [defaultTag];
+
+    // Cập nhật projectTags của Team trong database để đồng bộ
+    await prisma.team.update({
+      where: { id: membership.teamId },
+      data: { projectTags: teamProjectTags }
+    });
+  }
+
+  const hasMatchingTag = updatedTags.some(tag => teamProjectTags.includes(tag));
+  if (!hasMatchingTag) {
+    updatedTags = [...updatedTags, teamProjectTags[0]];
+  }
   
   // Cập nhật userId mới (Người được phân công) và đảm bảo khách nằm trong teamId
   await prisma.customer.update({
     where: { id: customerId },
     data: {
       userId: targetUserId,
-      teamId: membership.teamId
+      teamId: membership.teamId,
+      tags: updatedTags
     }
   });
 

@@ -80,6 +80,7 @@ export async function triggerSmartAlerts() {
       prisma.customer.findMany({
         where: {
           userId,
+          status: { notIn: ["Đã chốt", "Mất khách"] },
           nextFollowUp: {
             gte: todayStart,
             lte: todayEnd

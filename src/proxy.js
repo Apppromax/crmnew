@@ -15,7 +15,7 @@ export async function proxy(request) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,23 +27,23 @@ export async function proxy(request) {
     }
   )
 
-  // Dùng getUser thay vì getSession để bảo mật (kiểm tra token còn hợp lệ với server không)
+  // Tối ưu hiệu năng: Dùng getSession() thay vì getUser() để đọc trực tiếp session từ cookies trên Edge Proxy
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
 
   // Define public routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register') || request.nextUrl.pathname.startsWith('/auth/confirm')
   const isPublicRoute = isAuthRoute || request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/api/auth')
   
-  if (!user && !isPublicRoute) {
+  if (!session && !isPublicRoute) {
     // Redirect unauthenticated users to login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute) {
+  if (session && isAuthRoute) {
     // Redirect authenticated users away from login/register to dashboard
     const url = request.nextUrl.clone()
     url.pathname = '/'

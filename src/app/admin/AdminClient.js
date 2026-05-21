@@ -188,7 +188,7 @@ export default function AdminClient({ initialUsers, initialTopUps, initialSettin
               </div>
             ))}
           </div>
-        ) : activeTab === "pending" ? (
+        ) : activeTab === "topups" ? (
           <div className="space-y-3">
             {pendingTopUps.length === 0 ? (
               <div className="text-center p-8 text-slate-500">

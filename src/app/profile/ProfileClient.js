@@ -203,57 +203,15 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
     }
   };
 
-  const SectionItem = ({ id, icon: Icon, title, description, children, iconColor = "text-primary-500", iconBg = "bg-primary-50 dark:bg-primary-500/10" }) => {
-    const isActive = activeSection === id;
-    return (
-      <div id={`${id}-container`} className={`overflow-hidden rounded-3xl transition-all duration-300 border ${isActive ? 'border-primary-500 shadow-md' : 'border-slate-100 dark:border-slate-800 shadow-sm'} bg-white dark:bg-slate-900 scroll-mt-24`}>
-        <button 
-          onClick={() => toggleSection(id)} 
-          className="w-full flex items-center justify-between p-5 text-left active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-2xl ${isActive ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20' : `${iconBg} ${iconColor} dark:text-slate-300 dark:bg-slate-800`} transition-all`}>
-              <Icon className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className={`font-black ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
-            </div>
-          </div>
-          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
-        </button>
-        
-        <div className={`transition-all duration-300 ease-in-out ${isActive ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="p-5 pt-2 border-t border-slate-100 dark:border-slate-800/50 mt-1">
-            {children}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
-  const ActionItem = ({ icon: Icon, title, description, onClick, danger = false }) => (
-    <button 
-      onClick={onClick} 
-      className={`w-full flex items-center justify-between p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 active:scale-[0.98] transition-transform`}
-    >
-      <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-2xl ${danger ? 'bg-red-50 text-red-500 dark:bg-red-500/10' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-        <div className="text-left">
-          <h3 className={`font-black ${danger ? 'text-red-500' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
-          <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
-        </div>
-      </div>
-      <ArrowRight className={`w-5 h-5 ${danger ? 'text-red-400' : 'text-slate-400'}`} />
-    </button>
-  );
 
   const trialPeriodDays = 60;
   const trialEndDate = profile?.createdAt ? new Date(new Date(profile.createdAt).getTime() + trialPeriodDays * 24 * 60 * 60 * 1000) : new Date();
   const isTrial = new Date() < trialEndDate;
-  const isPro = profile?.isPro || profile?.ownedTeam?.isActive || profile?.teamMembership?.team?.isActive || isTrial;
+  const isProfilePro = profile?.isPro && (!profile?.proUntil || new Date(profile.proUntil) > new Date());
+  const isOwnedTeamActive = profile?.ownedTeam?.isActive && (!profile?.ownedTeam?.validUntil || new Date(profile.ownedTeam.validUntil) > new Date());
+  const isMemberTeamActive = profile?.teamMembership?.team?.isActive && (!profile?.teamMembership?.team?.validUntil || new Date(profile.teamMembership.team.validUntil) > new Date());
+  const isPro = isProfilePro || isOwnedTeamActive || isMemberTeamActive || isTrial;
 
   return (
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans relative transition-all duration-300">
@@ -311,7 +269,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
             )}
 
             {(!profile.teamMembership || profile.role === 'admin') && (
-              <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50">
+              <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50" activeSection={activeSection} toggleSection={toggleSection}>
               
               {topUpSuccess ? (
                 <div className="text-center py-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
@@ -395,7 +353,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
             )}
 
             {/* ===== SETTINGS SECTION ===== */}
-              <SectionItem id="settings" icon={Settings} title="Cài đặt CRM" description="Quy trình & thời gian chăm sóc" iconColor="text-blue-500" iconBg="bg-blue-50">
+              <SectionItem id="settings" icon={Settings} title="Cài đặt CRM" description="Quy trình & thời gian chăm sóc" iconColor="text-blue-500" iconBg="bg-blue-50" activeSection={activeSection} toggleSection={toggleSection}>
               
               <div className="space-y-6">
                 {/* Snooze Time */}
@@ -498,7 +456,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </SectionItem>
 
               {/* ===== THEME SECTION ===== */}
-              <SectionItem id="theme" icon={Palette} title="Giao diện" description="Màu sắc & Chế độ Sáng/Tối" iconColor="text-fuchsia-500" iconBg="bg-fuchsia-50">
+              <SectionItem id="theme" icon={Palette} title="Giao diện" description="Màu sắc & Chế độ Sáng/Tối" iconColor="text-fuchsia-500" iconBg="bg-fuchsia-50" activeSection={activeSection} toggleSection={toggleSection}>
               
               <div className="space-y-4">
                 {/* Theme Selector */}
@@ -539,11 +497,11 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
 
               {/* ===== PRO UPGRADE SECTION ===== */}
               {(!profile.teamMembership || profile.role === 'admin') && (
-                <SectionItem id="pro" icon={Rocket} title={profile.ownedTeam ? "Gói TEAM PRO" : "Gói Cá Nhân PRO"} description={profile.ownedTeam ? "Mở khóa AI cho toàn đội nhóm" : "Mở khóa AI cho cá nhân"} iconColor="text-amber-500" iconBg="bg-amber-50">
+                <SectionItem id="pro" icon={Rocket} title={profile.ownedTeam ? "Gói TEAM PRO" : "Gói Cá Nhân PRO"} description={profile.ownedTeam ? "Mở khóa AI cho toàn đội nhóm" : "Mở khóa AI cho cá nhân"} iconColor="text-amber-500" iconBg="bg-amber-50" activeSection={activeSection} toggleSection={toggleSection}>
                 
                 {profile.ownedTeam ? (
                   <div className="relative z-10">
-                    {profile.ownedTeam.isActive ? (
+                    {isOwnedTeamActive ? (
                       <>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Team đang sử dụng gói Pro cho {profile.ownedTeam.maxMembers} nhân sự.</p>
                         <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
@@ -568,10 +526,10 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                     </div>
 
                     <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
-                      {isUpgrading ? "Đang xử lý..." : profile.ownedTeam.isActive ? "Gia hạn thêm 1 tháng" : "Nâng cấp Team ngay"}
+                      {isUpgrading ? "Đang xử lý..." : isOwnedTeamActive ? "Gia hạn thêm 1 tháng" : "Nâng cấp Team ngay"}
                     </button>
                   </div>
-                ) : profile.isPro ? (
+                ) : isProfilePro ? (
                   <div className="relative z-10">
                     <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Bạn đang sử dụng gói Pro. Khách hàng không giới hạn, dùng AI thả ga.</p>
                     <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
@@ -723,3 +681,50 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
     </div>
   );
 }
+
+const ActionItem = ({ icon: Icon, title, description, onClick, danger = false }) => (
+  <button 
+    onClick={onClick} 
+    className={`w-full flex items-center justify-between p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm bg-white dark:bg-slate-900 active:scale-[0.98] transition-transform`}
+  >
+    <div className="flex items-center gap-4">
+      <div className={`p-3 rounded-2xl ${danger ? 'bg-red-50 text-red-500 dark:bg-red-500/10' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
+        <Icon className="w-6 h-6" />
+      </div>
+      <div className="text-left">
+        <h3 className={`font-black ${danger ? 'text-red-500' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
+        <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
+      </div>
+    </div>
+    <ArrowRight className={`w-5 h-5 ${danger ? 'text-red-400' : 'text-slate-400'}`} />
+  </button>
+);
+
+const SectionItem = ({ id, icon: Icon, title, description, children, iconColor = "text-primary-500", iconBg = "bg-primary-50 dark:bg-primary-500/10", activeSection, toggleSection }) => {
+  const isActive = activeSection === id;
+  return (
+    <div id={`${id}-container`} className={`overflow-hidden rounded-3xl transition-all duration-300 border ${isActive ? 'border-primary-500 shadow-md' : 'border-slate-100 dark:border-slate-800 shadow-sm'} bg-white dark:bg-slate-900 scroll-mt-24`}>
+      <button 
+        onClick={() => toggleSection(id)} 
+        className="w-full flex items-center justify-between p-5 text-left active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <div className={`p-3 rounded-2xl ${isActive ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20' : `${iconBg} ${iconColor} dark:text-slate-300 dark:bg-slate-800`} transition-all`}>
+            <Icon className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className={`font-black ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-900 dark:text-white'} text-lg tracking-tight`}>{title}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{description}</p>
+          </div>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+      </button>
+      
+      <div className={`transition-all duration-300 ease-in-out ${isActive ? 'max-h-[1500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="p-5 pt-2 border-t border-slate-100 dark:border-slate-800/50 mt-1">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};

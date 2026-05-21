@@ -242,16 +242,28 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       }
     }),
   ]);
-  // Không auto-gán teamId cho khách cá nhân.
-  // Chỉ gán teamId khi Leader phân bổ khách vào team pool.
-  const teamId = null;
+  // Tự động gán teamId nếu có tag trùng khớp với projectTags của team người đó tham gia/sở hữu
+  let teamId = null;
+  const team = profile?.teamMembership?.team || profile?.ownedTeam;
+  if (team && team.projectTags && team.projectTags.length > 0) {
+    const inputTags = tags || [];
+    const hasMatchingTag = inputTags.some(t => team.projectTags.includes(t));
+    if (hasMatchingTag) {
+      teamId = team.id;
+    }
+  }
 
   // FREE TIER LIMIT LOGIC
   const trialPeriodDays = 60; // 2 months trial
   const trialEndDate = new Date(profile.createdAt.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
-  const isTrial = new Date() < trialEndDate;
+  const now = new Date();
+  const isTrial = now < trialEndDate;
 
-  const isPro = profile.isPro || profile.ownedTeam?.isActive || profile.teamMembership?.team?.isActive || isTrial;
+  const isProfilePro = profile.isPro && (!profile.proUntil || new Date(profile.proUntil) > now);
+  const isOwnedTeamActive = profile.ownedTeam?.isActive && (!profile.ownedTeam?.validUntil || new Date(profile.ownedTeam.validUntil) > now);
+  const isMemberTeamActive = profile.teamMembership?.team?.isActive && (!profile.teamMembership?.team?.validUntil || new Date(profile.teamMembership.team.validUntil) > now);
+
+  const isPro = isProfilePro || isOwnedTeamActive || isMemberTeamActive || isTrial;
   
   // Skip count() cho trial/pro users — chỉ check khi thực sự cần
   if (!isPro) {
@@ -300,6 +312,26 @@ export async function updateCustomer(customerId, data) {
   for (const key of allowedFields) {
     if (data[key] !== undefined) {
       updateData[key] = dateFields.includes(key) && data[key] ? new Date(data[key]) : data[key];
+    }
+  }
+
+  // Tự động gán/hủy teamId nếu có sự thay đổi về tags hoặc nhãn trùng khớp
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    include: {
+      ownedTeam: true,
+      teamMembership: { include: { team: true } }
+    }
+  });
+
+  const team = profile?.teamMembership?.team || profile?.ownedTeam;
+  if (team) {
+    const checkTags = data.tags !== undefined ? data.tags : existing.tags;
+    const hasMatchingTag = checkTags && team.projectTags && team.projectTags.length > 0 && checkTags.some(t => team.projectTags.includes(t));
+    if (hasMatchingTag) {
+      updateData.teamId = team.id;
+    } else {
+      updateData.teamId = null;
     }
   }
 
@@ -377,9 +409,29 @@ export async function updateCustomerTags(customerId, tags) {
   const existing = await prisma.customer.findFirst({ where: { id: customerId, userId } });
   if (!existing) throw new Error("Not found");
 
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    include: {
+      ownedTeam: true,
+      teamMembership: { include: { team: true } }
+    }
+  });
+
+  const team = profile?.teamMembership?.team || profile?.ownedTeam;
+  let teamId = existing.teamId;
+
+  if (team) {
+    const hasMatchingTag = tags && team.projectTags && team.projectTags.length > 0 && tags.some(t => team.projectTags.includes(t));
+    if (hasMatchingTag) {
+      teamId = team.id;
+    } else {
+      teamId = null;
+    }
+  }
+
   await prisma.customer.update({
     where: { id: customerId },
-    data: { tags },
+    data: { tags, teamId },
   });
 
   revalidatePath("/customers");
