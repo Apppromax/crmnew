@@ -394,24 +394,37 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
               
               const totalSteps = JOURNEY_OPTIONS.length;
               const currentIdx = Math.max(0, JOURNEY_OPTIONS.findIndex(s => s.startsWith((c.journeyStage || "1.").split(".")[0])));
+              const isSnoozed = c.snoozedUntil && new Date(c.snoozedUntil) > new Date();
               
               return (
                 <div 
                   key={c.id} 
                   onClick={() => { setSelectedCustomer(c); setIsEditing(false); setSaveMsg(""); setModalTab("info"); setTimeline([]); setShowDeleteConfirm(false); }}
-                  className={`px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
-                    c.snoozedUntil && new Date(c.snoozedUntil) > new Date() ? 'opacity-70 bg-slate-50 dark:bg-slate-900/50' : ''
+                  className={`px-3 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border-l-4 ${
+                    isSnoozed
+                      ? 'border-l-amber-500 bg-amber-50/65 dark:bg-amber-950/20 opacity-80'
+                      : 'border-l-transparent'
                   } flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all`}
                 >
                   {/* Left: Journey Ring (Replaces Avatar) */}
                   <div className="relative w-[42px] h-[42px] shrink-0 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90 absolute top-0 left-0" viewBox="0 0 42 42">
                       <circle cx="21" cy="21" r="17" fill="none" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="3.5" />
-                      <circle cx="21" cy="21" r="17" fill="none" className="stroke-blue-500 transition-all duration-500" strokeWidth="3.5" strokeDasharray={106.8} strokeDashoffset={106.8 - (((currentIdx + 1) / totalSteps) * 106.8)} strokeLinecap="round" />
+                      <circle 
+                        cx="21" 
+                        cy="21" 
+                        r="17" 
+                        fill="none" 
+                        className={`transition-all duration-500 ${isSnoozed ? 'stroke-amber-500' : 'stroke-blue-500'}`} 
+                        strokeWidth="3.5" 
+                        strokeDasharray={106.8} 
+                        strokeDashoffset={106.8 - (((currentIdx + 1) / totalSteps) * 106.8)} 
+                        strokeLinecap="round" 
+                      />
                     </svg>
-                    <div className="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 absolute inset-0">
+                    <div className={`flex flex-col items-center justify-center absolute inset-0 ${isSnoozed ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
                       <span className="text-[11px] font-black leading-none">{currentIdx + 1}</span>
-                      <div className="w-3 h-px bg-blue-200 dark:bg-blue-800/80 my-[1px]"></div>
+                      <div className={`w-3 h-px my-[1px] ${isSnoozed ? 'bg-amber-200 dark:bg-amber-800/80' : 'bg-blue-200 dark:bg-blue-800/80'}`}></div>
                       <span className="text-[9px] font-bold leading-none">{totalSteps}</span>
                     </div>
                   </div>
@@ -419,8 +432,14 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                   {/* Middle: Info */}
                   <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
                     {/* Row 1: Name + Heat */}
-                    <div className="flex items-start gap-1.5 min-w-0 w-full">
-                      <h3 className="font-bold text-slate-900 dark:text-white text-[14px] leading-tight break-words line-clamp-2">{c.name || "Khách hàng"}</h3>
+                    <div className="flex items-start gap-1.5 min-w-0 w-full flex-wrap">
+                      <h3 className={`font-bold text-[14px] leading-tight break-words line-clamp-2 ${isSnoozed ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{c.name || "Khách hàng"}</h3>
+                      {isSnoozed && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-400 flex items-center gap-1 shrink-0 mt-[1px] border border-amber-300 dark:border-amber-800/50">
+                          <Clock className="w-2.5 h-2.5" />
+                          Tạm hoãn
+                        </span>
+                      )}
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] ${
                         c.heatLevel === 'Rất Nét' ? 'bg-red-50 text-red-600' :
                         c.heatLevel === 'Tiềm Năng' ? 'bg-orange-50 text-orange-600' :
@@ -431,7 +450,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                         {c.heatLevel}
                       </span>
                       {currentUserId && c.userId !== currentUserId && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-purple-50 text-purple-600 border border-purple-100 dark:border-purple-800 flex items-center gap-1">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-750 flex items-center gap-1">
                           <Users className="w-2.5 h-2.5" />
                           {c.profile?.fullName || c.profile?.email?.split('@')[0] || "Đội nhóm"}
                         </span>
@@ -439,7 +458,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                     </div>
 
                     {/* Row 2: Phone + Demand */}
-                    <div className="flex items-center gap-1.5 text-[12px] text-slate-500 min-w-0 w-full">
+                    <div className={`flex items-center gap-1.5 text-[12px] min-w-0 w-full ${isSnoozed ? 'text-slate-400' : 'text-slate-500'}`}>
                       <span className="font-medium shrink-0">{c.phone}</span>
                       {(c.area || c.demand) && (
                         <>
@@ -451,7 +470,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
 
                     {/* Row 3: Journey Stage Text */}
                     <div className="flex items-start gap-1.5 mt-0.5 min-w-0 w-full text-[11.5px] text-slate-600 dark:text-slate-400">
-                      <Target className="w-3 h-3 text-blue-500 shrink-0 mt-[2px]" />
+                      <Target className={`w-3 h-3 shrink-0 mt-[2px] ${isSnoozed ? 'text-amber-500' : 'text-blue-500'}`} />
                       <span className="leading-tight break-words">{c.journeyStage ? c.journeyStage.split(". ")[1] : "Chưa cập nhật"}</span>
                     </div>
                   </div>
@@ -471,7 +490,15 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                         {c.status}
                       </span>
                       
-                      {c.nextFollowUp && (
+                      {isSnoozed ? (
+                        <div className="flex flex-col items-end mt-0.5">
+                          <span className="text-[8.5px] text-amber-600 dark:text-amber-400 mb-0.5">Hoãn đến</span>
+                          <div className="flex items-center gap-1 text-[9.5px] font-bold text-amber-700 dark:text-amber-400">
+                            <Clock className="w-3 h-3 text-amber-500" />
+                            {new Date(c.snoozedUntil).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })} {new Date(c.snoozedUntil).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' })}
+                          </div>
+                        </div>
+                      ) : c.nextFollowUp ? (
                         <div className="flex flex-col items-end mt-0.5">
                           <span className="text-[8.5px] text-slate-400 mb-0.5">Hẹn tiếp theo</span>
                           <div className="flex items-center gap-1 text-[10px] font-medium text-slate-600 dark:text-slate-300">
@@ -479,7 +506,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                             {new Date(c.nextFollowUp).toLocaleDateString("vi-VN", { day: '2-digit', month: '2-digit' })}
                           </div>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                     <div className="text-slate-300 dark:text-slate-600 ml-0.5">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -602,7 +629,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                             {selectedCustomer.phone}
                           </p>
                           {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
-                            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-0.5 rounded border border-purple-100 dark:border-purple-500/20 whitespace-nowrap">
+                            <span className="text-[10px] font-bold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/50 whitespace-nowrap">
                               Tạm hoãn đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
                             </span>
                           )}
