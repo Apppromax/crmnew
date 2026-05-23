@@ -28,7 +28,10 @@ function formatFollowUp(dateStr) {
   const diffMs = date - now;
   const absH = Math.abs(Math.round(diffMs / 3600000));
   const absD = Math.abs(Math.round(diffMs / 86400000));
-  if (diffMs < 0) return absD >= 1 ? `Lỡ ${absD} ngày` : `Lỡ ${absH}h`;
+  if (diffMs <= 0) {
+    if (diffMs >= -3600000) return 'Đang trong giờ';
+    return absD >= 1 ? `Lỡ ${absD} ngày` : `Lỡ ${absH}h`;
+  }
   if (absH < 1) return 'Sắp tới';
   if (absH < 24) return `${absH}h nữa`;
   return `${absD} ngày nữa`;
@@ -36,6 +39,8 @@ function formatFollowUp(dateStr) {
 
 export default function RadarCard({ customer, onClick, onSnooze }) {
   const heat = heatConfig[customer.heatLevel] || heatConfig["Chưa Rõ"];
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
   const cardRef = useRef(null);
   const dragState = useRef({ startX: null, startY: null, currentX: 0, isSwiping: null });
@@ -130,9 +135,11 @@ export default function RadarCard({ customer, onClick, onSnooze }) {
           {heat.emoji}
         </div>
         <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border shrink-0 ${
-            customer.nextFollowUp && new Date(customer.nextFollowUp) < new Date() 
+            customer.nextFollowUp && new Date(customer.nextFollowUp) < oneHourAgo 
               ? 'text-red-600 bg-red-50 border-red-100 dark:bg-red-500/10 dark:border-red-500/20' 
-              : 'text-slate-500 bg-slate-50 border-slate-100 dark:text-slate-400 dark:bg-slate-800/50 dark:border-slate-800'
+              : customer.nextFollowUp && new Date(customer.nextFollowUp) <= now
+                ? 'text-primary-600 bg-primary-50 border-primary-100 dark:text-primary-400 dark:bg-primary-500/10 dark:border-primary-500/20'
+                : 'text-slate-500 bg-slate-50 border-slate-100 dark:text-slate-400 dark:bg-slate-800/50 dark:border-slate-800'
           }`}>
           <Clock className="w-3 h-3" />
           <span>{formatFollowUp(customer.nextFollowUp)}</span>

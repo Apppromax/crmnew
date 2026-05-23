@@ -127,7 +127,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                 const hasUpcomingAppt = customers.some(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) > now && new Date(c.nextFollowUp) <= in48h);
 
                 const snoozedCount = customers.filter(c => c.userId === m.userId && c.snoozedUntil && new Date(c.snoozedUntil) > now).length;
-                const overdueCount = customers.filter(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) < now && c.status !== "Đã chốt" && c.status !== "Mất khách").length;
+                const overdueCount = customers.filter(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) < new Date(now.getTime() - 60 * 60 * 1000) && c.status !== "Đã chốt" && c.status !== "Mất khách").length;
                 
                 const totalLeads = customers.filter(c => c.userId === m.userId).length;
                 const closedCount = memberStats.closed || 0;

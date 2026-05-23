@@ -30,8 +30,9 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
 
   if (!member || !mounted) return null;
 
-  // Lọc danh sách khách hàng của Sale này
   const memberCustomers = customers.filter(c => c.userId === member.userId);
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
   // Tính toán KPI
   const totalLeads = memberCustomers.length;
@@ -124,7 +125,7 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Khách hàng trễ hẹn</p>
-                <p className={`font-semibold mt-0.5 ${memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date() && c.status !== "Đã chốt" && c.status !== "Mất khách").length > 0 ? "text-rose-500" : "text-slate-700 dark:text-slate-200"}`}>{memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date() && c.status !== "Đã chốt" && c.status !== "Mất khách").length} khách</p>
+                <p className={`font-semibold mt-0.5 ${memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < oneHourAgo && c.status !== "Đã chốt" && c.status !== "Mất khách").length > 0 ? "text-rose-500" : "text-slate-700 dark:text-slate-200"}`}>{memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < oneHourAgo && c.status !== "Đã chốt" && c.status !== "Mất khách").length} khách</p>
               </div>
             </div>
             <div className="pt-2 border-t border-slate-100 dark:border-slate-850 flex justify-between text-xs font-medium text-slate-500">

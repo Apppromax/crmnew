@@ -28,6 +28,7 @@ function enrichStatus(customer) {
 export async function getDashboardData() {
   const userId = await requireUser();
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
   // 2 queries chạy SONG SONG thay vì tuần tự
   const [customers, teamInfo] = await Promise.all([
@@ -75,8 +76,8 @@ export async function getDashboardData() {
   // Re-sort: overdue first, then journeyStage
   const top10 = queueCandidates.slice(0, 10);
   top10.sort((a, b) => {
-    const aOverdue = a.nextFollowUp && a.nextFollowUp < now ? 0 : 1;
-    const bOverdue = b.nextFollowUp && b.nextFollowUp < now ? 0 : 1;
+    const aOverdue = a.nextFollowUp && a.nextFollowUp < oneHourAgo ? 0 : 1;
+    const bOverdue = b.nextFollowUp && b.nextFollowUp < oneHourAgo ? 0 : 1;
     if (aOverdue !== bOverdue) return aOverdue - bOverdue;
     const aJ = parseInt((a.journeyStage || "1.").split(".")[0]) || 1;
     const bJ = parseInt((b.journeyStage || "1.").split(".")[0]) || 1;
@@ -107,6 +108,7 @@ export async function getDashboardData() {
 export async function getSmartQueue() {
   const userId = await requireUser();
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
   const customers = await prisma.customer.findMany({
     where: {
@@ -135,8 +137,8 @@ export async function getSmartQueue() {
 
   // Re-sort: overdue first, then journeyStage
   const sorted = customers.sort((a, b) => {
-    const aOverdue = a.nextFollowUp && a.nextFollowUp < now ? 0 : 1;
-    const bOverdue = b.nextFollowUp && b.nextFollowUp < now ? 0 : 1;
+    const aOverdue = a.nextFollowUp && a.nextFollowUp < oneHourAgo ? 0 : 1;
+    const bOverdue = b.nextFollowUp && b.nextFollowUp < oneHourAgo ? 0 : 1;
     if (aOverdue !== bOverdue) return aOverdue - bOverdue;
     
     const aJourney = parseInt((a.journeyStage || "1.").split(".")[0]) || 1;
@@ -610,6 +612,7 @@ export async function getCustomerCount() {
 export async function getDashboardStats() {
   const userId = await requireUser();
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
 
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
   const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
@@ -650,7 +653,7 @@ export async function getDashboardStats() {
     if (c.heatLevel === "Tiềm Năng") warm++;
     
     if (c.nextFollowUp) {
-      if (c.nextFollowUp < now) overdue++;
+      if (c.nextFollowUp < oneHourAgo) overdue++;
       if (c.nextFollowUp >= todayStart && c.nextFollowUp <= todayEnd) todaySchedule++;
     }
   }
@@ -663,8 +666,9 @@ export async function getDashboardStats() {
 export async function getOverdueCustomers() {
   const userId = await requireUser();
   const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
   const customers = await prisma.customer.findMany({
-    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { lt: now } },
+    where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] }, nextFollowUp: { lt: oneHourAgo } },
     orderBy: { nextFollowUp: "asc" },
   });
   return customers.map((c) => enrichStatus({

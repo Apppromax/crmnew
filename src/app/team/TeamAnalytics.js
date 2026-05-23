@@ -16,7 +16,7 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
   const todayAppointments = customers.filter(c => c.nextFollowUp && isSameDay(new Date(c.nextFollowUp), today)).length;
 
   const activeCustomers = customers.filter(c => c.status === "Đang chăm" || c.status === "Đang chờ");
-  const overdueCustomers = activeCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today);
+  const overdueCustomers = activeCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date(today.getTime() - 60 * 60 * 1000));
   const overallFollowUpRate = activeCustomers.length > 0 
     ? Math.round(((activeCustomers.length - overdueCustomers.length) / activeCustomers.length) * 100) 
     : 100;
@@ -35,7 +35,7 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
   const priorities = members.map(m => {
     const memberCustomers = customers.filter(c => c.userId === m.userId);
     
-    const overdue = memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today && c.status !== "Đã chốt" && c.status !== "Bỏ qua");
+    const overdue = memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date(today.getTime() - 60 * 60 * 1000) && c.status !== "Đã chốt" && c.status !== "Bỏ qua");
     const hot = memberCustomers.filter(c => c.heatLevel?.includes("Rất Nét") || c.heatLevel?.includes("Chốt Ngay") || c.journeyStage?.includes("Dồn Chốt"));
     const noAppt = memberCustomers.filter(c => !c.nextFollowUp && c.status === "Đang chăm");
 
@@ -53,7 +53,7 @@ export default function TeamAnalytics({ stats, members, customers = [], setActiv
     
     // Real follow up rate
     const memberActive = customers.filter(c => c.userId === m.userId && (c.status === "Đang chăm" || c.status === "Đang chờ"));
-    const memberOverdue = memberActive.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < today);
+    const memberOverdue = memberActive.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date(today.getTime() - 60 * 60 * 1000));
     const followUpRate = memberActive.length > 0 
       ? Math.round(((memberActive.length - memberOverdue.length) / memberActive.length) * 100)
       : 100;
