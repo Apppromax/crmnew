@@ -155,7 +155,8 @@ export default function AddCustomerPage() {
   const [finalJourney, setFinalJourney] = useState(LOCAL_JOURNEY_OPTIONS[0]);
   const [finalDateString, setFinalDateString] = useState("");
 
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("idle"); // 'idle' | 'saving' | 'redirecting'
+  const isSaving = saveStatus !== "idle";
   const [error, setError] = useState(null);
   
   // Free Tier Limit Popup
@@ -183,7 +184,7 @@ export default function AddCustomerPage() {
   };
 
   const handleSaveWithFollowUp = async () => {
-    setIsSaving(true);
+    setSaveStatus("saving");
     setShowStatusPopup(false);
     setError(null);
     
@@ -201,10 +202,11 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(followUpDate)
       });
       sessionStorage.setItem('sp_save_toast', '1');
+      setSaveStatus("redirecting");
       router.push("/");
       router.refresh();
     } catch (err) {
-      setIsSaving(false);
+      setSaveStatus("idle");
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
         setShowLimitPopup(true);
       } else {
@@ -227,7 +229,7 @@ export default function AddCustomerPage() {
       return;
     }
     
-    setIsSaving(true);
+    setSaveStatus("saving");
     setShowFinalPopup(false);
     setError(null);
 
@@ -253,10 +255,11 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(finalDateString)
       });
       sessionStorage.setItem('sp_save_toast', '1');
+      setSaveStatus("redirecting");
       router.push("/");
       router.refresh();
     } catch (err) {
-      setIsSaving(false);
+      setSaveStatus("idle");
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
         setShowLimitPopup(true);
       } else {
@@ -668,13 +671,27 @@ export default function AddCustomerPage() {
             }
           `}} />
           <div className="bg-white/90 dark:bg-slate-900/90 p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/30 flex flex-col items-center max-w-xs w-full text-center animate-scale-in">
-            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 dark:border-emerald-500/10"></div>
-              <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
-              <UserPlus className="w-6 h-6 text-emerald-500 animate-pulse" />
-            </div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Đang lưu khách hàng</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Vui lòng đợi trong giây lát...</p>
+            {saveStatus === "saving" ? (
+              <>
+                <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 dark:border-emerald-500/10"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+                  <UserPlus className="w-6 h-6 text-emerald-500 animate-pulse" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Đang lưu khách hàng</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Vui lòng đợi trong giây lát...</p>
+              </>
+            ) : (
+              <>
+                <div className="relative w-16 h-16 mb-4 flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 rounded-full animate-bounce">
+                  <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Lưu thành công!</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Đang tải trang chủ...</p>
+              </>
+            )}
           </div>
         </div>
       )}

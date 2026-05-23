@@ -463,13 +463,27 @@ export async function getAllTags() {
 
 export async function getCustomerCount() {
   const userId = await requireUser();
-  const [total, hot, warm] = await Promise.all([
-    prisma.customer.count({
-      where: { userId, status: { notIn: ["Đã chốt", "Mất khách"] } },
-    }),
-    prisma.customer.count({ where: { userId, heatLevel: "Rất Nét" } }),
-    prisma.customer.count({ where: { userId, heatLevel: "Tiềm Năng" } }),
-  ]);
+  const customers = await prisma.customer.findMany({
+    where: { userId },
+    select: { status: true, heatLevel: true }
+  });
+
+  let total = 0;
+  let hot = 0;
+  let warm = 0;
+
+  for (const c of customers) {
+    if (c.status !== "Đã chốt" && c.status !== "Mất khách") {
+      total++;
+    }
+    if (c.heatLevel === "Rất Nét") {
+      hot++;
+    }
+    if (c.heatLevel === "Tiềm Năng") {
+      warm++;
+    }
+  }
+
   return { total, hot, warm };
 }
 
