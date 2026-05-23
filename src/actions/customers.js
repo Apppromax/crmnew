@@ -285,8 +285,9 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
     },
   });
 
-  revalidatePath("/");
-  revalidatePath("/customers");
+  // revalidatePath is handled client-side via router.refresh() after push to avoid blocking Server Action
+  // revalidatePath("/");
+  // revalidatePath("/customers");
 
   return customer;
 }

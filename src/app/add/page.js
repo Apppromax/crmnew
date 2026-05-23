@@ -202,6 +202,7 @@ export default function AddCustomerPage() {
       });
       sessionStorage.setItem('sp_save_toast', '1');
       router.push("/");
+      router.refresh();
     } catch (err) {
       setIsSaving(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
@@ -253,6 +254,7 @@ export default function AddCustomerPage() {
       });
       sessionStorage.setItem('sp_save_toast', '1');
       router.push("/");
+      router.refresh();
     } catch (err) {
       setIsSaving(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
