@@ -1,14 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user.id;
-}
+import { createClient, requireUser } from "@/lib/supabase/server";
 
 export async function getUserProfile() {
   const userId = await requireUser();

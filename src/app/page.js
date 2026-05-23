@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/supabase/server";
 import nextDynamic from "next/dynamic";
 
 const Dashboard = nextDynamic(() => import("@/components/Dashboard"), {
@@ -23,8 +23,7 @@ import { getTeamContext } from "@/actions/team";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     return <LandingPage />;

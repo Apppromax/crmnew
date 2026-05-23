@@ -1,15 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, requireUser } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user.id;
-}
 
 function enrichStatus(customer) {
   if (!customer) return customer;
@@ -231,17 +224,14 @@ export async function clearAllSnoozes() {
 export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand, tags, status, nextFollowUp, journeyStage }) {
   const userId = await requireUser();
 
-  // Parallel fetch: team membership + profile (independent queries)
-  const [membership, profile] = await Promise.all([
-    prisma.teamMember.findUnique({ where: { userId } }),
-    prisma.profile.findUnique({
-      where: { id: userId },
-      include: {
-        ownedTeam: true,
-        teamMembership: { include: { team: true } }
-      }
-    }),
-  ]);
+  // Fetch profile (which includes membership and ownedTeam)
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    include: {
+      ownedTeam: true,
+      teamMembership: { include: { team: true } }
+    }
+  });
   // Tự động gán teamId nếu có tag trùng khớp với projectTags của team người đó tham gia/sở hữu
   let teamId = null;
   const team = profile?.teamMembership?.team || profile?.ownedTeam;

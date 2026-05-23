@@ -1,15 +1,8 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, requireUser } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-  return user.id;
-}
 
 function generateInviteCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
