@@ -27,29 +27,29 @@ function enrichCustomer(c) {
     : 0;
 
   let reason = "Khách mới, cần tìm hiểu thêm";
-  let nextStep = "Gọi tìm hiểu nhu cầu";
+  let nextStep = c.nextAction || "Gọi tìm hiểu nhu cầu";
 
   if (overdueDays > 0) {
     reason = `Lỡ hẹn ${overdueDays} ngày, cần liên hệ lại ngay`;
-    nextStep = "Gọi xác nhận lại lịch hẹn";
+    if (!c.nextAction) nextStep = "Gọi xác nhận lại lịch hẹn";
   } else if (c.journeyStage && c.journeyStage.startsWith("5.")) {
     reason = "Đang dồn chốt, cần đẩy nhanh";
-    nextStep = "Tạo khan hiếm, đề xuất phương án";
+    if (!c.nextAction) nextStep = "Tạo khan hiếm, đề xuất phương án";
   } else if (c.journeyStage && c.journeyStage.startsWith("4.")) {
     reason = "Đã hẹn gặp, cần follow-up";
-    nextStep = "Hỏi cảm nhận và đề xuất bước tiếp";
+    if (!c.nextAction) nextStep = "Hỏi cảm nhận và đề xuất bước tiếp";
   } else if (c.journeyStage && c.journeyStage.startsWith("2.")) {
     reason = "Đã liên hệ, cần tư vấn chuyên sâu";
-    nextStep = "Lên lịch hẹn gặp khách";
+    if (!c.nextAction) nextStep = "Lên lịch hẹn gặp khách";
   } else if (c.heatLevel === "Rất Nét") {
     reason = "Khách rõ nét, thông tin đầy đủ";
-    nextStep = "Gọi tư vấn chi tiết";
+    if (!c.nextAction) nextStep = "Gọi tư vấn chi tiết";
   } else if (c.heatLevel === "Tiềm Năng") {
     reason = "Khách tiềm năng, cần nuôi dưỡng";
-    nextStep = "Nhắn tin follow-up";
+    if (!c.nextAction) nextStep = "Nhắn tin follow-up";
   } else if (c.heatLevel === "Quan Tâm" || c.heatLevel === "Tham Khảo" || c.heatLevel === "Chưa Rõ") {
     reason = "Thông tin còn mơ hồ, cần khai thác";
-    nextStep = "Gọi tìm hiểu ngân sách";
+    if (!c.nextAction) nextStep = "Gọi tìm hiểu ngân sách";
   }
 
   return { ...c, reason, nextStep };

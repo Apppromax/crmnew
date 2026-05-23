@@ -85,6 +85,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
   const [careFollowUpOption, setCareFollowUpOption] = useState("1d");
   const [isCaring, setIsCaring] = useState(false);
   const [isUpdateCareOpen, setIsUpdateCareOpen] = useState(false);
+  const [preselectedNextAction, setPreselectedNextAction] = useState("");
   const filteredCustomers = localCustomers.filter((c) => {
     const term = search.toLowerCase();
     const matchSearch = 
@@ -767,6 +768,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                             className="w-full text-sm p-3 pr-8 rounded-xl border border-primary-200 dark:border-primary-900/50 bg-primary-50/50 dark:bg-primary-900/10 text-primary-700 dark:text-primary-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500/50 appearance-none shadow-sm"
                             onChange={(e) => {
                               if (e.target.value) {
+                                setPreselectedNextAction(e.target.value);
                                 setIsUpdateCareOpen(true);
                                 e.target.value = "";
                               }
@@ -805,6 +807,18 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                         </div>
                       </div>
                     </div>
+
+                    {selectedCustomer.nextAction && (
+                      <div className="flex items-start gap-2 pt-2.5 pb-1">
+                        <Activity className="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hành động tiếp theo</p>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                            {selectedCustomer.nextAction}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Info Fields - Table Layout */}
                     <div className="space-y-3 pt-2">
@@ -985,11 +999,16 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
       <UpdateCareSheet
         isOpen={isUpdateCareOpen}
         customer={selectedCustomer}
-        onClose={() => setIsUpdateCareOpen(false)}
+        onClose={() => {
+          setIsUpdateCareOpen(false);
+          setPreselectedNextAction("");
+        }}
+        initialNextAction={preselectedNextAction}
         onComplete={async (data) => {
           try {
             // 1. Optimistic Update (Zero-latency)
             setIsUpdateCareOpen(false);
+            setPreselectedNextAction("");
             setSaveMsg("✓ Đã lưu thông tin chăm sóc");
             setTimeout(() => setSaveMsg(""), 3000);
             
@@ -1001,6 +1020,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                 status: data.status || prev.status,
                 journeyStage: data.journeyStage || prev.journeyStage,
                 nextFollowUp: data.nextFollowUp !== undefined ? data.nextFollowUp : prev.nextFollowUp,
+                nextAction: data.nextAction !== undefined ? data.nextAction : prev.nextAction,
               };
               
               // Also update the list view

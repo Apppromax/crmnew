@@ -219,6 +219,7 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
 
   const updateData = { lastContactAt: now, coldStreak };
   if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
+  if (nextAction !== undefined) updateData.nextAction = nextAction || null;
   
   if (status) {
     updateData.status = status;

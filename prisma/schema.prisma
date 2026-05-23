@@ -68,6 +68,7 @@ model Customer {
   nextFollowUp  DateTime? @map("next_follow_up")
   lastContactAt DateTime? @map("last_contact_at")
   snoozedUntil  DateTime? @map("snoozed_until")
+  nextAction    String?   @map("next_action")
 
   // Tags
   tags         String[] @default([])

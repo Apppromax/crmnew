@@ -120,6 +120,12 @@ const SwipeableCard = ({ item, onClick, onComplete, onReschedule, isCompleted })
             {item.demand && <span className="text-slate-300 dark:text-slate-700">•</span>}
             {item.demand && <span className="truncate">{item.demand}</span>}
           </div>
+          {item.nextAction && (
+            <div className="text-xs text-primary-600 dark:text-primary-400 font-semibold mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0"></span>
+              <span className="truncate">{item.nextAction}</span>
+            </div>
+          )}
         </div>
         
         <div className="text-right shrink-0">
@@ -173,13 +179,21 @@ export default function ScheduleClient({ initialSchedule, initialOverdue }) {
     });
   };
 
-  const handleCareComplete = () => {
+  const handleCareComplete = (data) => {
     setIsCareSheetOpen(false);
     if (selectedItem) {
       setCompletedIds(prev => new Set([...prev, selectedItem.id]));
     }
     setSelectedItem(null);
-    router.refresh();
+    startTransition(async () => {
+      try {
+        await completeCustomerAction(data);
+        router.refresh();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Có lỗi xảy ra khi lưu: " + err.message);
+      }
+    });
   };
 
   const handleReschedule = (item, days) => {

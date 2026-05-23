@@ -56,7 +56,7 @@ const LOCAL_JOURNEY_DETAILS = {
   "7. Xây dựng mối quan hệ": { actions: ["Xin lời giới thiệu khách hàng mới (Referral)", "Mời tham gia event tri ân", "Cập nhật tiến độ xây dựng", "Hỗ trợ tìm khách thuê"] }
 };
 
-export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose }) {
+export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose, initialNextAction }) {
   const [step, setStep] = useState(1);
   const [note, setNote] = useState('');
   const [journeyStage, setJourneyStage] = useState('');
@@ -133,11 +133,11 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose 
     if (isOpen && customer) {
       setStep(1);
       setNote('');
-      setJourneyStage(customer.journeyStage || LOCAL_JOURNEY_OPTIONS[0]);
+      setJourneyStage(!customer.journeyStage || customer.journeyStage === "Lead" ? LOCAL_JOURNEY_OPTIONS[0] : customer.journeyStage);
       setJourneyProgress(null);
       setStatusAction(null);
       setSelectedDate(null);
-      setNextAction('');
+      setNextAction(initialNextAction || customer.nextAction || '');
       setIsCompleting(false);
     }
   }
