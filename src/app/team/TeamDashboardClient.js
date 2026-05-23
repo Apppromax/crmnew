@@ -7,6 +7,18 @@ import TeamAnalytics from "./TeamAnalytics";
 import MemberPerformanceModal from "./MemberPerformanceModal";
 import { updateTeamProjectTags } from "@/actions/team";
 
+const formatLastActive = (isoString) => {
+  if (!isoString) return "Chưa hoạt động";
+  const diffMs = new Date() - new Date(isoString);
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "Vừa xong";
+  if (diffMins < 60) return `${diffMins} phút trước`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} ngày trước`;
+};
+
 export default function TeamDashboardClient({ team, role, members, customers, stats }) {
   const isLeader = role === "LEADER";
   const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'members', 'leads', 'settings'
@@ -114,6 +126,13 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                 
                 const hasUpcomingAppt = customers.some(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) > now && new Date(c.nextFollowUp) <= in48h);
 
+                const snoozedCount = customers.filter(c => c.userId === m.userId && c.snoozedUntil && new Date(c.snoozedUntil) > now).length;
+                const overdueCount = customers.filter(c => c.userId === m.userId && c.nextFollowUp && new Date(c.nextFollowUp) < now && c.status !== "Đã chốt" && c.status !== "Mất khách").length;
+                
+                const totalLeads = customers.filter(c => c.userId === m.userId).length;
+                const closedCount = memberStats.closed || 0;
+                const conversionRate = totalLeads > 0 ? Math.round((closedCount / totalLeads) * 100) : 0;
+
                 return (
                   <div key={m.id} className="group flex flex-col p-4 rounded-2xl glass hover:border-primary-400/50 transition-all">
                     <div className="flex items-center justify-between mb-3">
@@ -126,6 +145,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                             {m.user.email.split('@')[0]}
                           </p>
                           <p className="text-[10px] text-slate-500 font-medium">Tham gia: {new Date(m.joinedAt).toLocaleDateString("vi-VN")}</p>
+                          <p className="text-[9px] text-slate-400 mt-0.5">Hoạt động: {formatLastActive(m.stats?.lastInteraction)}</p>
                         </div>
                       </div>
                       <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${m.role === 'LEADER' ? 'text-primary-600 bg-primary-50 dark:bg-primary-500/10' : 'text-slate-500 bg-slate-100 dark:bg-slate-800'}`}>
@@ -133,7 +153,7 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                       </span>
                     </div>
 
-                    {(hasClosingSoon || hasUpcomingAppt) && (
+                    {(hasClosingSoon || hasUpcomingAppt || overdueCount > 0) && (
                       <div className="flex flex-wrap gap-1.5 mb-3">
                         {hasClosingSoon && (
                            <span className="px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-[9px] font-bold uppercase tracking-widest border border-red-100 dark:border-red-500/20 flex items-center gap-1">
@@ -145,26 +165,42 @@ export default function TeamDashboardClient({ team, role, members, customers, st
                              ⏰ Sắp có hẹn
                            </span>
                         )}
+                        {overdueCount > 0 && (
+                           <span className="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[9px] font-bold uppercase tracking-widest border border-rose-100 dark:border-rose-500/20 flex items-center gap-1">
+                             ⚠️ {overdueCount} khách trễ hẹn
+                           </span>
+                        )}
                       </div>
                     )}
                     
                     {/* Performance mini-stats */}
-                    <div className="flex items-center gap-2 mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
-                      <div className="flex-1 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg py-1.5">
-                        <span className="block text-[9px] text-slate-400 font-bold uppercase">Đang chăm</span>
-                        <span className="text-sm font-black text-slate-700 dark:text-slate-300">{memberStats.active}</span>
+                    <div className="grid grid-cols-4 gap-1.5 mt-auto pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <div className="text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg py-1.5">
+                        <span className="block text-[8px] text-slate-400 font-bold uppercase">Đang chăm</span>
+                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{memberStats.active}</span>
                       </div>
-                      <div className="flex-1 text-center bg-emerald-50 dark:bg-emerald-500/10 rounded-lg py-1.5">
-                        <span className="block text-[9px] text-emerald-600/70 dark:text-emerald-400/70 font-bold uppercase">Đã chốt</span>
-                        <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">{memberStats.closed}</span>
+                      <div className="text-center bg-amber-50 dark:bg-amber-500/10 rounded-lg py-1.5">
+                        <span className="block text-[8px] text-amber-600/70 dark:text-amber-400/70 font-bold uppercase">Tạm hoãn</span>
+                        <span className="text-xs font-black text-amber-600 dark:text-amber-400">{snoozedCount}</span>
                       </div>
-                      <button 
-                        onClick={() => setSelectedMember(m)}
-                        className="flex-1 bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold text-[11px] rounded-lg py-2 hover:bg-primary-100 dark:hover:bg-primary-500/20 transition-colors"
-                      >
-                        Chi tiết
-                      </button>
+                      <div className="text-center bg-blue-50 dark:bg-blue-500/10 rounded-lg py-1.5">
+                        <span className="block text-[8px] text-blue-600/70 dark:text-blue-400/70 font-bold uppercase">Tương tác</span>
+                        <span className="text-xs font-black text-blue-600 dark:text-blue-400" title={`Tổng: ${m.stats?.totalInteractions || 0}`}>
+                          {m.stats?.interactionsLast7Days || 0} <span className="text-[7px] text-slate-400">/7d</span>
+                        </span>
+                      </div>
+                      <div className="text-center bg-emerald-50 dark:bg-emerald-500/10 rounded-lg py-1.5">
+                        <span className="block text-[8px] text-emerald-600/70 dark:text-emerald-400/70 font-bold uppercase">Tỷ lệ chốt</span>
+                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{conversionRate}%</span>
+                      </div>
                     </div>
+                    
+                    <button 
+                      onClick={() => setSelectedMember(m)}
+                      className="mt-2.5 w-full bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 font-bold text-[11px] rounded-lg py-2 hover:bg-primary-100 dark:hover:bg-primary-500/20 transition-colors"
+                    >
+                      Chi tiết hiệu suất
+                    </button>
                   </div>
                 );
               })}

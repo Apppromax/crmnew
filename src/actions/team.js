@@ -37,10 +37,10 @@ export async function getTeamContext({ includeData = false } = {}) {
     if (includeData) {
       const hasProjectTags = ownedTeam.projectTags && ownedTeam.projectTags.length > 0;
       
-      const [members, customers] = await Promise.all([
+      const [members, customers, interactions] = await Promise.all([
         prisma.teamMember.findMany({
           where: { teamId: ownedTeam.id },
-          include: { user: { select: { email: true, role: true } } },
+          include: { user: { select: { email: true, fullName: true, role: true } } },
           orderBy: { joinedAt: "asc" }
         }),
         prisma.customer.findMany({
@@ -59,18 +59,56 @@ export async function getTeamContext({ includeData = false } = {}) {
             id: true, userId: true, name: true, phone: true,
             status: true, heatLevel: true, journeyStage: true,
             clarityScore: true, nextFollowUp: true, tags: true,
+            snoozedUntil: true, lastContactAt: true, teamId: true
           },
           orderBy: { createdAt: "desc" }
+        }),
+        prisma.interaction.findMany({
+          where: {
+            customer: {
+              OR: [
+                { teamId: ownedTeam.id },
+                { userId }
+              ]
+            }
+          },
+          select: {
+            createdAt: true,
+            customer: {
+              select: { userId: true }
+            }
+          }
         })
       ]);
 
-      result.members = members.map(m => ({
-        ...m,
-        joinedAt: m.joinedAt?.toISOString() || null
-      }));
+      result.members = members.map(m => {
+        const memberInteractions = interactions.filter(i => i.customer?.userId === m.userId);
+        const totalInteractions = memberInteractions.length;
+        
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const interactionsLast7Days = memberInteractions.filter(i => new Date(i.createdAt) >= sevenDaysAgo).length;
+        
+        const lastInteraction = memberInteractions.length > 0 
+          ? new Date(Math.max(...memberInteractions.map(i => new Date(i.createdAt).getTime()))).toISOString()
+          : null;
+
+        return {
+          ...m,
+          joinedAt: m.joinedAt?.toISOString() || null,
+          stats: {
+            totalInteractions,
+            interactionsLast7Days,
+            lastInteraction
+          }
+        };
+      });
+
       result.customers = customers.map(c => ({
         ...c,
-        nextFollowUp: c.nextFollowUp?.toISOString() || null
+        nextFollowUp: c.nextFollowUp?.toISOString() || null,
+        snoozedUntil: c.snoozedUntil?.toISOString() || null,
+        lastContactAt: c.lastContactAt?.toISOString() || null,
       }));
     }
 

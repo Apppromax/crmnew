@@ -335,8 +335,8 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                 className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-400 outline-none focus:border-primary-500"
               >
                 <option value="All">Tất cả khách</option>
-                <option value="Personal">Khách của tôi</option>
-                <option value="Team">Khách đội nhóm</option>
+                <option value="Personal">Khách cá nhân (của tôi)</option>
+                <option value="Team">Khách đội nhóm (thành viên)</option>
               </select>
               <div className="w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
             </>

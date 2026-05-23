@@ -4,6 +4,18 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Flame, CheckCircle2, User, TrendingUp, BarChart3, Database } from "lucide-react";
 
+const formatLastActive = (isoString) => {
+  if (!isoString) return "Chưa hoạt động";
+  const diffMs = new Date() - new Date(isoString);
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "Vừa xong";
+  if (diffMins < 60) return `${diffMins} phút trước`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} giờ trước`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} ngày trước`;
+};
+
 export default function MemberPerformanceModal({ member, customers, onClose }) {
   const [mounted, setMounted] = useState(false);
 
@@ -91,6 +103,33 @@ export default function MemberPerformanceModal({ member, customers, onClose }) {
               <CheckCircle2 className="w-5 h-5 mx-auto mb-2 text-emerald-500" />
               <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/70 mb-1">Đã Chốt</p>
               <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400">{closedLeads}</p>
+            </div>
+          </div>
+
+          {/* Hoạt động & Nhóm */}
+          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 space-y-3">
+            <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Hoạt động & Lịch sử Nhóm</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tham gia nhóm</p>
+                <p className="font-semibold text-slate-700 dark:text-slate-200 mt-0.5">{new Date(member.joinedAt).toLocaleDateString("vi-VN")}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hoạt động cuối</p>
+                <p className="font-semibold text-slate-700 dark:text-slate-200 mt-0.5">{formatLastActive(member.stats?.lastInteraction)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tương tác tuần qua</p>
+                <p className="font-semibold text-slate-700 dark:text-slate-200 mt-0.5">{member.stats?.interactionsLast7Days || 0} lần</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Khách hàng trễ hẹn</p>
+                <p className={`font-semibold mt-0.5 ${memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date() && c.status !== "Đã chốt" && c.status !== "Mất khách").length > 0 ? "text-rose-500" : "text-slate-700 dark:text-slate-200"}`}>{memberCustomers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date() && c.status !== "Đã chốt" && c.status !== "Mất khách").length} khách</p>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-850 flex justify-between text-xs font-medium text-slate-500">
+              <span>Đang hoãn chăm sóc:</span>
+              <span className="font-bold text-amber-600">{memberCustomers.filter(c => c.snoozedUntil && new Date(c.snoozedUntil) > new Date()).length} khách</span>
             </div>
           </div>
 
