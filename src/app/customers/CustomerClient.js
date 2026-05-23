@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateCustomer, deleteCustomer, getCustomerInteractions, updateCustomerTags, completeCustomerAction } from "@/actions/customers";
 import BottomNav from "@/components/BottomNav";
 import UpdateCareSheet from "@/components/UpdateCareSheet";
-import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map, Users } from "lucide-react";
+import { Search, Plus, X, Calendar, Phone, MapPin, Target, Clock, Activity, FileText, Edit3, Save, ChevronDown, Trash2, History, MessageSquare, Tag, Map, Users, User } from "lucide-react";
 
 const STATUS_OPTIONS = ["Mới", "Chưa liên lạc được", "Đang chăm", "Đang chờ", "Ngủ đông", "Đã chốt", "Mất khách"];
 const HEAT_OPTIONS = ["Rất Nét", "Tiềm Năng", "Quan Tâm", "Tham Khảo", "Chưa Rõ"];
@@ -91,7 +91,11 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
       (c.name && c.name.toLowerCase().includes(term)) ||
       (c.phone && c.phone.includes(term)) ||
       (c.demand && c.demand.toLowerCase().includes(term));
-    const matchStatus = filterStatus === "All" || c.status === filterStatus;
+    const matchStatus = filterStatus === "All" || (
+      filterStatus === "Tạm hoãn" 
+        ? (c.snoozedUntil && new Date(c.snoozedUntil) > new Date())
+        : c.status === filterStatus
+    );
     const matchHeat = filterHeat === "All" || c.heatLevel === filterHeat;
     const matchTag = filterTag === "All" || (c.tags && c.tags.includes(filterTag));
     
@@ -356,6 +360,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
           >
             <option value="All">Tất cả trạng thái</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="Tạm hoãn">⚠️ Đang tạm hoãn</option>
           </select>
           <select 
             value={filterHeat}
@@ -449,6 +454,17 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                       }`}>
                         {c.heatLevel}
                       </span>
+                      {c.teamId ? (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1">
+                          <Users className="w-2.5 h-2.5" />
+                          Đội nhóm
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 border border-sky-200 dark:border-sky-850/60 flex items-center gap-1">
+                          <User className="w-2.5 h-2.5" />
+                          Cá nhân
+                        </span>
+                      )}
                       {currentUserId && c.userId !== currentUserId && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-[1px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-750 flex items-center gap-1">
                           <Users className="w-2.5 h-2.5" />
@@ -631,6 +647,23 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                           {selectedCustomer.snoozedUntil && new Date(selectedCustomer.snoozedUntil) > new Date() && (
                             <span className="text-[10px] font-bold text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800/50 whitespace-nowrap">
                               Tạm hoãn đến: {new Date(selectedCustomer.snoozedUntil).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
+                            </span>
+                          )}
+                          {selectedCustomer.teamId ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 flex items-center gap-1 shrink-0">
+                              <Users className="w-3.5 h-3.5" />
+                              Đội nhóm
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-900/60 flex items-center gap-1 shrink-0">
+                              <User className="w-3.5 h-3.5" />
+                              Cá nhân
+                            </span>
+                          )}
+                          {currentUserId && selectedCustomer.userId !== currentUserId && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 flex items-center gap-1 shrink-0">
+                              <Users className="w-3.5 h-3.5" />
+                              {selectedCustomer.profile?.fullName || selectedCustomer.profile?.email?.split('@')[0] || "Đội nhóm"}
                             </span>
                           )}
                         </div>

@@ -350,7 +350,7 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       status: status || "Mới",
       heatLevel: heatLevel || "Chưa Rõ",
       clarityScore: 0,
-      journeyStage: journeyStage || "1. Phá băng và làm rõ nhu cầu",
+      journeyStage: journeyStage || "1. Phá băng và tư vấn ban đầu",
       tags: tags || [],
       nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
       notes: note ? {
@@ -592,7 +592,15 @@ export async function getDashboardStats() {
   });
 
   let total = 0, hot = 0, warm = 0, overdue = 0, todaySchedule = 0, closedThisMonth = 0;
-  const stages = ["1. Phá băng và làm rõ nhu cầu", "2. Tư vấn sản phẩm", "3. Xây dựng lòng tin", "4. Hẹn gặp/xem", "5. Xử lý từ chối", "6. Chốt giao dịch"];
+  const stages = [
+    "1. Phá băng và tư vấn ban đầu",
+    "2. Tư vấn chuyên sâu lần 1",
+    "3. Xây dựng lòng tin",
+    "4. Hẹn gặp khách",
+    "5. Dồn Chốt",
+    "6. Chốt Cọc",
+    "7. Xây dựng mối quan hệ"
+  ];
   const funnelCounts = Object.fromEntries(stages.map(s => [s, 0]));
 
   for (const c of customers) {

@@ -71,7 +71,7 @@ export async function createCustomerFromAI({ parsedData, rawNote }) {
         finance: parsedData.finance,
         clarityScore: parsedData.clarityScore || 10,
         heatLevel: parsedData.heatLevel || "Chưa Rõ",
-        journeyStage: "1. Phá băng và làm rõ nhu cầu",
+        journeyStage: "1. Phá băng và tư vấn ban đầu",
       },
     });
 
