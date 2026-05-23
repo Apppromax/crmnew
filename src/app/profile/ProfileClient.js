@@ -272,8 +272,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </div>
             )}
 
-            {(!profile.teamMembership || profile.role === 'admin') && (
-              <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50" activeSection={activeSection} toggleSection={toggleSection}>
+            <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50" activeSection={activeSection} toggleSection={toggleSection}>
               
               {topUpSuccess ? (
                 <div className="text-center py-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
@@ -353,8 +352,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                   </form>
                 </div>
               )}
-              </SectionItem>
-            )}
+            </SectionItem>
 
             {/* ===== SETTINGS SECTION ===== */}
               <SectionItem id="settings" icon={Settings} title="Cài đặt CRM" description="Quy trình & thời gian chăm sóc" iconColor="text-blue-500" iconBg="bg-blue-50" activeSection={activeSection} toggleSection={toggleSection}>
