@@ -22,6 +22,87 @@ function enrichStatus(customer) {
   return customer;
 }
 
+// OPTIMIZED: Gộp getSmartQueue + getCustomerCount + hasTeam vào 1 function
+// Trước: 3 function × requireUser() + riêng DB queries = 6+ round trips
+// Sau: 1 requireUser() + 2 parallel queries = 3 round trips
+export async function getDashboardData() {
+  const userId = await requireUser();
+  const now = new Date();
+
+  // 2 queries chạy SONG SONG thay vì tuần tự
+  const [customers, teamInfo] = await Promise.all([
+    // Query 1: Lấy TẤT CẢ active customers — dùng chung cho cả queue + counts
+    prisma.customer.findMany({
+      where: {
+        userId,
+        status: { notIn: ["Mất khách"] }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    // Query 2: Check hasTeam nhẹ nhất có thể — chỉ cần biết có/không
+    prisma.teamMember.findUnique({
+      where: { userId },
+      select: { teamId: true }
+    })
+  ]);
+
+  // Tính counts từ data đã có (RAM, không query thêm)
+  let total = 0, hot = 0, warm = 0;
+  for (const c of customers) {
+    if (c.status !== "Đã chốt" && c.status !== "Mất khách") total++;
+    if (c.heatLevel === "Rất Nét") hot++;
+    if (c.heatLevel === "Tiềm Năng") warm++;
+  }
+
+  // Tính queue từ data đã có (filter + sort trong RAM)
+  const queueCandidates = customers.filter(c => {
+    if (c.status === "Đã chốt" || c.status === "Mất khách") return false;
+    if (c.snoozedUntil && c.snoozedUntil > now) return false;
+    if (c.nextFollowUp && c.nextFollowUp > now) return false;
+    return true;
+  });
+
+  // Sort: clarityScore desc → lastContactAt asc → nextFollowUp asc
+  queueCandidates.sort((a, b) => {
+    const cs = (b.clarityScore || 0) - (a.clarityScore || 0);
+    if (cs !== 0) return cs;
+    const la = (a.lastContactAt?.getTime() || 0) - (b.lastContactAt?.getTime() || 0);
+    if (la !== 0) return la;
+    return (a.nextFollowUp?.getTime() || 0) - (b.nextFollowUp?.getTime() || 0);
+  });
+
+  // Re-sort: overdue first, then journeyStage
+  const top10 = queueCandidates.slice(0, 10);
+  top10.sort((a, b) => {
+    const aOverdue = a.nextFollowUp && a.nextFollowUp < now ? 0 : 1;
+    const bOverdue = b.nextFollowUp && b.nextFollowUp < now ? 0 : 1;
+    if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+    const aJ = parseInt((a.journeyStage || "1.").split(".")[0]) || 1;
+    const bJ = parseInt((b.journeyStage || "1.").split(".")[0]) || 1;
+    if (aJ !== bJ) return bJ - aJ;
+    return (b.clarityScore || 0) - (a.clarityScore || 0);
+  });
+
+  const queue = top10.map(c => enrichStatus({
+    ...c,
+    nextFollowUp: c.nextFollowUp?.toISOString() || null,
+    lastContactAt: c.lastContactAt?.toISOString() || null,
+    snoozedUntil: c.snoozedUntil?.toISOString() || null,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }));
+
+  // hasTeam: true nếu user có teamMember record HOẶC sở hữu team
+  let hasTeam = !!teamInfo;
+  if (!hasTeam) {
+    // Fallback: check nếu user là owner
+    const owned = await prisma.team.findUnique({ where: { ownerId: userId }, select: { id: true } });
+    hasTeam = !!owned;
+  }
+
+  return { queue, counts: { total, hot, warm }, hasTeam };
+}
+
 export async function getSmartQueue() {
   const userId = await requireUser();
   const now = new Date();
