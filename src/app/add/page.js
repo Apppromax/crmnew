@@ -183,17 +183,14 @@ export default function AddCustomerPage() {
   };
 
   const handleSaveWithFollowUp = async () => {
+    setIsSaving(true);
     setShowStatusPopup(false);
+    setError(null);
     
     const parts = [];
     if (manualSource) parts.push(`Nguồn: ${manualSource}`);
     const fullNote = parts.join("\n");
 
-    // Navigate IMMEDIATELY — user sees instant transition
-    sessionStorage.setItem('sp_save_toast', '1');
-    router.push("/");
-
-    // Fire API in background
     try {
       await createCustomer({ 
         name: manualName, 
@@ -203,10 +200,14 @@ export default function AddCustomerPage() {
         status: pendingStatus,
         nextFollowUp: parseLocalToISO(followUpDate)
       });
+      sessionStorage.setItem('sp_save_toast', '1');
+      router.push("/");
     } catch (err) {
+      setIsSaving(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
-        sessionStorage.removeItem('sp_save_toast');
         setShowLimitPopup(true);
+      } else {
+        setError(err.message || "Có lỗi xảy ra khi lưu khách hàng.");
       }
     }
   };
@@ -225,8 +226,9 @@ export default function AddCustomerPage() {
       return;
     }
     
-    setError(null);
+    setIsSaving(true);
     setShowFinalPopup(false);
+    setError(null);
 
     const parts = [];
     if (manualSource) parts.push(`Nguồn: ${manualSource}`);
@@ -234,11 +236,6 @@ export default function AddCustomerPage() {
     if (manualNote) parts.push(`Ghi chú: ${manualNote}`);
     const fullNote = parts.join("\n");
 
-    // Navigate IMMEDIATELY — user sees instant transition
-    sessionStorage.setItem('sp_save_toast', '1');
-    router.push("/");
-
-    // Fire API in background
     try {
       await createCustomer({ 
         name: manualName, 
@@ -254,10 +251,14 @@ export default function AddCustomerPage() {
         journeyStage: finalJourney,
         nextFollowUp: parseLocalToISO(finalDateString)
       });
+      sessionStorage.setItem('sp_save_toast', '1');
+      router.push("/");
     } catch (err) {
+      setIsSaving(false);
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
-        sessionStorage.removeItem('sp_save_toast');
         setShowLimitPopup(true);
+      } else {
+        setError(err.message || "Có lỗi xảy ra khi lưu khách hàng.");
       }
     }
   };
@@ -651,6 +652,30 @@ export default function AddCustomerPage() {
           </div>
         </div>
       </div>
+
+      {/* Full-screen Loading Overlay */}
+      {isSaving && (
+        <div className="fixed inset-0 z-[150] flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes scaleIn {
+              0% { transform: scale(0.9); opacity: 0; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+            .animate-scale-in {
+              animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+          `}} />
+          <div className="bg-white/90 dark:bg-slate-900/90 p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/30 flex flex-col items-center max-w-xs w-full text-center animate-scale-in">
+            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 dark:border-emerald-500/10"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+              <UserPlus className="w-6 h-6 text-emerald-500 animate-pulse" />
+            </div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Đang lưu khách hàng</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Vui lòng đợi trong giây lát...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
