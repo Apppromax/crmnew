@@ -159,6 +159,9 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
   const handleNextStep = (action) => {
     if (action) {
       setStatusAction(action);
+      if (action === 'Chưa liên lạc được') {
+        setNote("Gọi điện không bắt máy / thuê bao");
+      }
       setStep(3);
     } else {
       setStep(2);
@@ -274,7 +277,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
                   </button>
                 </div>
               ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Nội dung chăm sóc</label>
                     <div className="relative">
@@ -294,6 +297,17 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
                       </button>
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setNote("Gọi điện không bắt máy / thuê bao");
+                      setStatusAction("Chưa liên lạc được");
+                      setStep(3);
+                    }}
+                    className="w-full py-3.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-300 text-xs font-bold active:scale-[0.98] transition-all hover:bg-amber-100 dark:hover:bg-amber-900/20 flex items-center justify-center gap-1.5"
+                  >
+                    <Phone className="w-4 h-4 text-amber-500" /> Hẹn gọi lại nhanh (Không liên lạc được)
+                  </button>
 
                   <button
                     onClick={() => handleNextStep()}

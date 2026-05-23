@@ -80,6 +80,7 @@ export async function updateProfileSettings(data) {
     data: {
       defaultSnoozeHours: data.defaultSnoozeHours,
       defaultFollowUpDays: data.defaultFollowUpDays,
+      maxMissedCalls: data.maxMissedCalls,
       queueSize: data.queueSize,
       confirmSnooze: data.confirmSnooze,
       theme: data.theme,

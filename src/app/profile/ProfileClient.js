@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { upgradeToPro, updateProfileInfo, updateProfileSettings, requestTopUp, getUserTransactions, upgradeTeamPro } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown, History, CheckCircle2, Clock } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown, History, CheckCircle2, Clock, Phone } from "lucide-react";
 
 export default function ProfileClient({ initialProfile, settings = {} }) {
   const router = useRouter();
@@ -35,6 +35,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
   // Settings State (persisted in localStorage + DB)
   const [snoozeHours, setSnoozeHours] = useState(profile?.defaultSnoozeHours || 4);
   const [followUpDays, setFollowUpDays] = useState(profile?.defaultFollowUpDays || 3);
+  const [maxMissedCalls, setMaxMissedCalls] = useState(profile?.maxMissedCalls || 5);
   const [queueSize, setQueueSize] = useState(profile?.queueSize || 10);
   const [confirmSnooze, setConfirmSnooze] = useState(profile?.confirmSnooze ?? false);
   const [settingsSaved, setSettingsSaved] = useState("");
@@ -169,6 +170,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
       await updateProfileSettings({
         defaultSnoozeHours: Number(snoozeHours),
         defaultFollowUpDays: Number(followUpDays),
+        maxMissedCalls: Number(maxMissedCalls),
         queueSize: Number(queueSize),
         confirmSnooze: confirmSnooze,
         theme,
@@ -178,6 +180,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
         ...p, 
         defaultSnoozeHours: Number(snoozeHours),
         defaultFollowUpDays: Number(followUpDays),
+        maxMissedCalls: Number(maxMissedCalls),
         queueSize: Number(queueSize),
         confirmSnooze,
         theme,
@@ -193,6 +196,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
   const SNOOZE_PRESETS = [1, 2, 4, 8, 12, 24, 48];
   const QUEUE_PRESETS = [5, 10, 15, 20];
   const FOLLOWUP_PRESETS = [1, 3, 5, 7, 14];
+  const MISSED_CALLS_PRESETS = [3, 5, 7, 10];
 
   const toggleSection = (id) => {
     setActiveSection(prev => prev === id ? null : id);
@@ -423,6 +427,30 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                         }`}
                       >
                         {s} khách
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Max Missed Calls */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Phone className="w-4 h-4 text-rose-500" />
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Giới hạn gọi nhỡ (Ngủ đông)</p>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Tự động chuyển khách sang Ngủ đông và giãn lịch hẹn 7 ngày khi gọi nhỡ đạt mốc này</p>
+                  <div className="flex flex-wrap gap-2">
+                    {MISSED_CALLS_PRESETS.map(m => (
+                      <button
+                        key={m}
+                        onClick={() => setMaxMissedCalls(m)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                          maxMissedCalls === m
+                            ? "bg-primary-600 text-white shadow-sm"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                        }`}
+                      >
+                        {m} lần
                       </button>
                     ))}
                   </div>

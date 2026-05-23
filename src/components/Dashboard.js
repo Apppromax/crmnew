@@ -17,7 +17,7 @@ import {
 } from "@/actions/customers";
 import { getNotifications, triggerSmartAlerts } from "@/actions/notifications";
 import NotificationSheet from "@/components/NotificationSheet";
-import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw, Users, Check } from "lucide-react";
+import { Bell, Plus, X, TrendingUp, CalendarCheck, AlertTriangle, Trophy, RotateCcw, Users, Check, Clock } from "lucide-react";
 
 // Fallback reasons/next steps based on data
 function enrichCustomer(c) {
@@ -55,7 +55,7 @@ function enrichCustomer(c) {
   return { ...c, reason, nextStep };
 }
 
-export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0 }, hasTeam }) {
+export default function Dashboard({ initialQueue = [], initialCounts = { total: 0, hot: 0, warm: 0, snoozed: 0 }, hasTeam }) {
   const [queue, setQueue] = useState(initialQueue.map(enrichCustomer));
   const [counts, setCounts] = useState(initialCounts);
   const [loading, setLoading] = useState(false);
@@ -294,10 +294,33 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
               <div key={i} className="animate-pulse glass rounded-2xl h-28 w-full" />
             ))}
           </div>
-        ) : queue.length === 0 ? (
-          <InboxZero />
         ) : (
-          <div className="space-y-4">
+          <>
+            {counts.snoozed >= 3 && (
+              <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 flex items-center justify-between gap-3 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-white">Có {counts.snoozed} khách hàng đang tạm hoãn</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Bạn có thể khôi phục để chăm sóc sớm hơn.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRestoreQueue}
+                  disabled={isPending}
+                  className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 transition-all text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 whitespace-nowrap"
+                >
+                  {isPending ? "Đang mở..." : "Chăm sóc ngay"}
+                </button>
+              </div>
+            )}
+
+            {queue.length === 0 ? (
+              <InboxZero />
+            ) : (
+              <div className="space-y-4">
             {focusCustomer && (
               <div className="mb-2">
                 <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 px-1">
@@ -332,7 +355,9 @@ export default function Dashboard({ initialQueue = [], initialCounts = { total: 
                 </div>
               </div>
             )}
-          </div>
+            </div>
+          )}
+          </>
         )}
         
         {/* Nút thêm khách ở giữa */}

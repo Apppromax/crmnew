@@ -18,6 +18,7 @@ model Profile {
   proUntil  DateTime? @map("pro_until")
   defaultSnoozeHours Int @default(4) @map("default_snooze_hours")
   defaultFollowUpDays Int @default(3) @map("default_follow_up_days")
+  maxMissedCalls Int @default(5) @map("max_missed_calls")
   queueSize  Int @default(10) @map("queue_size")
   confirmSnooze Boolean @default(false) @map("confirm_snooze")
   theme      String @default("system")
@@ -76,6 +77,7 @@ model Customer {
   // Journey
   journeyStage String @default("Lead") @map("journey_stage")
   coldStreak   Int    @default(0) @map("cold_streak")
+  unreachableStreak Int    @default(0) @map("unreachable_streak")
 
   // Relations
   interactions Interaction[]

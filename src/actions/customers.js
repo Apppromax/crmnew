@@ -47,11 +47,12 @@ export async function getDashboardData() {
   ]);
 
   // Tính counts từ data đã có (RAM, không query thêm)
-  let total = 0, hot = 0, warm = 0;
+  let total = 0, hot = 0, warm = 0, snoozed = 0;
   for (const c of customers) {
     if (c.status !== "Đã chốt" && c.status !== "Mất khách") total++;
     if (c.heatLevel === "Rất Nét") hot++;
     if (c.heatLevel === "Tiềm Năng") warm++;
+    if (c.snoozedUntil && new Date(c.snoozedUntil) > now) snoozed++;
   }
 
   // Tính queue từ data đã có (filter + sort trong RAM)
@@ -100,7 +101,7 @@ export async function getDashboardData() {
     hasTeam = !!owned;
   }
 
-  return { queue, counts: { total, hot, warm }, hasTeam };
+  return { queue, counts: { total, hot, warm, snoozed }, hasTeam };
 }
 
 export async function getSmartQueue() {
@@ -210,6 +211,29 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
 
   const fullNote = nextAction ? `${note || "Đã chăm sóc"}\n\nHành động tiếp theo: ${nextAction}` : (note || "Đã chăm sóc");
 
+  // Lấy cấu hình maxMissedCalls của user từ profile
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    select: { maxMissedCalls: true }
+  });
+  const maxMissedCalls = profile?.maxMissedCalls || 5;
+
+  let unreachableStreak = existing.unreachableStreak || 0;
+  let nextStatus = status;
+
+  if (status === "Chưa liên lạc được") {
+    unreachableStreak += 1;
+    if (unreachableStreak >= maxMissedCalls) {
+      nextStatus = "Ngủ đông";
+      unreachableStreak = 0; // reset
+      // Tự động giãn lịch hẹn gọi lại sau 7 ngày
+      const sevenDaysLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      nextFollowUp = sevenDaysLater.toISOString();
+    }
+  } else if (status === "Đang chăm" || journeyProgress) {
+    unreachableStreak = 0;
+  }
+
   let coldStreak = existing.coldStreak || 0;
   if (journeyProgress === "Lên mốc") {
     coldStreak = 0;
@@ -217,12 +241,12 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
     coldStreak += 1;
   }
 
-  const updateData = { lastContactAt: now, coldStreak };
+  const updateData = { lastContactAt: now, coldStreak, unreachableStreak };
   if (nextFollowUp !== undefined) updateData.nextFollowUp = nextFollowUp ? new Date(nextFollowUp) : null;
   if (nextAction !== undefined) updateData.nextAction = nextAction || null;
   
-  if (status) {
-    updateData.status = status;
+  if (nextStatus) {
+    updateData.status = nextStatus;
   } else if (coldStreak >= 3 && journeyProgress === "Nguội đi") {
     updateData.status = "Ngủ đông";
   } else if (!existing.status || ["Mới", "Đang chăm", "Đang chờ"].includes(existing.status)) {
@@ -556,12 +580,14 @@ export async function getCustomerCount() {
   const userId = await requireUser();
   const customers = await prisma.customer.findMany({
     where: { userId },
-    select: { status: true, heatLevel: true }
+    select: { status: true, heatLevel: true, snoozedUntil: true }
   });
 
   let total = 0;
   let hot = 0;
   let warm = 0;
+  let snoozed = 0;
+  const now = new Date();
 
   for (const c of customers) {
     if (c.status !== "Đã chốt" && c.status !== "Mất khách") {
@@ -573,9 +599,12 @@ export async function getCustomerCount() {
     if (c.heatLevel === "Tiềm Năng") {
       warm++;
     }
+    if (c.snoozedUntil && c.snoozedUntil > now) {
+      snoozed++;
+    }
   }
 
-  return { total, hot, warm };
+  return { total, hot, warm, snoozed };
 }
 
 export async function getDashboardStats() {
