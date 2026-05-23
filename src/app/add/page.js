@@ -202,9 +202,8 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(followUpDate)
       });
       sessionStorage.setItem('sp_save_toast', '1');
-      setSaveStatus("redirecting");
+      // Redirect immediately - home page is force-dynamic so it will fetch fresh data
       router.push("/");
-      router.refresh();
     } catch (err) {
       setSaveStatus("idle");
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
@@ -255,9 +254,8 @@ export default function AddCustomerPage() {
         nextFollowUp: parseLocalToISO(finalDateString)
       });
       sessionStorage.setItem('sp_save_toast', '1');
-      setSaveStatus("redirecting");
+      // Redirect immediately - home page is force-dynamic so it will fetch fresh data
       router.push("/");
-      router.refresh();
     } catch (err) {
       setSaveStatus("idle");
       if (err.message?.includes("FREE_LIMIT_REACHED")) {
@@ -658,8 +656,8 @@ export default function AddCustomerPage() {
         </div>
       </div>
 
-      {/* Full-screen Loading Overlay */}
-      {isSaving && (
+      {/* Full-screen Loading Overlay - only shows during save, not during redirect */}
+      {saveStatus === "saving" && (
         <div className="fixed inset-0 z-[150] flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <style dangerouslySetInnerHTML={{__html: `
             @keyframes scaleIn {
@@ -671,27 +669,13 @@ export default function AddCustomerPage() {
             }
           `}} />
           <div className="bg-white/90 dark:bg-slate-900/90 p-8 rounded-3xl shadow-2xl border border-white/20 dark:border-slate-800/30 flex flex-col items-center max-w-xs w-full text-center animate-scale-in">
-            {saveStatus === "saving" ? (
-              <>
-                <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 dark:border-emerald-500/10"></div>
-                  <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
-                  <UserPlus className="w-6 h-6 text-emerald-500 animate-pulse" />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Đang lưu khách hàng</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Vui lòng đợi trong giây lát...</p>
-              </>
-            ) : (
-              <>
-                <div className="relative w-16 h-16 mb-4 flex items-center justify-center bg-emerald-50 dark:bg-emerald-500/10 rounded-full animate-bounce">
-                  <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                </div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Lưu thành công!</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Đang tải trang chủ...</p>
-              </>
-            )}
+            <div className="relative w-16 h-16 mb-4 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20 dark:border-emerald-500/10"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+              <UserPlus className="w-6 h-6 text-emerald-500 animate-pulse" />
+            </div>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">Đang lưu khách hàng</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 animate-pulse">Vui lòng đợi trong giây lát...</p>
           </div>
         </div>
       )}

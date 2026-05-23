@@ -224,49 +224,42 @@ export async function clearAllSnoozes() {
 export async function createCustomer({ name, phone, note, budget, area, timeline, heatLevel, demand, tags, status, nextFollowUp, journeyStage }) {
   const userId = await requireUser();
 
-  // Fetch profile (which includes membership and ownedTeam)
+  // FAST PATH: Lightweight profile check — chỉ select fields cần cho pro/trial check, KHÔNG join team
   const profile = await prisma.profile.findUnique({
     where: { id: userId },
-    include: {
-      ownedTeam: true,
-      teamMembership: { include: { team: true } }
-    }
+    select: { isPro: true, proUntil: true, createdAt: true }
   });
-  // Tự động gán teamId nếu có tag trùng khớp với projectTags của team người đó tham gia/sở hữu
-  let teamId = null;
-  const team = profile?.teamMembership?.team || profile?.ownedTeam;
-  if (team && team.projectTags && team.projectTags.length > 0) {
-    const inputTags = tags || [];
-    const hasMatchingTag = inputTags.some(t => team.projectTags.includes(t));
-    if (hasMatchingTag) {
-      teamId = team.id;
-    }
-  }
 
-  // FREE TIER LIMIT LOGIC
-  const trialPeriodDays = 60; // 2 months trial
-  const trialEndDate = new Date(profile.createdAt.getTime() + trialPeriodDays * 24 * 60 * 60 * 1000);
   const now = new Date();
-  const isTrial = now < trialEndDate;
-
+  const isTrial = now < new Date(profile.createdAt.getTime() + 60 * 24 * 60 * 60 * 1000);
   const isProfilePro = profile.isPro && (!profile.proUntil || new Date(profile.proUntil) > now);
-  const isOwnedTeamActive = profile.ownedTeam?.isActive && (!profile.ownedTeam?.validUntil || new Date(profile.ownedTeam.validUntil) > now);
-  const isMemberTeamActive = profile.teamMembership?.team?.isActive && (!profile.teamMembership?.team?.validUntil || new Date(profile.teamMembership.team.validUntil) > now);
 
-  const isPro = isProfilePro || isOwnedTeamActive || isMemberTeamActive || isTrial;
-  
-  // Skip count() cho trial/pro users — chỉ check khi thực sự cần
-  if (!isPro) {
-    const customerCount = await prisma.customer.count({ where: { userId } });
-    if (customerCount >= 10) {
+  // Fast pro check: nếu user đã pro hoặc trial → skip mọi check nặng
+  if (!isProfilePro && !isTrial) {
+    // Chỉ free user mới cần check team pro + count — chạy song song
+    const [teamProInfo, customerCount] = await Promise.all([
+      prisma.profile.findUnique({
+        where: { id: userId },
+        select: {
+          ownedTeam: { select: { isActive: true, validUntil: true } },
+          teamMembership: { select: { team: { select: { isActive: true, validUntil: true } } } }
+        }
+      }),
+      prisma.customer.count({ where: { userId } })
+    ]);
+
+    const isOwnedTeamActive = teamProInfo?.ownedTeam?.isActive && (!teamProInfo.ownedTeam.validUntil || new Date(teamProInfo.ownedTeam.validUntil) > now);
+    const isMemberTeamActive = teamProInfo?.teamMembership?.team?.isActive && (!teamProInfo.teamMembership.team.validUntil || new Date(teamProInfo.teamMembership.team.validUntil) > now);
+
+    if (!isOwnedTeamActive && !isMemberTeamActive && customerCount >= 10) {
       throw new Error("FREE_LIMIT_REACHED");
     }
   }
 
+  // Tạo customer ngay lập tức — không chờ team assignment
   const customer = await prisma.customer.create({
     data: {
       userId,
-      teamId,
       name,
       phone,
       budget,
@@ -285,11 +278,27 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
     },
   });
 
-  // revalidatePath is handled client-side via router.refresh() after push to avoid blocking Server Action
-  // revalidatePath("/");
-  // revalidatePath("/customers");
+  // BACKGROUND: Team tag assignment — chạy async, không block response
+  if (tags?.length > 0) {
+    assignTeamInBackground(userId, customer.id, tags).catch(() => {});
+  }
 
-  return customer;
+  return { id: customer.id };
+}
+
+// Helper: gán teamId dựa trên projectTags — chạy background sau khi response đã trả
+async function assignTeamInBackground(userId, customerId, tags) {
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+    select: {
+      ownedTeam: { select: { id: true, projectTags: true } },
+      teamMembership: { select: { team: { select: { id: true, projectTags: true } } } }
+    }
+  });
+  const team = profile?.teamMembership?.team || profile?.ownedTeam;
+  if (team?.projectTags?.length > 0 && tags.some(t => team.projectTags.includes(t))) {
+    await prisma.customer.update({ where: { id: customerId }, data: { teamId: team.id } });
+  }
 }
 
 export async function updateCustomer(customerId, data) {
