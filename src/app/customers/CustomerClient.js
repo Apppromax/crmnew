@@ -55,6 +55,9 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
   const [localCustomers, setLocalCustomers] = useState(initialCustomers);
   const teamTags = allTagsData?.teamTags || [];
 
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
   useEffect(() => {
     setLocalCustomers(initialCustomers);
   }, [initialCustomers]);
@@ -95,7 +98,11 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
     const matchStatus = filterStatus === "All" || (
       filterStatus === "Tạm hoãn" 
         ? (c.snoozedUntil && new Date(c.snoozedUntil) > new Date())
-        : c.status === filterStatus
+        : filterStatus === "Lỡ hẹn"
+          ? (c.status === "Đang chờ" && c.nextFollowUp && new Date(c.nextFollowUp) < oneHourAgo)
+          : filterStatus === "Đang chờ"
+            ? (c.status === "Đang chờ" && (!c.nextFollowUp || new Date(c.nextFollowUp) >= oneHourAgo))
+            : c.status === filterStatus
     );
     const matchHeat = filterHeat === "All" || c.heatLevel === filterHeat;
     const matchTag = filterTag === "All" || (c.tags && c.tags.includes(filterTag));
@@ -361,6 +368,7 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
           >
             <option value="All">Tất cả trạng thái</option>
             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="Lỡ hẹn">⚠️ Lỡ hẹn (quá hạn)</option>
             <option value="Tạm hoãn">⚠️ Đang tạm hoãn</option>
           </select>
           <select 
@@ -495,17 +503,24 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                   {/* Right: Status + Next FollowUp */}
                   <div className="flex items-center gap-1 shrink-0">
                     <div className="flex flex-col items-end gap-1 justify-center h-full">
-                      <span className={`text-[9px] font-bold ${c.status === 'Mất khách' ? '' : 'px-1.5 py-0.5 rounded-full'} ${
-                        c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700' :
-                        c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700' :
-                        c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-600' :
-                        c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-600' :
-                        c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600' :
-                        c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700' :
-                        'text-red-600' // Mất khách has no bg
-                      }`}>
-                        {c.status}
-                      </span>
+                      {(() => {
+                        const isOverdue = c.status === 'Đang chờ' && c.nextFollowUp && new Date(c.nextFollowUp) < oneHourAgo;
+                        const badgeText = isOverdue ? 'Lỡ hẹn' : c.status;
+                        const badgeClass = isOverdue 
+                          ? 'bg-red-50 text-red-600' 
+                          : c.status === 'Mới' ? 'bg-indigo-50 text-indigo-700'
+                          : c.status === 'Chưa liên lạc được' ? 'bg-orange-50 text-orange-700'
+                          : c.status === 'Đang chăm' ? 'bg-emerald-50 text-emerald-600'
+                          : c.status === 'Đang chờ' ? 'bg-amber-50 text-amber-600'
+                          : c.status === 'Ngủ đông' ? 'bg-slate-100 text-slate-600'
+                          : c.status === 'Đã chốt' ? 'bg-blue-50 text-blue-700'
+                          : 'text-red-600'; // Mất khách has no bg
+                        return (
+                          <span className={`text-[9px] font-bold ${c.status === 'Mất khách' ? '' : 'px-1.5 py-0.5 rounded-full'} ${badgeClass}`}>
+                            {badgeText}
+                          </span>
+                        );
+                      })()}
                       
                       {isSnoozed ? (
                         <div className="flex flex-col items-end mt-0.5">
@@ -704,7 +719,11 @@ export default function CustomerClient({ initialCustomers, allTagsData, currentU
                   <div className="grid grid-cols-2 gap-2 mt-4">
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Trạng thái</p>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">{selectedCustomer.status || "Mới"}</p>
+                      <p className="font-bold text-sm text-slate-900 dark:text-white">
+                        {selectedCustomer.status === "Đang chờ" && selectedCustomer.nextFollowUp && new Date(selectedCustomer.nextFollowUp) < oneHourAgo
+                          ? "Lỡ hẹn"
+                          : selectedCustomer.status || "Mới"}
+                      </p>
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
                       <p className="text-[10px] uppercase text-slate-400 mb-1">Hành trình</p>
