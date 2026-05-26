@@ -145,12 +145,12 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
   useEffect(() => {
     if (isOpen && customer) {
       const isNew = customer.status === 'Mới' || customer.status === 'Chưa liên lạc được';
-      if (!isNew) {
+      if (!isNew || statusAction === 'Đã Tư Vấn') {
         const t = setTimeout(() => textareaRef.current?.focus(), 400);
         return () => clearTimeout(t);
       }
     }
-  }, [isOpen, customer]);
+  }, [isOpen, customer, statusAction]);
 
   if (!isOpen || !customer) return null;
 
@@ -161,8 +161,10 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
       setStatusAction(action);
       if (action === 'Chưa liên lạc được') {
         setNote("Gọi điện không bắt máy / thuê bao");
+        setStep(3);
+      } else {
+        setStep(1);
       }
-      setStep(3);
     } else {
       setStep(2);
     }
@@ -193,8 +195,8 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
       note,
       nextFollowUp: selectedDate?.toISOString() || null,
       status: statusAction === 'Chưa liên lạc được' ? 'Chưa liên lạc được' : (statusAction === 'Đã Tư Vấn' ? 'Đang chăm' : undefined),
-      journeyStage: isNewOrUnreachable ? undefined : journeyStage,
-      journeyProgress: isNewOrUnreachable ? undefined : journeyProgress,
+      journeyStage: statusAction === 'Chưa liên lạc được' ? undefined : journeyStage,
+      journeyProgress: statusAction === 'Chưa liên lạc được' ? undefined : journeyProgress,
       nextAction,
     });
   };
@@ -254,7 +256,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
 
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              {isNewOrUnreachable ? (
+              {isNewOrUnreachable && !statusAction ? (
                 <div className="space-y-4">
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">Trạng thái hiện tại: <strong className="text-slate-900 dark:text-white">{customer.status}</strong></p>
                   
@@ -321,7 +323,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
             </div>
           )}
 
-          {step === 2 && !isNewOrUnreachable && (
+          {step === 2 && statusAction !== 'Chưa liên lạc được' && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Đánh giá khách hàng</label>
@@ -439,7 +441,7 @@ export default function UpdateCareSheet({ isOpen, customer, onComplete, onClose,
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => setStep(isNewOrUnreachable ? 1 : 2)}
+                  onClick={() => setStep(statusAction === 'Chưa liên lạc được' ? 1 : 2)}
                   className="px-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold"
                 >
                   Quay lại
