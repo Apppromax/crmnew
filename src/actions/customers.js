@@ -24,6 +24,22 @@ export function enrichStatus(customer) {
   return customer;
 }
 
+export function calculateClarityScore({ budget, demand, area, timeline, heatLevel }) {
+  let score = 0;
+  if (budget && budget !== "" && budget !== "Chưa xác định") score += 20;
+  if (demand && demand !== "" && demand !== "Khác") score += 20;
+  if (area && area !== "" && area !== "Khác") score += 20;
+  if (timeline && timeline !== "" && timeline !== "Tham khảo" && timeline !== "Tham khảo (Chưa rõ)") score += 20;
+  
+  if (heatLevel === "Rất Nét") score += 20;
+  else if (heatLevel === "Tiềm Năng") score += 15;
+  else if (heatLevel === "Quan Tâm") score += 10;
+  else if (heatLevel === "Tham Khảo") score += 5;
+  
+  return score;
+}
+
+
 // OPTIMIZED: Gộp getSmartQueue + getCustomerCount + hasTeam vào 1 function
 // Trước: 3 function × requireUser() + riêng DB queries = 6+ round trips
 // Sau: 1 requireUser() + 2 parallel queries = 3 round trips
@@ -378,7 +394,7 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
       demand,
       status: status || "Mới",
       heatLevel: heatLevel || "Chưa Rõ",
-      clarityScore: 0,
+      clarityScore: calculateClarityScore({ budget, demand, area, timeline, heatLevel }),
       journeyStage: journeyStage || "1. Phá băng và tư vấn ban đầu",
       tags: tags || [],
       nextFollowUp: nextFollowUp ? new Date(nextFollowUp) : null,
@@ -424,6 +440,20 @@ export async function updateCustomer(customerId, data) {
       updateData[key] = dateFields.includes(key) && data[key] ? new Date(data[key]) : data[key];
     }
   }
+
+  const checkBudget = data.budget !== undefined ? data.budget : existing.budget;
+  const checkDemand = data.demand !== undefined ? data.demand : existing.demand;
+  const checkArea = data.area !== undefined ? data.area : existing.area;
+  const checkTimeline = data.timeline !== undefined ? data.timeline : existing.timeline;
+  const checkHeatLevel = data.heatLevel !== undefined ? data.heatLevel : existing.heatLevel;
+
+  updateData.clarityScore = calculateClarityScore({
+    budget: checkBudget,
+    demand: checkDemand,
+    area: checkArea,
+    timeline: checkTimeline,
+    heatLevel: checkHeatLevel
+  });
 
   // Tự động gán/hủy teamId nếu có sự thay đổi về tags hoặc nhãn trùng khớp
   const profile = await prisma.profile.findUnique({

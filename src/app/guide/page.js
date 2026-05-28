@@ -13,7 +13,7 @@ import BottomNav from "@/components/BottomNav";
 const CHAPTERS = [
   {
     id: "onboarding",
-    title: "1. Khởi đầu & Nhập liệu AI",
+    title: "1. Khởi đầu & Nhập liệu 1-Chạm",
     icon: Sparkles,
     color: "from-indigo-500 to-purple-500",
     bgColor: "bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400"
@@ -150,9 +150,9 @@ export default function GuidePage() {
                 <div className="space-y-6">
                   <div>
                     <span className="text-[10px] uppercase font-extrabold tracking-widest text-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-2.5 py-1 rounded-md">Chương 1</span>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Đăng Nhập & Nhập Liệu AI Siêu Tốc</h2>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Khởi Đầu & Nhập Liệu 1-Chạm Siêu Tốc</h2>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      SalesPush loại bỏ hoàn toàn các trường biểu mẫu nhập liệu dài dòng. Bạn chỉ cần nhập liệu tự do bằng giọng nói hoặc văn bản, AI sẽ tự động phân tích và bóc tách dữ liệu sạch.
+                      SalesPush loại bỏ hoàn toàn việc gõ phím rườm rà trên điện thoại. Bạn có thể vuốt ngang và chạm nhanh để điền đầy đủ thuộc tính khách hàng chỉ trong chớp mắt.
                     </p>
                   </div>
 
@@ -164,55 +164,57 @@ export default function GuidePage() {
                       <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-sm mb-4">1</div>
                       <h3 className="font-bold text-sm text-slate-900 dark:text-white">Thiết lập tài khoản</h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                        Đăng nhập bằng Gmail hoặc Email cá nhân. Vào trang **Cá Nhân (Profile)** thiết lập số ngày hẹn mặc định, số giờ tạm hoãn và số lần gọi nhỡ tối đa trước khi đưa khách vào danh sách ngủ đông.
+                        Vào trang **Cá Nhân (Profile)** để thiết lập cấu hình CRM riêng: Thời gian tạm hoãn mặc định, số ngày hẹn gọi lại tự động, và giới hạn cuộc gọi nhỡ trước khi đẩy khách ngủ đông.
                       </p>
                     </div>
 
                     <div className="border border-slate-100 dark:border-slate-800 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 relative group">
                       <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-sm mb-4">2</div>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Nhập liệu tự do (AI Note)</h3>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Nhập liệu 2 giai đoạn linh hoạt</h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                        Nhấp nút **Thêm khách** ở trang chủ. Nhập ghi chú thô của cuộc gọi, ví dụ:
-                        <i className="block bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-150 dark:border-slate-800/80 my-2 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 leading-normal not-italic shadow-sm">
-                          &quot;Anh Nam 0371525751 quan tâm đất nền nghỉ dưỡng Cần Giờ, ngân sách tầm 5 đến 10 tỷ, sang tháng mua ngay, đã đặt lịch hẹn gọi lại.&quot;
-                        </i>
+                        - **Bước 1 (Sơ bộ)**: Nhập nhanh Họ tên + SĐT và chạm chọn Nguồn khách. Phù hợp khi sales đang bận rộn trên đường.
+                        <br />
+                        - **Bước 2 (Chi tiết - khi chọn &quot;Đã Tư Vấn&quot;)**: Form mở rộng mượt mà cho phép vuốt ngang chọn nhanh Phân khúc tài chính, Loại hình BĐS, Khu vực quan tâm và Timeline mua.
                       </p>
                     </div>
                   </div>
 
-                  {/* AI Result Card */}
+                  {/* ScrollChipSelect Illustration Card */}
                   <div className="border border-indigo-100 dark:border-indigo-950/30 rounded-2xl p-5 bg-gradient-to-br from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-slate-900 shadow-sm relative overflow-hidden">
                     <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
                       <Sparkles className="w-40 h-40 text-indigo-500" />
                     </div>
                     <div className="flex items-center gap-2 mb-3">
                       <BrainCircuit className="w-5 h-5 text-indigo-500" />
-                      <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Dữ liệu phân tích từ AI Note:</span>
+                      <span className="text-xs font-black text-indigo-650 dark:text-indigo-400 uppercase tracking-widest">Giao diện Nhập liệu 1-Chạm (ScrollChipSelect) thực tế:</span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                      <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                        <span className="text-[9px] font-bold text-slate-450 block uppercase">Nhu cầu</span>
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Đất nền nghỉ dưỡng</span>
+                    <div className="space-y-3.5">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">Mức độ nét của khách:</span>
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500 text-white border border-red-600 shrink-0">🌟 Rất Nét</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">🔥 Tiềm Năng</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">👀 Quan Tâm</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">❄️ Chưa Rõ</span>
+                        </div>
                       </div>
-                      <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                        <span className="text-[9px] font-bold text-slate-450 block uppercase">Khu vực</span>
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Cần Giờ</span>
-                      </div>
-                      <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                        <span className="text-[9px] font-bold text-slate-450 block uppercase">Ngân sách</span>
-                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">5 - 10 tỷ</span>
-                      </div>
-                      <div className="bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
-                        <span className="text-[9px] font-bold text-slate-450 block uppercase">Thời gian</span>
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Sang tháng</span>
+
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">Phân khúc tài chính:</span>
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">Dưới 2 tỷ</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-500 text-white border border-primary-600 shrink-0">2 - 3 tỷ</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">3 - 5 tỷ</span>
+                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">5 - 10 tỷ</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-4 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+                    <div className="mt-5 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-150 dark:border-slate-800/80 flex items-start gap-3">
                       <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0 mt-0.5" />
                       <p className="text-[11px] text-slate-650 leading-relaxed">
-                        **Độ Nét (Clarity Score):** AI sẽ tự động tính toán mức độ mạch lạc thông tin của khách hàng. Nếu đầy đủ dữ liệu (ngân sách, khu vực, nhu cầu), điểm rõ nét sẽ tự động tăng cao, đánh dấu **Tiềm Năng** hoặc **Rất Nét** trên hàng chờ!
+                        **Điểm Rõ Nét (Clarity Score):** Khi sales bấm chọn đầy đủ thông tin (Ngân sách, Loại hình, Khu vực...), hệ thống tự động tính toán độ rõ nét của lead cực kỳ chuẩn xác (mỗi thông tin chi tiết đóng góp 20% vào điểm số tối đa 100%). Điểm rõ nét càng cao, khách hàng càng nóng sẽ tự động được ưu tiên đưa lên vị trí số 1 tại hàng chờ **Smart Queue** để bạn tập trung chăm sóc!
                       </p>
                     </div>
                   </div>

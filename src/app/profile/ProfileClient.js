@@ -272,7 +272,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
               </div>
             )}
 
-            <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI" iconColor="text-indigo-500" iconBg="bg-indigo-50" activeSection={activeSection} toggleSection={toggleSection}>
+            <SectionItem id="topup" icon={Wallet} title="Nạp Credits" description="Nạp tiền vào ví để dùng AI Cố Vấn" iconColor="text-indigo-500" iconBg="bg-indigo-50" activeSection={activeSection} toggleSection={toggleSection}>
               
               {topUpSuccess ? (
                 <div className="text-center py-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
@@ -523,7 +523,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
 
               {/* ===== PRO UPGRADE SECTION ===== */}
               {(!profile.teamMembership || profile.role === 'admin') && (
-                <SectionItem id="pro" icon={Rocket} title={profile.ownedTeam ? "Gói TEAM PRO" : "Gói Cá Nhân PRO"} description={profile.ownedTeam ? "Mở khóa AI cho toàn đội nhóm" : "Mở khóa AI cho cá nhân"} iconColor="text-amber-500" iconBg="bg-amber-50" activeSection={activeSection} toggleSection={toggleSection}>
+                <SectionItem id="pro" icon={Rocket} title={profile.ownedTeam ? "Gói TEAM PRO" : "Gói Cá Nhân PRO"} description={profile.ownedTeam ? "Mở khóa AI Cố Vấn cho toàn đội nhóm" : "Mở khóa AI Cố Vấn cho cá nhân"} iconColor="text-amber-500" iconBg="bg-amber-50" activeSection={activeSection} toggleSection={toggleSection}>
                 
                 {profile.ownedTeam ? (
                   <div className="relative z-10">
@@ -535,7 +535,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                         </div>
                       </>
                     ) : (
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Đăng ký gói PRO để cấp quyền dùng AI cho tất cả nhân viên trong Team.</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Đăng ký gói PRO để cấp quyền dùng AI Cố Vấn cho tất cả nhân viên trong Team.</p>
                     )}
                     
                     <div className="mb-4">
@@ -557,7 +557,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                   </div>
                 ) : isProfilePro ? (
                   <div className="relative z-10">
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Bạn đang sử dụng gói Pro. Khách hàng không giới hạn, dùng AI thả ga.</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Bạn đang sử dụng gói Pro. Khách hàng không giới hạn, dùng AI Cố Vấn thả ga.</p>
                     <div className="inline-block px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm font-bold mb-4">
                       Hạn dùng: {new Date(profile.proUntil).toLocaleDateString('vi-VN')}
                     </div>
@@ -573,7 +573,7 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                           Bạn đang trong thời gian dùng thử 2 tháng miễn phí (còn {Math.max(0, Math.ceil((trialEndDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} ngày).
                         </span>
                       ) : null}
-                      Mở khóa tính năng thêm khách hàng bằng AI, không giới hạn lưu trữ.
+                      Mở khóa tính năng AI Cố vấn chiến lược hàng tuần, không giới hạn lưu trữ.
                     </p>
                     <button onClick={handleUpgrade} disabled={isUpgrading} className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-slate-900/20 dark:shadow-white/10 transition-all active:scale-95">
                       {isUpgrading ? "Đang xử lý..." : "Nâng cấp ngay (99K CR/tháng)"}

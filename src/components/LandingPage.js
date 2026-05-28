@@ -166,8 +166,8 @@ export default function LandingPage() {
                 <BrainCircuit className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-800">AI Đề xuất</p>
-                <p className="text-xs text-slate-500">Gọi ngay khách hàng nóng</p>
+                <p className="text-sm font-bold text-slate-800">Báo cáo Chiến lược AI</p>
+                <p className="text-xs text-slate-500">Tối ưu hiệu suất bán hàng</p>
               </div>
             </motion.div>
           </motion.div>
@@ -188,7 +188,7 @@ export default function LandingPage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { step: "01", title: "Nhập liệu siêu tốc", desc: "Thêm thông tin khách hàng chỉ trong vài giây. AI tự động phân tích và chấm điểm tiềm năng." },
+              { step: "01", title: "Nhập liệu siêu tốc", desc: "Thêm thông tin khách hàng chỉ trong vài giây với biểu mẫu 1-chạm tối ưu hóa cao cho điện thoại di động." },
               { step: "02", title: "Smart Queue Ưu tiên", desc: "Mỗi sáng thức dậy, hệ thống đã xếp sẵn danh sách những khách hàng 'Nóng' nhất cần gọi." },
               { step: "03", title: "Vuốt để Chốt đơn", desc: "Giao diện vuốt như Tinder. Vuốt phải để gọi lại, vuốt trái để bỏ qua. Chốt sales mượt mà." }
             ].map((item, i) => (
