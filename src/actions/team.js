@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { enrichStatus } from "./customers";
 
 function generateInviteCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -59,7 +60,8 @@ export async function getTeamContext({ includeData = false } = {}) {
             id: true, userId: true, name: true, phone: true,
             status: true, heatLevel: true, journeyStage: true,
             clarityScore: true, nextFollowUp: true, tags: true,
-            snoozedUntil: true, lastContactAt: true, teamId: true
+            snoozedUntil: true, lastContactAt: true, teamId: true,
+            createdAt: true
           },
           orderBy: { createdAt: "desc" }
         }),
@@ -104,11 +106,12 @@ export async function getTeamContext({ includeData = false } = {}) {
         };
       });
 
-      result.customers = customers.map(c => ({
+      result.customers = customers.map(c => enrichStatus({
         ...c,
         nextFollowUp: c.nextFollowUp?.toISOString() || null,
         snoozedUntil: c.snoozedUntil?.toISOString() || null,
         lastContactAt: c.lastContactAt?.toISOString() || null,
+        createdAt: c.createdAt?.toISOString() || null,
       }));
     }
 
@@ -333,11 +336,14 @@ export async function getTeamCustomers(teamId) {
       heatLevel: true,
       journeyStage: true,
       clarityScore: true,
+      nextFollowUp: true,
+      lastContactAt: true,
+      createdAt: true,
     },
     orderBy: { createdAt: "desc" }
   });
 
-  return customers;
+  return customers.map(c => enrichStatus(c));
 }
 
 // Phân bổ Khách hàng cho Thành viên (Dành cho Leader)

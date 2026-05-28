@@ -4,13 +4,15 @@ import prisma from "@/lib/prisma";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-function enrichStatus(customer) {
+export function enrichStatus(customer) {
   if (!customer) return customer;
   if (customer.status !== "Đang chăm" && customer.status !== "Đang chờ") return customer;
-  if (!customer.lastContactAt) return customer;
+  if (!customer.lastContactAt && !customer.createdAt) return customer;
 
   const now = new Date();
-  const lastContact = new Date(customer.lastContactAt);
+  const lastContact = customer.lastContactAt
+    ? new Date(customer.lastContactAt)
+    : new Date(customer.createdAt);
   const diffMinutes = (now - lastContact) / 60000;
 
   if (diffMinutes <= 30) {
