@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { upgradeToPro, updateProfileInfo, updateProfileSettings, requestTopUp, getUserTransactions, upgradeTeamPro } from "@/actions/user";
 import { createClient } from "@/lib/supabase/client";
 import BottomNav from "@/components/BottomNav";
-import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown, History, CheckCircle2, Clock, Phone } from "lucide-react";
+import { Settings, LogOut, Rocket, Users, Crown, Edit3, Moon, Sun, X, Palette, Timer, Bell, ListOrdered, ShieldCheck, Wallet, ArrowRight, Copy, ChevronDown, History, CheckCircle2, Clock, Phone, BookOpen } from "lucide-react";
 
 export default function ProfileClient({ initialProfile, settings = {} }) {
   const router = useRouter();
@@ -602,7 +602,12 @@ export default function ProfileClient({ initialProfile, settings = {} }) {
                     onClick={() => router.push('/admin')} 
                   />
                 )}
-
+                <ActionItem 
+                  icon={BookOpen} 
+                  title="Hướng dẫn sử dụng" 
+                  description="Xem hướng dẫn chi tiết cho người mới" 
+                  onClick={() => router.push('/guide')} 
+                />
               <ActionItem 
                 icon={LogOut} 
                 title="Đăng xuất" 
