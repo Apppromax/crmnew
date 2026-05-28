@@ -1,13 +1,22 @@
 import { getTeamContext } from "@/actions/team";
 import TeamDashboardClient from "./TeamDashboardClient";
 import NoTeamView from "./NoTeamView";
+import prisma from "@/lib/prisma";
+import { requireUser } from "@/lib/supabase/server";
 
 export default async function TeamPage() {
   // Single call fetches everything — no duplicate auth/membership checks
   const context = await getTeamContext({ includeData: true });
 
   if (!context.hasTeam) {
-    return <NoTeamView />;
+    const userId = await requireUser();
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { createdAt: true }
+    });
+    const isTrial = profile ? (new Date() < new Date(profile.createdAt.getTime() + 60 * 24 * 60 * 60 * 1000)) : false;
+
+    return <NoTeamView isTrial={isTrial} />;
   }
 
   const { team, role, members = [], customers = [] } = context;

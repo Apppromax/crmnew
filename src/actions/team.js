@@ -157,7 +157,13 @@ export async function createTeam(name, months = 1) {
       const profile = await tx.profile.findUnique({ where: { id: userId } });
       if (!profile) throw new Error("User not found");
 
-      if (profile.balance < totalCost) {
+      const now = new Date();
+      const trialEndDate = new Date(profile.createdAt.getTime() + 60 * 24 * 60 * 60 * 1000);
+      const isTrial = now < trialEndDate;
+
+      const actualCost = isTrial ? 0 : totalCost;
+
+      if (profile.balance < actualCost) {
         throw new Error("Số dư không đủ để mở Team. Vui lòng nạp thêm Credits.");
       }
 
@@ -168,26 +174,39 @@ export async function createTeam(name, months = 1) {
       const existingMembership = await tx.teamMember.findUnique({ where: { userId } });
       if (existingMembership) throw new Error("Bạn đang là thành viên của Team khác. Vui lòng rời Team trước.");
 
-      const now = new Date();
-      const validUntil = new Date();
-      validUntil.setMonth(now.getMonth() + months);
+      const validUntil = isTrial ? trialEndDate : new Date();
+      if (!isTrial) {
+        validUntil.setMonth(now.getMonth() + months);
+      }
 
-      // Trừ tiền
-      await tx.profile.update({
-        where: { id: userId },
-        data: { balance: profile.balance - totalCost },
-      });
+      // Chỉ trừ tiền và tạo giao dịch nếu có phát sinh chi phí
+      if (actualCost > 0) {
+        await tx.profile.update({
+          where: { id: userId },
+          data: { balance: profile.balance - actualCost },
+        });
 
-      // Tạo Transaction
-      await tx.transaction.create({
-        data: {
-          userId,
-          amount: -totalCost,
-          type: "SPEND",
-          note: `Đăng ký gói TEAM ${months} tháng`,
-          status: "COMPLETED",
-        },
-      });
+        await tx.transaction.create({
+          data: {
+            userId,
+            amount: -actualCost,
+            type: "SPEND",
+            note: `Đăng ký gói TEAM ${months} tháng`,
+            status: "COMPLETED",
+          },
+        });
+      } else {
+        // Giao dịch miễn phí cho Free Trial
+        await tx.transaction.create({
+          data: {
+            userId,
+            amount: 0,
+            type: "SPEND",
+            note: "Đăng ký gói TEAM (Dùng thử miễn phí)",
+            status: "COMPLETED",
+          },
+        });
+      }
 
       // Tạo Team
       let inviteCode = generateInviteCode();

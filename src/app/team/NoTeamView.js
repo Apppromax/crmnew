@@ -7,7 +7,7 @@ import { Crown, KeyRound, Loader2, Zap, Users, BarChart3, ShieldCheck, ChevronRi
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
-export default function NoTeamView() {
+export default function NoTeamView({ isTrial = false }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -130,13 +130,23 @@ export default function NoTeamView() {
                   <p className="text-xs text-slate-500 dark:text-slate-400">Hãy tạo Team để bắt đầu mời nhân sự vào nhóm.</p>
                 </div>
                 
-                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-3 flex items-start gap-3">
-                  <ShieldCheck className="w-5 h-5 text-amber-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-bold text-amber-800 dark:text-amber-500">Phí duy trì: 299,000 CR / tháng</p>
-                    <p className="text-[10px] text-amber-700 dark:text-amber-600/80 mt-1">Đã bao gồm 5 tài khoản thành viên. Trưởng phòng trả phí.</p>
+                {isTrial ? (
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-3 flex items-start gap-3">
+                    <Crown className="w-5 h-5 text-emerald-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800 dark:text-emerald-500">Phí duy trì: MIỄN PHÍ (Free Trial)</p>
+                      <p className="text-[10px] text-emerald-750 dark:text-emerald-400 mt-1">Bạn đang trong 2 tháng dùng thử. Tạo nhóm hoàn toàn miễn phí, mời tối đa 5 thành viên.</p>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-3 flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-800 dark:text-amber-500">Phí duy trì: 299,000 CR / tháng</p>
+                      <p className="text-[10px] text-amber-700 dark:text-amber-600/80 mt-1">Đã bao gồm 5 tài khoản thành viên. Trưởng phòng trả phí.</p>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">Tên Team của bạn</label>
@@ -152,10 +162,10 @@ export default function NoTeamView() {
                 <button
                   onClick={handleCreate}
                   disabled={isPending || !teamName}
-                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 transition-transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 transition-transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 shadow-md"
                 >
                   {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-                  Thanh toán & Tạo Team
+                  {isTrial ? "Tạo Team Miễn Phí" : "Thanh toán & Tạo Team"}
                 </button>
               </div>
             ) : (
