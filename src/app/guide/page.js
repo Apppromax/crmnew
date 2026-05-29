@@ -263,6 +263,16 @@ export default function GuidePage() {
     setSimulationStep(2);
   };
 
+  const handleQuickLink = (tabId) => {
+    setActiveTab(tabId);
+    setTimeout(() => {
+      const el = document.getElementById("content-anchor");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-24 md:pb-8 md:pl-64 font-sans selection:bg-indigo-200 selection:text-indigo-900 transition-colors">
       
@@ -287,6 +297,90 @@ export default function GuidePage() {
 
       <main className="max-w-4xl mx-auto px-4 pt-6">
         
+        {/* 3 Core Breakthrough Features Highlight Panel */}
+        <section className="mb-10 bg-gradient-to-br from-indigo-50/50 via-white to-emerald-50/30 dark:from-indigo-950/10 dark:via-slate-900 dark:to-emerald-950/10 border border-slate-150 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+          {/* Subtle decoration dots */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 space-y-6">
+            <div>
+              <span className="text-[10px] uppercase font-black tracking-widest text-primary-500 bg-primary-50 dark:bg-primary-500/10 px-2.5 py-1 rounded-md">⚡ BẬT MÍ CỐT LÕI</span>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white mt-2 flex items-center gap-1.5">
+                3 Tính Năng Bất Bại Của SalesPush
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium leading-relaxed">
+                Được thiết kế tối ưu giúp tăng 300% hiệu suất bán hàng và không bao giờ bỏ sót bất kỳ cơ hội chốt giao dịch nào.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Feature 1 */}
+              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
+                <div>
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
+                    Tự Đẩy Khách Thông Minh
+                  </h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
+                    Hệ thống tự động đưa khách có lịch hẹn và khách **&quot;quan tâm sâu&quot; (Rất Nét)** lên màn hình chính. Bạn chỉ cần mở app là thấy ngay, không mất thời gian tìm kiếm hay lục lọi danh sách.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleQuickLink("queue")}
+                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                >
+                  Xem chi tiết & Thử tương tác ➔
+                </button>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
+                <div>
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
+                    Nhập Liệu & Tiến Trình Sales
+                  </h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
+                    Biểu mẫu 1-chạm tối giản cho di động. Lưu vết phân khúc tài chính, nhu cầu và quản lý tiến trình sales chuẩn khoa học qua **Hành trình 7 Bước** trực quan.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleQuickLink("onboarding")}
+                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                >
+                  Xem cách hoạt động ➔
+                </button>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
+                <div>
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
+                    Quản Lý Phòng & Cố Vấn AI
+                  </h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
+                    Leader nắm trọn thông số hoạt động của cả phòng theo thời gian thực. **AI Engine** tự động tổng hợp thông tin, đưa ra cố vấn chiến lược bám đuổi mục tiêu hàng tuần cực kỳ sắc bén.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleQuickLink("team")}
+                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                >
+                  Xem phân tích Team ➔
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Horizontal Navigation Chapters */}
         <div className="flex gap-2.5 overflow-x-auto pb-3 mb-6 scrollbar-hide shrink-0">
           {CHAPTERS.map(ch => {
@@ -310,6 +404,9 @@ export default function GuidePage() {
             );
           })}
         </div>
+
+        {/* Scroll Anchor */}
+        <div id="content-anchor" className="scroll-mt-24" />
 
         {/* Content Box */}
         <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-3xl p-6 shadow-sm overflow-hidden min-h-[50vh] transition-colors">
