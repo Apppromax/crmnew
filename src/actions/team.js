@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { enrichStatus } from "./customers";
+import { enrichStatus } from "@/lib/utils";
 
 function generateInviteCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
