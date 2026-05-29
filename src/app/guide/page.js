@@ -10,6 +10,182 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
+function InteractiveScreenshot() {
+  const [selectedSpot, setSelectedSpot] = useState({
+    id: "smart-queue",
+    x: "50%",
+    y: "28%",
+    title: "⚡ Hàng chờ Smart Queue",
+    desc: "Khách hàng khẩn cấp nhất tự động được sắp xếp ở vị trí số 1 dựa trên Điểm Rõ Nét và lịch hẹn để sales tập trung xử lý ngay đầu ngày."
+  });
+
+  const hotspots = [
+    {
+      id: "snooze-restore",
+      x: "76%",
+      y: "15%",
+      title: "🔄 Khôi phục Tạm hoãn",
+      desc: "Bấm nút xoay tròn để khôi phục nhanh tất cả các khách hàng đang tạm hoãn (Snooze) quay lại hàng chờ làm việc."
+    },
+    {
+      id: "smart-queue",
+      x: "50%",
+      y: "28%",
+      title: "⚡ Hàng chờ Smart Queue",
+      desc: "Khách hàng khẩn cấp nhất tự động được sắp xếp ở vị trí số 1 dựa trên Điểm Rõ Nét và lịch hẹn để sales tập trung xử lý ngay đầu ngày."
+    },
+    {
+      id: "overdue-badge",
+      x: "83%",
+      y: "34%",
+      title: "🔴 Cảnh báo Lỡ Hẹn",
+      desc: "Thẻ đỏ hiển thị số ngày/giờ bị lỡ hẹn để bạn lập tức gọi lại chăm sóc ngay, tránh bỏ rơi cơ hội."
+    },
+    {
+      id: "next-action",
+      x: "40%",
+      y: "43%",
+      title: "📋 Hành động tiếp theo",
+      desc: "Gợi ý hành động chi tiết dựa trên tiến trình thực tế (ví dụ: Gọi xác nhận lịch hẹn, tư vấn chuyên sâu...) giúp sales luôn biết cần làm gì."
+    },
+    {
+      id: "one-tap-actions",
+      x: "50%",
+      y: "53%",
+      title: "📞 Tương tác 1-Chạm",
+      desc: "Nút Cập nhật trạng thái, Gọi điện trực tiếp, hoặc nhắn tin Zalo nhanh chỉ với một chạm duy nhất."
+    },
+    {
+      id: "fab-add",
+      x: "50%",
+      y: "82%",
+      title: "➕ Thêm khách nhanh",
+      desc: "Nút thêm khách hàng nổi bật ở cuối trang giúp bạn nhanh chóng mở form nhập liệu 2 giai đoạn bất kỳ lúc nào."
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start my-6 bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-3xl border border-slate-150 dark:border-slate-800/80">
+      {/* Visual Device Frame */}
+      <div className="lg:col-span-6 flex flex-col items-center">
+        <span className="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-wider">📱 Bấm trực tiếp vào các điểm tròn phát sáng trên màn hình:</span>
+        <div className="relative w-full max-w-[300px] aspect-[9/19.5] rounded-[42px] bg-slate-900 border-[8px] border-slate-800 shadow-2xl p-1 overflow-hidden ring-1 ring-slate-700/30">
+          {/* Notch */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-slate-800 rounded-b-xl z-30 flex items-center justify-center">
+            <div className="w-10 h-0.5 bg-slate-900 rounded-full mb-0.5" />
+          </div>
+
+          <div className="relative w-full h-full rounded-[34px] overflow-hidden bg-slate-100 select-none">
+            {/* Screenshot */}
+            <img 
+              src="/images/dashboard-mobile.png" 
+              alt="SalesPush Mobile Dashboard"
+              className="w-full h-full object-cover pointer-events-none"
+            />
+
+            {/* Hotspots Overlay */}
+            {hotspots.map((spot) => {
+              const isSelected = selectedSpot?.id === spot.id;
+              return (
+                <div
+                  key={spot.id}
+                  className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: spot.x, top: spot.y }}
+                >
+                  <button
+                    onClick={() => setSelectedSpot(isSelected ? null : spot)}
+                    className="relative w-7 h-7 flex items-center justify-center focus:outline-none"
+                  >
+                    {/* Pulsing ring */}
+                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${isSelected ? 'bg-indigo-400' : 'bg-primary-400'}`} />
+                    {/* Core dot */}
+                    <span className={`relative inline-flex rounded-full h-4.5 w-4.5 items-center justify-center shadow-lg border border-white transition-all duration-200 ${isSelected ? 'bg-indigo-500 scale-110' : 'bg-primary-500 hover:scale-105'}`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                    </span>
+                  </button>
+                </div>
+              );
+            })}
+
+            {/* Tooltip Popup inside phone screen */}
+            <AnimatePresence>
+              {selectedSpot && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xl"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <h4 className="text-[11px] font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                      {selectedSpot.title}
+                    </h4>
+                    <button 
+                      onClick={() => setSelectedSpot(null)}
+                      className="text-[9px] text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold p-0.5"
+                    >
+                      Đóng
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                    {selectedSpot.desc}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* Explanations Sidebar list */}
+      <div className="lg:col-span-6 space-y-3 mt-4 lg:mt-0">
+        <h3 className="font-black text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+          💡 Chú thích chi tiết tính năng:
+        </h3>
+        <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+          {hotspots.map((spot, idx) => {
+            const isSelected = selectedSpot?.id === spot.id;
+            return (
+              <button
+                key={spot.id}
+                onClick={() => setSelectedSpot(isSelected ? null : spot)}
+                className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 flex items-start gap-3 active:scale-[0.99] ${
+                  isSelected 
+                    ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800 shadow-sm"
+                    : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-850"
+                }`}
+              >
+                <div className={`w-5 h-5 rounded-lg font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 ${
+                  isSelected 
+                    ? "bg-indigo-500 text-white" 
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                }`}>
+                  {idx + 1}
+                </div>
+                <div>
+                  <h4 className={`text-xs font-black transition-colors ${isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                    {spot.title}
+                  </h4>
+                  {isSelected && (
+                    <motion.p 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed font-semibold"
+                    >
+                      {spot.desc}
+                    </motion.p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const CHAPTERS = [
   {
     id: "onboarding",
@@ -232,6 +408,9 @@ export default function GuidePage() {
                   </div>
 
                   <hr className="border-slate-100 dark:border-slate-800" />
+
+                  {/* Interactive Screenshot Hotspot Tool */}
+                  <InteractiveScreenshot />
 
                   {/* Overdue Concept Explain */}
                   <div className="space-y-4">
