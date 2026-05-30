@@ -134,7 +134,7 @@ export async function generateWeeklyStrategy() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  // Get active customers
+  // Get active customers with all necessary fields for rich analysis
   const customers = await prisma.customer.findMany({
     where: { 
       userId: user.id,
@@ -142,12 +142,18 @@ export async function generateWeeklyStrategy() {
     },
     select: {
       name: true,
+      phone: true,
+      status: true,
+      heatLevel: true,
       budget: true,
       demand: true,
-      heatLevel: true,
+      area: true,
+      timeline: true,
       journeyStage: true,
       clarityScore: true,
       nextFollowUp: true,
+      lastContactAt: true,
+      createdAt: true,
     }
   });
 
@@ -157,27 +163,42 @@ export async function generateWeeklyStrategy() {
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
-Bạn là Cố vấn Chiến lược Bán hàng (AI Engine) chuyên nghiệp và nhạy bén.
-Hãy phân tích toàn bộ danh sách khách hàng dưới đây để lập một Báo cáo Chiến lược cực kỳ MẠCH LẠC, GỌN GÀNG, ĐI THẲNG VÀO TRỌNG TÂM dựa trên 4 mục tiêu sau:
+Bạn là AI phân tích CRM chuyên nghiệp và nhạy bén. Hãy rà soát toàn bộ dữ liệu CRM của người dùng dưới đây và tạo báo cáo ngắn gọn, sạch, có thể hành động ngay.
 
-1. 🎯 PHÁT HIỆN KHÁCH HÀNG TIỀM NĂNG NHẤT:
-   - Hãy chỉ đích danh tên và phân tích các khách hàng có tiềm năng giao dịch cao nhất dựa trên mức độ nét (heatLevel), tài chính (budget), và nhu cầu cụ thể (demand).
+Nhiệm vụ của bạn:
+1. Tìm khách hàng/deal tiềm năng nhất.
+2. Cảnh báo khách hàng đang bị bỏ sót.
+3. Phát hiện điểm nghẽn trong phễu bán hàng.
+4. Đề xuất các hành động ưu tiên cần làm hôm nay.
 
-2. ⚠️ CẢNH BÁO KHÁCH ĐANG BỊ BỎ SÓT:
-   - Liệt kê ngay các khách hàng có lịch hẹn đã quá hạn chăm sóc (overdue) hoặc đã lâu chưa được tương tác chăm sóc lại.
+Quy tắc phân tích nghiêm ngặt:
+- Chỉ kết luận dựa trên dữ liệu thực tế có sẵn được cung cấp dưới đây. Tuyệt đối không tự bịa hay suy diễn thông tin nằm ngoài dữ liệu.
+- Nếu thiếu dữ liệu để rút ra kết luận ở bất kỳ mục nào, hãy ghi rõ cụm từ: "Chưa đủ dữ liệu để kết luận".
+- Mỗi phát hiện, nhận định hoặc insight đưa ra phải đi kèm lý do và bằng chứng dữ liệu cụ thể rõ ràng (ví dụ: căn cứ theo mức độ nét heatLevel, ngày liên hệ cuối lastContactAt, điểm clarityScore, hoặc lịch hẹn quá hạn nextFollowUp).
+- Ưu tiên đề xuất các hành động thiết thực giúp trực tiếp tăng doanh thu hoặc giảm thiểu nguy cơ mất khách hàng.
+- Trả kết quả cực kỳ ngắn gọn, rõ ràng, mạch lạc và chuyên nghiệp.
 
-3. 📊 ĐIỂM NGHẼN TRONG PHỄU BÁN HÀNG:
-   - Chỉ ra điểm nghẽn hiện tại (ví dụ: lượng khách đang dồn ứ quá nhiều ở bước "Phá băng" mà chưa chuyển qua "Tư vấn chuyên sâu", hoặc "Dồn chốt" bị tắc nghẽn) và đưa ra gợi ý tháo gỡ.
+Hãy viết báo cáo bằng Markdown và chia chính xác theo các tiêu đề (Output) sau:
 
-4. 🚀 ĐỀ XUẤT HÀNH ĐỘNG ƯU TIÊN HÔM NAY:
-   - Liệt kê 3-5 hành động cụ thể, ưu tiên cần làm ngay hôm nay cho các khách hàng mục tiêu để tạo bước tiến trong phễu bán hàng.
+## 📊 Tổng quan nhanh
+[Tóm tắt siêu ngắn gọn về sức khỏe tệp khách hàng của bạn hôm nay]
 
-Nguyên tắc báo cáo quan trọng:
-- Tuyệt đối làm việc dựa trên dữ liệu phân tích thực tế từ danh sách khách hàng, không nhận định cảm tính.
-- Báo cáo phải cực kỳ mạch lạc, gọn gàng, có tiêu đề rõ ràng, sử dụng bullet points ngắn gọn và in đậm các từ khóa/tên khách hàng quan trọng.
-- KHÔNG lặp lại danh sách khách hàng dài dòng, chỉ tập trung vào phân tích chất lượng (insights) và hành động (actions) thực tế.
+## 🎯 Top khách hàng tiềm năng
+[Danh sách khách hàng tiềm năng nhất. Phải ghi rõ tên khách và bằng chứng dữ liệu: ví dụ mức độ nét Rất Nét, tài chính tốt, nhu cầu rõ ràng hoặc điểm clarityScore cao...]
 
-Danh sách khách hàng của tôi:
+## ⚠️ Khách hàng có nguy cơ bị bỏ sót
+[Cảnh báo các khách hàng quá hạn chăm sóc (overdue) hoặc không có lịch hẹn tiếp theo và đã quá lâu chưa tương tác dựa trên lastContactAt/createdAt...]
+
+## 📊 Điểm nghẽn pipeline
+[Phân tích sự phân bổ khách hàng trong các bước của phễu bán hàng (journeyStage) và chỉ ra nơi đang bị dồn ứ/tắc nghẽn...]
+
+## 🚀 Việc nên làm hôm nay
+[Đề xuất các hành động ưu tiên, cụ thể và thực tế cần làm ngay hôm nay để chốt sale hoặc cứu khách sắp mất]
+
+## 🔍 Cảnh báo chất lượng dữ liệu (nếu có)
+[Chỉ ra các khách hàng bị thiếu thông tin quan trọng như SĐT, tài chính, nhu cầu... làm giảm chất lượng chăm sóc, hoặc ghi "Không có cảnh báo" nếu dữ liệu đã sạch hoàn toàn]
+
+Dữ liệu CRM của tôi:
 ${JSON.stringify(customers, null, 2)}
 `;
 
