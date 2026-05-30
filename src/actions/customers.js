@@ -373,6 +373,10 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
     assignTeamInBackground(userId, customer.id, tags).catch(() => {});
   }
 
+  revalidatePath("/");
+  revalidatePath("/customers");
+  revalidatePath("/schedule");
+
   return { id: customer.id };
 }
 

@@ -2,6 +2,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function parseNoteWithAI(noteText) {
   if (!process.env.GEMINI_API_KEY) {
@@ -95,6 +96,10 @@ export async function createCustomerFromAI({ parsedData, rawNote }) {
         summary: parsedData.summary || "Thêm mới qua AI Data Entry",
       },
     });
+
+    revalidatePath("/");
+    revalidatePath("/customers");
+    revalidatePath("/schedule");
 
     return { success: true, customerId: customer.id };
   } catch (error) {

@@ -4,177 +4,215 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, Sparkles, BrainCircuit, Users, Target, Clock, 
-  Calendar, CheckCircle2, ChevronRight, Play, BookOpen, AlertCircle, RefreshCw
+  Calendar, CheckCircle2, ChevronRight, Play, BookOpen, AlertCircle, RefreshCw,
+  ChevronDown, ChevronUp, ShieldAlert, Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import BottomNav from "@/components/BottomNav";
 
-function InteractiveScreenshot() {
-  const [selectedSpot, setSelectedSpot] = useState({
-    id: "smart-queue",
-    x: "50%",
-    y: "28%",
-    title: "⚡ Hàng chờ Smart Queue",
-    desc: "Khách hàng khẩn cấp nhất tự động được sắp xếp ở vị trí số 1 dựa trên Điểm Rõ Nét và lịch hẹn để sales tập trung xử lý ngay đầu ngày."
-  });
+// Helper collapsible component to compress verbose text with a clean HUD design
+function CollapsibleDetail({ title, children }) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="border border-slate-200/80 dark:border-slate-800/80 rounded-xl overflow-hidden bg-slate-50/60 dark:bg-slate-900/40 transition-colors">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left focus:outline-none hover:bg-slate-100/50 dark:hover:bg-slate-800/40 transition-colors"
+      >
+        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+          {title}
+        </span>
+        {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          >
+            <div className="px-4 pb-4 pt-1 text-[11px] text-slate-650 dark:text-slate-400 leading-relaxed border-t border-slate-150 dark:border-slate-800/60 font-medium">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
+function InteractiveScreenshot() {
   const hotspots = [
-    {
-      id: "snooze-restore",
-      x: "76%",
-      y: "15%",
-      title: "🔄 Khôi phục Tạm hoãn",
-      desc: "Bấm nút xoay tròn để khôi phục nhanh tất cả các khách hàng đang tạm hoãn (Snooze) quay lại hàng chờ làm việc."
-    },
     {
       id: "smart-queue",
       x: "50%",
       y: "28%",
+      number: "1",
       title: "⚡ Hàng chờ Smart Queue",
-      desc: "Khách hàng khẩn cấp nhất tự động được sắp xếp ở vị trí số 1 dựa trên Điểm Rõ Nét và lịch hẹn để sales tập trung xử lý ngay đầu ngày."
-    },
-    {
-      id: "overdue-badge",
-      x: "83%",
-      y: "34%",
-      title: "🔴 Cảnh báo Lỡ Hẹn",
-      desc: "Thẻ đỏ hiển thị số ngày/giờ bị lỡ hẹn để bạn lập tức gọi lại chăm sóc ngay, tránh bỏ rơi cơ hội."
+      shortDesc: "Tự động đẩy khách khẩn cấp lên đầu ngày.",
+      desc: "Khách hàng nóng nhất tự động sắp xếp lên vị trí số 1 dựa trên Điểm Rõ Nét và lịch hẹn để sales tập trung xử lý lập tức."
     },
     {
       id: "next-action",
       x: "40%",
       y: "43%",
-      title: "📋 Hành động tiếp theo",
-      desc: "Gợi ý hành động chi tiết dựa trên tiến trình thực tế (ví dụ: Gọi xác nhận lịch hẹn, tư vấn chuyên sâu...) giúp sales luôn biết cần làm gì."
+      number: "2",
+      title: "📋 Gợi ý Hành động Tiếp Theo",
+      shortDesc: "Luôn biết cần làm gì tiếp theo với khách hàng.",
+      desc: "Hệ thống tự động đưa ra các gợi ý hành động thực tế tiếp theo (ví dụ: Gọi xác nhận cọc, gửi vị trí...) để sales không bị mất phương hướng."
     },
     {
       id: "one-tap-actions",
       x: "50%",
       y: "53%",
-      title: "📞 Tương tác 1-Chạm",
-      desc: "Nút Cập nhật trạng thái, Gọi điện trực tiếp, hoặc nhắn tin Zalo nhanh chỉ với một chạm duy nhất."
+      number: "3",
+      title: "📞 Tương tác 1-Chạm Siêu Tốc",
+      shortDesc: "Cập nhật, gọi điện, nhắn Zalo chỉ với 1 chạm.",
+      desc: "Hỗ trợ các nút gọi điện, gửi tin nhắn Zalo soạn sẵn và cập nhật trạng thái cực nhanh trực tiếp từ thẻ khách hàng."
+    },
+    {
+      id: "overdue-badge",
+      x: "83%",
+      y: "34%",
+      number: "4",
+      title: "🔴 Cảnh báo Trễ Hẹn",
+      shortDesc: "Phát hiện ngay các lịch hẹn bị bỏ lỡ.",
+      desc: "Hộp cảnh báo đỏ hiển thị chính xác số giờ hoặc ngày trễ hẹn, giúp sales lập tức phát hiện và chăm sóc lại, tránh bỏ quên cơ hội."
+    },
+    {
+      id: "snooze-restore",
+      x: "76%",
+      y: "15%",
+      number: "5",
+      title: "🔄 Khôi phục Tạm hoãn",
+      shortDesc: "Đưa khách hàng tạm ẩn quay lại danh sách.",
+      desc: "Chạm nút xoay tròn để khôi phục nhanh toàn bộ danh sách khách hàng đang tạm hoãn (Snooze) quay trở lại hàng chờ làm việc tức thời."
     },
     {
       id: "fab-add",
       x: "50%",
       y: "82%",
+      number: "6",
       title: "➕ Thêm khách nhanh",
-      desc: "Nút thêm khách hàng nổi bật ở cuối trang giúp bạn nhanh chóng mở form nhập liệu 2 giai đoạn bất kỳ lúc nào."
+      shortDesc: "Mở form thêm nhanh ở bất cứ đâu.",
+      desc: "Nút thêm khách hàng nổi bật ở góc dưới màn hình giúp bạn mở nhanh form nhập liệu tối giản bất cứ lúc nào."
     }
   ];
 
+  const [activeSpotId, setActiveSpotId] = useState("smart-queue");
+  const activeSpot = hotspots.find(s => s.id === activeSpotId) || hotspots[0];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start my-6 bg-slate-50/50 dark:bg-slate-950/20 p-5 rounded-3xl border border-slate-150 dark:border-slate-800/80">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start my-4 bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm transition-colors">
+      
       {/* Visual Device Frame */}
-      <div className="lg:col-span-6 flex flex-col items-center">
-        <span className="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-wider">📱 Bấm trực tiếp vào các điểm tròn phát sáng trên màn hình:</span>
-        <div className="relative w-full max-w-[300px] aspect-[9/19.5] rounded-[42px] bg-slate-900 border-[8px] border-slate-800 shadow-2xl p-1 overflow-hidden ring-1 ring-slate-700/30">
-          {/* Notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-slate-800 rounded-b-xl z-30 flex items-center justify-center">
-            <div className="w-10 h-0.5 bg-slate-900 rounded-full mb-0.5" />
-          </div>
+      <div className="md:col-span-5 flex flex-col items-center w-full">
+        <span className="text-[9px] font-black text-slate-450 dark:text-slate-500 mb-3 uppercase tracking-wider text-center block">
+          📱 Bản đồ tính năng trực quan:
+        </span>
+        
+        {/* Responsive Scale Wrapper */}
+        <div className="w-full flex justify-center py-2 overflow-visible">
+          <div className="relative w-[240px] sm:w-[260px] aspect-[9/19.5] rounded-[32px] bg-slate-950 border-[5px] border-slate-850 shadow-lg p-1 overflow-hidden ring-1 ring-slate-800/40">
+            {/* Dark Tint Overlay */}
+            <div className="absolute inset-0 bg-black/5 dark:bg-black/20 pointer-events-none z-10" />
 
-          <div className="relative w-full h-full rounded-[34px] overflow-hidden bg-slate-100 select-none">
-            {/* Screenshot */}
-            <img 
-              src="/images/dashboard-mobile.png" 
-              alt="SalesPush Mobile Dashboard"
-              className="w-full h-full object-cover pointer-events-none"
-            />
+            {/* Notch */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-slate-850 rounded-b-lg z-30 flex items-center justify-center">
+              <div className="w-6 h-0.5 bg-slate-950 rounded-full mb-0.5" />
+            </div>
 
-            {/* Hotspots Overlay */}
-            {hotspots.map((spot) => {
-              const isSelected = selectedSpot?.id === spot.id;
-              return (
-                <div
-                  key={spot.id}
-                  className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: spot.x, top: spot.y }}
-                >
-                  <button
-                    onClick={() => setSelectedSpot(isSelected ? null : spot)}
-                    className="relative w-7 h-7 flex items-center justify-center focus:outline-none"
+            <div className="relative w-full h-full rounded-[24px] overflow-hidden bg-slate-55 select-none">
+              {/* Mockup Image */}
+              <Image 
+                src="/images/dashboard-mobile.png" 
+                alt="SalesPush Mobile Dashboard"
+                fill
+                sizes="(max-width: 768px) 240px, 260px"
+                className="object-cover pointer-events-none"
+                priority
+              />
+
+              {/* Hotspots Overlay */}
+              {hotspots.map((spot) => {
+                const isActive = activeSpotId === spot.id;
+                return (
+                  <div
+                    key={spot.id}
+                    className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: spot.x, top: spot.y }}
                   >
-                    {/* Pulsing ring */}
-                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${isSelected ? 'bg-indigo-400' : 'bg-primary-400'}`} />
-                    {/* Core dot */}
-                    <span className={`relative inline-flex rounded-full h-4.5 w-4.5 items-center justify-center shadow-lg border border-white transition-all duration-200 ${isSelected ? 'bg-indigo-500 scale-110' : 'bg-primary-500 hover:scale-105'}`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                    </span>
-                  </button>
-                </div>
-              );
-            })}
-
-            {/* Tooltip Popup inside phone screen */}
-            <AnimatePresence>
-              {selectedSpot && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute bottom-3 left-3 right-3 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xl"
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="text-[11px] font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                      {selectedSpot.title}
-                    </h4>
-                    <button 
-                      onClick={() => setSelectedSpot(null)}
-                      className="text-[9px] text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold p-0.5"
+                    <button
+                      onClick={() => setActiveSpotId(spot.id)}
+                      className="relative w-6 h-6 flex items-center justify-center focus:outline-none"
                     >
-                      Đóng
+                      {isActive && (
+                        <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-primary-400" />
+                      )}
+                      <span className={`relative inline-flex rounded-full h-4.5 w-4.5 items-center justify-center shadow-md border transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-primary-500 text-white border-white scale-110 font-bold text-[9px]' 
+                          : 'bg-emerald-500 text-white border-white hover:scale-105 font-semibold text-[8px]'
+                      }`}>
+                        {spot.number}
+                      </span>
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
-                    {selectedSpot.desc}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Explanations Sidebar list */}
-      <div className="lg:col-span-6 space-y-3 mt-4 lg:mt-0">
-        <h3 className="font-black text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-          💡 Chú thích chi tiết tính năng:
+      {/* Touch-Friendly Feature Spotlights Accordion (Perfect for Mobile) */}
+      <div className="md:col-span-7 space-y-2 w-full">
+        <h3 className="font-black text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center md:text-left mb-2.5">
+          💡 Chọn tính năng để xem chi tiết:
         </h3>
-        <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-          {hotspots.map((spot, idx) => {
-            const isSelected = selectedSpot?.id === spot.id;
+        
+        <div className="space-y-2">
+          {hotspots.map((spot) => {
+            const isActive = activeSpotId === spot.id;
             return (
               <button
                 key={spot.id}
-                onClick={() => setSelectedSpot(isSelected ? null : spot)}
-                className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 flex items-start gap-3 active:scale-[0.99] ${
-                  isSelected 
-                    ? "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-800 shadow-sm"
-                    : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-850"
+                onClick={() => setActiveSpotId(spot.id)}
+                className={`w-full text-left p-3 rounded-xl transition-all border flex gap-3 focus:outline-none ${
+                  isActive
+                    ? "bg-slate-50 dark:bg-slate-900/60 border-slate-350 dark:border-slate-700 shadow-sm"
+                    : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-850/40"
                 }`}
               >
-                <div className={`w-5 h-5 rounded-lg font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 ${
-                  isSelected 
-                    ? "bg-indigo-500 text-white" 
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                <div className={`w-5 h-5 rounded-lg font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5 border ${
+                  isActive 
+                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" 
+                    : "bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-450 border-slate-200 dark:border-slate-800"
                 }`}>
-                  {idx + 1}
+                  {spot.number}
                 </div>
-                <div>
-                  <h4 className={`text-xs font-black transition-colors ${isSelected ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'}`}>
+                <div className="space-y-1 flex-1">
+                  <span className={`text-xs font-bold block ${isActive ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"}`}>
                     {spot.title}
-                  </h4>
-                  {isSelected && (
+                  </span>
+                  
+                  {isActive ? (
                     <motion.p 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed font-semibold"
+                      transition={{ duration: 0.15 }}
+                      className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed pt-1.5 font-medium border-t border-slate-150 dark:border-slate-800/60"
                     >
                       {spot.desc}
                     </motion.p>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold block line-clamp-1">
+                      {spot.shortDesc}
+                    </span>
                   )}
                 </div>
               </button>
@@ -182,6 +220,7 @@ function InteractiveScreenshot() {
           })}
         </div>
       </div>
+
     </div>
   );
 }
@@ -189,31 +228,27 @@ function InteractiveScreenshot() {
 const CHAPTERS = [
   {
     id: "onboarding",
-    title: "1. Khởi đầu & Nhập liệu 1-Chạm",
+    title: "1. Nhập Liệu",
     icon: Sparkles,
-    color: "from-indigo-500 to-purple-500",
-    bgColor: "bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400"
+    bgColor: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400"
   },
   {
     id: "queue",
-    title: "2. Hàng chờ & Trạng thái động",
+    title: "2. Hàng Chờ",
     icon: BrainCircuit,
-    color: "from-emerald-500 to-teal-500",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400"
   },
   {
     id: "followup",
-    title: "3. Lịch hẹn & Tránh lỡ khách",
+    title: "3. Lịch Hẹn",
     icon: Clock,
-    color: "from-amber-500 to-orange-500",
     bgColor: "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400"
   },
   {
     id: "team",
-    title: "4. Quản lý Đội nhóm (Team)",
+    title: "4. Đồng Đội",
     icon: Users,
-    color: "from-blue-500 to-sky-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400"
+    bgColor: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
   }
 ];
 
@@ -221,46 +256,36 @@ export default function GuidePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("onboarding");
 
-  // Simulated Swipe Interaction State
+  // Playground simulated customer state
   const [simulatedCustomer, setSimulatedCustomer] = useState({
-    name: "Anh Huy",
-    status: "Đang chăm",
-    lastContact: "Mới tạo",
-    nextFollowUp: "26/05/2026 (Quá hạn 2 ngày)",
-    heat: "Rất Nét",
-    displayStatus: "Đang chăm"
+    name: "Anh Huy (Quận 2)",
+    heat: "🌟 Rất Nét",
+    lastContact: "Mới tạo lead",
+    nextFollowUp: "Trễ hạn 2 ngày",
+    displayStatus: "Lỡ hẹn"
   });
-  const [simulationStep, setSimulationStep] = useState(0); // 0: Initial, 1: 30m passed, 2: Simulated care completed
+  const [simulationStep, setSimulationStep] = useState(0);
 
   const resetSimulation = () => {
     setSimulatedCustomer({
-      name: "Anh Huy",
-      status: "Đang chăm",
-      lastContact: "Mới tạo",
-      nextFollowUp: "26/05/2026 (Quá hạn 2 ngày)",
-      heat: "Rất Nét",
-      displayStatus: "Đang chăm"
+      name: "Anh Huy (Quận 2)",
+      heat: "🌟 Rất Nét",
+      lastContact: "Mới tạo lead",
+      nextFollowUp: "Trễ hạn 2 ngày",
+      displayStatus: "Lỡ hẹn"
     });
     setSimulationStep(0);
   };
 
-  const handleSimulatePassTime = () => {
-    setSimulatedCustomer(prev => ({
-      ...prev,
-      lastContact: "30 phút trước",
-      displayStatus: "Lỡ hẹn"
-    }));
-    setSimulationStep(1);
-  };
-
   const handleSimulateCare = () => {
-    setSimulatedCustomer(prev => ({
-      ...prev,
-      lastContact: "Vừa tương tác",
-      nextFollowUp: "Ngày mai",
+    setSimulatedCustomer({
+      name: "Anh Huy (Quận 2)",
+      heat: "🌟 Rất Nét",
+      lastContact: "Vừa gọi điện tư vấn",
+      nextFollowUp: "Ngày mai 09:00",
       displayStatus: "Đang chăm"
-    }));
-    setSimulationStep(2);
+    });
+    setSimulationStep(1);
   };
 
   const handleQuickLink = (tabId) => {
@@ -274,115 +299,122 @@ export default function GuidePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-24 md:pb-8 md:pl-64 font-sans selection:bg-indigo-200 selection:text-indigo-900 transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-24 md:pb-8 md:pl-64 font-sans selection:bg-primary-100 selection:text-primary-900 transition-colors">
       
-      {/* Header */}
-      <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 border-b border-slate-150 dark:border-slate-800 transition-colors">
+      {/* Header - Sharp & Pristine Styling */}
+      <header className="pt-safe px-4 sm:px-6 pt-5 pb-4 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-40 transition-colors shadow-sm">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => router.push("/")}
-            className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-950 dark:hover:text-white transition-colors"
+            className="p-2 -ml-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-950 dark:hover:text-white transition-all active:scale-95"
+            aria-label="Quay lại"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              Hướng Dẫn Sử Dụng
+            <h1 className="text-sm sm:text-base font-black tracking-tight flex items-center gap-2 text-slate-900 dark:text-white">
+              <BookOpen className="w-4.5 h-4.5 text-primary-500" />
+              Bí Kíp Bán Hàng 1-Chạm
             </h1>
-            <p className="text-xs text-slate-400 font-medium">Bí kíp chốt sales đột phá cùng SalesPush CRM</p>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Làm chủ SalesPush CRM trong 3 phút</p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 pt-6">
+      <main className="max-w-3xl mx-auto px-4 pt-5 space-y-6">
         
-        {/* 3 Core Breakthrough Features Highlight Panel */}
-        <section className="mb-10 bg-gradient-to-br from-indigo-50/50 via-white to-emerald-50/30 dark:from-indigo-950/10 dark:via-slate-900 dark:to-emerald-950/10 border border-slate-150 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-          {/* Subtle decoration dots */}
-          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Core Breakthrough Section - Redesigned to snapping carousel */}
+        <section className="bg-slate-900 dark:bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-primary-500/10 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-6">
-            <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-primary-500 bg-primary-50 dark:bg-primary-500/10 px-2.5 py-1 rounded-md">⚡ BẬT MÍ CỐT LÕI</span>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white mt-2 flex items-center gap-1.5">
-                3 Tính Năng Bất Bại Của SalesPush
+          <div className="relative z-10 space-y-4">
+            <div className="text-center sm:text-left">
+              <span className="text-[9px] uppercase font-black tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">⚡ BẬT MÍ CỐT LÕI</span>
+              <h2 className="text-sm sm:text-base font-black text-white mt-1.5">
+                3 Trụ Cột Bất Bại Tăng 300% Hiệu Suất
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium leading-relaxed">
-                Được thiết kế tối ưu giúp tăng 300% hiệu suất bán hàng và không bao giờ bỏ sót bất kỳ cơ hội chốt giao dịch nào.
-              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Feature 1 */}
-              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
-                <div>
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
-                    <Target className="w-5 h-5" />
+            {/* Horizontal Swipe deck on mobile, structured grid on desktop */}
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-x-visible md:pb-0 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+              
+              {/* Card 1 */}
+              <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between shrink-0 w-[240px] snap-center md:w-auto hover:border-slate-700 transition-colors">
+                <div className="space-y-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                    <Target className="w-4 h-4" />
                   </div>
-                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
-                    Tự Đẩy Khách Thông Minh
+                  <h3 className="font-black text-[10px] text-white uppercase tracking-wider">
+                    Tự Đẩy Khách Nét
                   </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
-                    Hệ thống tự động đưa khách có lịch hẹn và khách **&quot;quan tâm sâu&quot; (Rất Nét)** lên màn hình chính. Bạn chỉ cần mở app là thấy ngay, không mất thời gian tìm kiếm hay lục lọi danh sách.
+                  <p className="text-[10px] text-slate-400 leading-relaxed font-semibold">
+                    Tự động đưa khách hàng có độ rõ nét cao và lịch hẹn khẩn cấp nhất lên hàng đầu Dashboard để xử lý lập tức.
                   </p>
                 </div>
                 <button
                   onClick={() => handleQuickLink("queue")}
-                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                  className="mt-3.5 text-[9px] font-black text-primary-400 hover:text-primary-300 flex items-center gap-1 active:scale-95 transition-all text-left"
                 >
-                  Xem chi tiết & Thử tương tác ➔
+                  Xem hàng chờ ➔
                 </button>
               </div>
 
-              {/* Feature 2 */}
-              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
-                <div>
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3">
-                    <Sparkles className="w-5 h-5" />
+              {/* Card 2 */}
+              <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between shrink-0 w-[240px] snap-center md:w-auto hover:border-slate-700 transition-colors">
+                <div className="space-y-2">
+                  <div className="w-7 h-7 rounded-lg bg-primary-500/10 text-primary-400 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
                   </div>
-                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
-                    Nhập Liệu & Tiến Trình Sales
+                  <h3 className="font-black text-[10px] text-white uppercase tracking-wider">
+                    Nhập Liệu Di Động
                   </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
-                    Biểu mẫu 1-chạm tối giản cho di động. Lưu vết phân khúc tài chính, nhu cầu và quản lý tiến trình sales chuẩn khoa học qua **Hành trình 7 Bước** trực quan.
+                  <p className="text-[10px] text-slate-400 leading-relaxed font-semibold">
+                    Loại bỏ gõ phím. Cập nhật tiến trình đàm phán 7 bước và ngân sách tài chính siêu tốc chỉ bằng vuốt chạm ngang.
                   </p>
                 </div>
                 <button
                   onClick={() => handleQuickLink("onboarding")}
-                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                  className="mt-3.5 text-[9px] font-black text-primary-400 hover:text-primary-300 flex items-center gap-1 active:scale-95 transition-all text-left"
                 >
-                  Xem cách hoạt động ➔
+                  Xem cách nhập ➔
                 </button>
               </div>
 
-              {/* Feature 3 */}
-              <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-150 dark:border-slate-800 flex flex-col justify-between shadow-sm relative group hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
-                <div>
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-                    <Users className="w-5 h-5" />
+              {/* Card 3 */}
+              <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex flex-col justify-between shrink-0 w-[240px] snap-center md:w-auto hover:border-slate-700 transition-colors">
+                <div className="space-y-2">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                    <Users className="w-4 h-4" />
                   </div>
-                  <h3 className="font-black text-xs text-slate-900 dark:text-white uppercase tracking-wide">
-                    Quản Lý Phòng & Cố Vấn AI
+                  <h3 className="font-black text-[10px] text-white uppercase tracking-wider">
+                    AI Cố Vấn & Đồng Đội
                   </h3>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-semibold">
-                    Leader nắm trọn thông số hoạt động của cả phòng theo thời gian thực. **AI Engine** tự động tổng hợp thông tin, đưa ra cố vấn chiến lược bám đuổi mục tiêu hàng tuần cực kỳ sắc bén.
+                  <p className="text-[10px] text-slate-400 leading-relaxed font-semibold">
+                    Leader phân bổ lead 1-chạm. AI Engine tự động phân tích hành vi và đề xuất chiến lược bám sát mục tiêu.
                   </p>
                 </div>
                 <button
                   onClick={() => handleQuickLink("team")}
-                  className="mt-4 text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-850 flex items-center gap-1 active:scale-95 transition-transform"
+                  className="mt-3.5 text-[9px] font-black text-primary-400 hover:text-primary-300 flex items-center gap-1 active:scale-95 transition-all text-left"
                 >
-                  Xem phân tích Team ➔
+                  Xem cách chia lead ➔
                 </button>
               </div>
+
+            </div>
+
+            {/* Subtle swipe indicator dots for Mobile view */}
+            <div className="flex justify-center gap-1.5 md:hidden pt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
             </div>
           </div>
         </section>
 
-        {/* Horizontal Navigation Chapters */}
-        <div className="flex gap-2.5 overflow-x-auto pb-3 mb-6 scrollbar-hide shrink-0">
+        {/* Chapters Navigation - Modern Segmented Control Grid */}
+        <div className="grid grid-cols-4 gap-1 p-1 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl">
           {CHAPTERS.map(ch => {
             const Icon = ch.icon;
             const isActive = activeTab === ch.id;
@@ -390,222 +422,219 @@ export default function GuidePage() {
               <button
                 key={ch.id}
                 onClick={() => setActiveTab(ch.id)}
-                className={`px-4 py-3 rounded-2xl flex items-center gap-2.5 whitespace-nowrap text-xs font-bold transition-all border active:scale-95 shrink-0 ${
+                className={`py-2 px-1 rounded-lg flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 text-center ${
                   isActive 
-                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md shadow-slate-950/10" 
-                    : "bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200/60 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-850"
+                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-sm" 
+                    : "text-slate-500 dark:text-slate-450 hover:bg-slate-50 dark:hover:bg-slate-850"
                 }`}
               >
-                <span className={`p-1.5 rounded-lg ${isActive ? "bg-white/10 dark:bg-slate-900/10 text-white dark:text-slate-900" : ch.bgColor}`}>
-                  <Icon className="w-4 h-4" />
+                <Icon className={`w-4 h-4 ${isActive ? "text-white dark:text-slate-900" : "text-slate-500"}`} />
+                <span className="text-[9px] font-bold tracking-tight block truncate w-full px-0.5">
+                  {ch.title}
                 </span>
-                {ch.title}
               </button>
             );
           })}
         </div>
 
         {/* Scroll Anchor */}
-        <div id="content-anchor" className="scroll-mt-24" />
+        <div id="content-anchor" className="scroll-mt-20" />
 
         {/* Content Box */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-3xl p-6 shadow-sm overflow-hidden min-h-[50vh] transition-colors">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 sm:p-6 shadow-sm overflow-hidden min-h-[35vh] transition-colors">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-5"
             >
+              
               {activeTab === "onboarding" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <span className="text-[10px] uppercase font-extrabold tracking-widest text-indigo-500 bg-indigo-50 dark:bg-indigo-950/30 px-2.5 py-1 rounded-md">Chương 1</span>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Khởi Đầu & Nhập Liệu 1-Chạm Siêu Tốc</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      SalesPush loại bỏ hoàn toàn việc gõ phím rườm rà trên điện thoại. Bạn có thể vuốt ngang và chạm nhanh để điền đầy đủ thuộc tính khách hàng chỉ trong chớp mắt.
+                    <span className="text-[8px] uppercase font-black tracking-widest text-primary-500 bg-primary-50 dark:bg-primary-950/20 px-2 py-0.5 rounded-md">Chương 1</span>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white mt-1.5">Nhập Liệu 1-Chạm Siêu Tốc</h2>
+                    <p className="text-xs text-slate-550 dark:text-slate-400 mt-1 leading-relaxed font-semibold">
+                      Loại bỏ gõ phím rườm rà. Bạn chỉ cần chạm chọn các thuộc tính để lưu trữ chi tiết khách hàng trong 3 giây.
                     </p>
                   </div>
 
-                  <hr className="border-slate-100 dark:border-slate-800" />
+                  <hr className="border-slate-100 dark:border-slate-800/80" />
 
-                  {/* Visual Bento Step Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-slate-100 dark:border-slate-800 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 relative group">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-sm mb-4">1</div>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Thiết lập tài khoản</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                        Vào trang **Cá Nhân (Profile)** để thiết lập cấu hình CRM riêng: Thời gian tạm hoãn mặc định, số ngày hẹn gọi lại tự động, và giới hạn cuộc gọi nhỡ trước khi đẩy khách ngủ đông.
-                      </p>
+                  {/* Clean Visual Steps - Miller's Law Chunking */}
+                  <div className="space-y-3.5">
+                    <div className="flex gap-3.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-primary-500 text-white font-extrabold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</div>
+                      <div className="space-y-0.5">
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white">Thiết lập tài khoản (Profile)</h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                          Cấu hình nhanh thời gian tạm hoãn mặc định, số ngày hẹn gọi lại và cài đặt bộ nhớ thông minh để hệ thống phân bổ hàng chờ chuẩn xác nhất.
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="border border-slate-100 dark:border-slate-800 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 relative group">
-                      <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-sm mb-4">2</div>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-white">Nhập liệu 2 giai đoạn linh hoạt</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                        - **Bước 1 (Sơ bộ)**: Nhập nhanh Họ tên + SĐT và chạm chọn Nguồn khách. Phù hợp khi sales đang bận rộn trên đường.
-                        <br />
-                        - **Bước 2 (Chi tiết - khi chọn &quot;Đã Tư Vấn&quot;)**: Form mở rộng mượt mà cho phép vuốt ngang chọn nhanh Phân khúc tài chính, Loại hình BĐS, Khu vực quan tâm và Timeline mua.
-                      </p>
+                    <div className="flex gap-3.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-primary-500 text-white font-extrabold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</div>
+                      <div className="space-y-0.5">
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white">Nhập liệu 2 giai đoạn linh hoạt</h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                          - **Sơ bộ**: Ghi nhanh Họ tên + SĐT + Nguồn khách trong 2 giây khi đang di chuyển trên đường.
+                          <br />
+                          - **Chi tiết**: Vuốt chọn nhanh ngân sách, khu vực, loại hình BĐS khi bắt đầu tư vấn.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-primary-500 text-white font-extrabold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</div>
+                      <div className="space-y-0.5">
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white">Thao tác vuốt chọn trực quan</h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                          Hỗ trợ thanh vuốt ngang các lựa chọn (Chips) giúp bạn chọn nhanh ngân sách và độ &quot;nét&quot; của khách mà không cần gõ bàn phím.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* ScrollChipSelect Illustration Card */}
-                  <div className="border border-indigo-100 dark:border-indigo-950/30 rounded-2xl p-5 bg-gradient-to-br from-indigo-50/30 to-white dark:from-indigo-950/10 dark:to-slate-900 shadow-sm relative overflow-hidden">
-                    <div className="absolute right-0 top-0 opacity-5 pointer-events-none">
-                      <Sparkles className="w-40 h-40 text-indigo-500" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <BrainCircuit className="w-5 h-5 text-indigo-500" />
-                      <span className="text-xs font-black text-indigo-650 dark:text-indigo-400 uppercase tracking-widest">Giao diện Nhập liệu 1-Chạm (ScrollChipSelect) thực tế:</span>
+                  {/* Clean Visual representation of ScrollChips */}
+                  <div className="border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <BrainCircuit className="w-4 h-4 text-primary-500" />
+                      <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ví dụ Nhập Liệu 1-Chạm thực tế:</span>
                     </div>
 
-                    <div className="space-y-3.5">
+                    <div className="space-y-2">
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">Mức độ nét của khách:</span>
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500 text-white border border-red-600 shrink-0">🌟 Rất Nét</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">🔥 Tiềm Năng</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">👀 Quan Tâm</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">❄️ Chưa Rõ</span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase block mb-1">Mức độ nét của khách:</span>
+                        <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+                          <span className="px-2.5 py-1 rounded bg-rose-500 text-white text-[10px] font-bold shrink-0 shadow-sm">🌟 Rất Nét</span>
+                          <span className="px-2.5 py-1 rounded bg-white dark:bg-slate-850 text-slate-500 border border-slate-200 dark:border-slate-800 text-[10px] font-semibold shrink-0">🔥 Tiềm Năng</span>
+                          <span className="px-2.5 py-1 rounded bg-white dark:bg-slate-850 text-slate-500 border border-slate-200 dark:border-slate-800 text-[10px] font-semibold shrink-0">👀 Quan Tâm</span>
                         </div>
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">Phân khúc tài chính:</span>
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">Dưới 2 tỷ</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-500 text-white border border-primary-600 shrink-0">2 - 3 tỷ</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">3 - 5 tỷ</span>
-                          <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 shrink-0">5 - 10 tỷ</span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase block mb-1">Ngân sách khách hàng:</span>
+                        <div className="flex gap-1.5 overflow-x-auto pb-1 hide-scrollbar">
+                          <span className="px-2.5 py-1 rounded bg-white dark:bg-slate-850 text-slate-500 border border-slate-200 dark:border-slate-800 text-[10px] font-semibold shrink-0">Dưới 2 tỷ</span>
+                          <span className="px-2.5 py-1 rounded bg-primary-500 text-white text-[10px] font-bold shrink-0 shadow-sm">2 - 3 tỷ</span>
+                          <span className="px-2.5 py-1 rounded bg-white dark:bg-slate-850 text-slate-500 border border-slate-200 dark:border-slate-800 text-[10px] font-semibold shrink-0">3 - 5 tỷ</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-5 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-150 dark:border-slate-800/80 flex items-start gap-3">
-                      <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-slate-650 leading-relaxed">
-                        **Điểm Rõ Nét (Clarity Score):** Khi sales bấm chọn đầy đủ thông tin (Ngân sách, Loại hình, Khu vực...), hệ thống tự động tính toán độ rõ nét của lead cực kỳ chuẩn xác (mỗi thông tin chi tiết đóng góp 20% vào điểm số tối đa 100%). Điểm rõ nét càng cao, khách hàng càng nóng sẽ tự động được ưu tiên đưa lên vị trí số 1 tại hàng chờ **Smart Queue** để bạn tập trung chăm sóc!
-                      </p>
-                    </div>
+                    {/* Collapsible detail to minimize mobile text noise */}
+                    <CollapsibleDetail title="Tìm hiểu sâu về Điểm Rõ Nét (Clarity Score)">
+                      Khi bạn cập nhật đầy đủ các thông tin (Tài chính, BĐS quan tâm, Khu vực...), hệ thống tự động tính độ rõ nét của khách hàng (mỗi tiêu chí đóng góp 20%). Khách hàng có Điểm Rõ Nét càng cao sẽ tự động được ưu tiên đưa lên hàng đầu hàng chờ **Smart Queue** để xử lý trước.
+                    </CollapsibleDetail>
                   </div>
                 </div>
               )}
 
               {activeTab === "queue" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <span className="text-[10px] uppercase font-extrabold tracking-widest text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md">Chương 2</span>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Hàng Chờ Thông Minh & Trạng Thái Động</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      SalesPush hoạt động dựa trên triết lý **"Không để leads bị bỏ rơi"**. Hệ thống quản lý trạng thái động thông minh theo thời gian thực (Compute on Read) giúp loại bỏ dữ liệu treo.
+                    <span className="text-[8px] uppercase font-black tracking-widest text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-md">Chương 2</span>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white mt-1.5">Hàng Chờ Thông Minh & Trạng Thái Động</h2>
+                    <p className="text-xs text-slate-555 dark:text-slate-400 mt-1 leading-relaxed font-semibold">
+                      Loại bỏ hoàn toàn danh sách tĩnh. Trạng thái khách hàng tự động dịch chuyển theo thời gian thực giúp bạn làm việc thông suốt.
                     </p>
                   </div>
 
-                  <hr className="border-slate-100 dark:border-slate-800" />
+                  <hr className="border-slate-100 dark:border-slate-800/80" />
 
-                  {/* Interactive Screenshot Hotspot Tool */}
+                  {/* Re-designed Interactive Spotlight mockup instead of simple hotspots */}
                   <InteractiveScreenshot />
 
-                  {/* Overdue Concept Explain */}
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-base text-slate-900 dark:text-white">Cơ chế tự động chuyển "Lỡ hẹn" đặc biệt:</h3>
+                  {/* Concise Status Timeline */}
+                  <div className="space-y-3 bg-slate-50/50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800/80">
+                    <h3 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-primary-500" />
+                      Cơ chế tự động chuyển đổi Trạng thái:
+                    </h3>
                     
-                    <div className="p-4 bg-slate-50 dark:bg-slate-950/20 border border-slate-150 dark:border-slate-850 rounded-2xl space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">A</div>
-                        <p className="text-xs text-slate-650 leading-relaxed">
-                          **Trạng thái "Đang chăm" (Màu xanh lục):** Chỉ hiển thị trong vòng **30 phút** kể từ thời điểm tương tác cuối cùng để báo hiệu sales đang tích cực đàm phán hoặc hỗ trợ.
-                        </p>
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-150 dark:border-slate-800/60">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Đang chăm</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold text-right">Khách mới tạo hoặc vừa cập nhật báo cáo</span>
                       </div>
 
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">B</div>
-                        <p className="text-xs text-slate-650 leading-relaxed">
-                          **Tự động chuyển sang "Đang chờ":** Sau 30 phút, nếu sales chưa chốt khách nhưng đã lên lịch hẹn (`nextFollowUp`), hệ thống sẽ tự động cập nhật hiển thị sang trạng thái **"Đang chờ"**.
-                        </p>
+                      <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-150 dark:border-slate-800/60">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                          <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Đang chờ</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold text-right">Chuyển sau 30 phút để chuẩn bị cho cuộc gọi tiếp</span>
                       </div>
 
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">C</div>
-                        <p className="text-xs text-slate-650 leading-relaxed">
-                          **Chuyển đỏ "Lỡ hẹn":** Khi thời điểm hiện tại vượt quá mốc giờ hẹn `nextFollowUp` (quá 1 giờ), hệ thống sẽ lập tức chuyển màu hiển thị sang nhãn đỏ cảnh báo **"Lỡ hẹn"** tại tất cả các danh sách để sales gọi lại ngay lập tức!
-                        </p>
+                      <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-150 dark:border-slate-800/60">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                          <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Lỡ hẹn</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold text-right">Nhãn đỏ cảnh báo khi lịch hẹn bị quá 1 giờ</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* SWIPE INTERACTIVE PLAYGROUND */}
-                  <div className="bg-indigo-50/15 dark:bg-indigo-950/10 border-2 border-dashed border-indigo-200 dark:border-indigo-900 p-5 rounded-3xl space-y-4">
+                  {/* Aesthetic Minimised Playground Widget */}
+                  <div className="border border-slate-200/80 dark:border-slate-800/80 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Play className="w-4 h-4 text-indigo-500 fill-current" />
-                        <span className="text-xs font-black text-indigo-650 dark:text-indigo-400 uppercase tracking-widest">Khu trải nghiệm thử (Playground)</span>
+                        <Play className="w-3.5 h-3.5 text-primary-500 fill-current animate-pulse" />
+                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-450 uppercase tracking-wider">Khu Trải Nghiệm (Playground)</span>
                       </div>
                       {simulationStep > 0 && (
                         <button 
                           onClick={resetSimulation}
-                          className="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 active:scale-95 transition-transform"
+                          className="text-[9px] font-bold text-primary-500 hover:text-primary-600 flex items-center gap-1 active:scale-95 transition-transform"
                         >
-                          <RefreshCw className="w-3 h-3" /> Đặt lại mô phỏng
+                          <RefreshCw className="w-2.5 h-2.5" /> Đặt lại
                         </button>
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-500">Bấm các nút hành động phía dưới để thử nghiệm luồng thời gian thực của thẻ khách hàng:</p>
-
                     {/* Simulated Customer Row */}
-                    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-150 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors">
+                    <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-slate-900 dark:text-white">{simulatedCustomer.name}</h4>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-50 text-red-600">{simulatedCustomer.heat}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white">{simulatedCustomer.name}</span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500 text-white shrink-0 shadow-xs">{simulatedCustomer.heat}</span>
                         </div>
-                        <p className="text-[11px] text-slate-400">Tương tác cuối: <span className="font-bold text-slate-650">{simulatedCustomer.lastContact}</span></p>
+                        <p className="text-[10px] text-slate-450">Liên hệ cuối: <span className="font-bold text-slate-700 dark:text-slate-350">{simulatedCustomer.lastContact}</span></p>
                         <p className="text-[10px] text-slate-500 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          Hẹn gọi lại: {simulatedCustomer.nextFollowUp}
+                          <Calendar className="w-3 h-3 text-slate-450" />
+                          Hẹn gọi: <span className="font-semibold text-slate-700 dark:text-slate-300">{simulatedCustomer.nextFollowUp}</span>
                         </p>
                       </div>
 
-                      <div className="text-right">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          simulatedCustomer.displayStatus === "Đang chăm" ? "bg-emerald-50 text-emerald-600" :
-                          simulatedCustomer.displayStatus === "Đang chờ" ? "bg-amber-50 text-amber-600" :
-                          "bg-red-50 text-red-600 border border-red-200"
-                        }`}>
-                          {simulatedCustomer.displayStatus}
-                        </span>
-                      </div>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        simulatedCustomer.displayStatus === "Đang chăm" ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                        "bg-rose-500/10 text-rose-600 dark:text-rose-450 border border-rose-500/15 animate-pulse"
+                      }`}>
+                        {simulatedCustomer.displayStatus}
+                      </span>
                     </div>
 
-                    {/* Simulation Controller Buttons */}
+                    {/* Action button */}
                     <div className="flex gap-2">
-                      {simulationStep === 0 && (
-                        <button
-                          onClick={handleSimulatePassTime}
-                          className="flex-1 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5"
-                        >
-                          <Clock className="w-4 h-4" />
-                          Giả lập Trôi qua 30 phút (Trễ hẹn)
-                        </button>
-                      )}
-                      
-                      {simulationStep === 1 && (
+                      {simulationStep === 0 ? (
                         <button
                           onClick={handleSimulateCare}
-                          className="flex-1 py-3 bg-emerald-600 text-white text-xs font-bold rounded-xl active:scale-95 transition-all shadow-md shadow-emerald-600/10 flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-555 text-white text-xs font-bold rounded-xl active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                         >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Bấm "Chăm sóc ngay" & Hẹn lịch mới
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          Bấm &quot;Chăm sóc ngay&quot; &amp; Lên lịch hẹn mới
                         </button>
-                      )}
-
-                      {simulationStep === 2 && (
-                        <div className="w-full text-center py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-900/30">
-                          <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">🎉 Tuyệt vời! Khách quay lại xanh "Đang chăm" trong 30 phút tiếp theo.</p>
+                      ) : (
+                        <div className="w-full text-center py-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                          <p className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">🎉 Tuyệt vời! Khách hàng đã chuyển sang màu xanh &quot;Đang chăm&quot;.</p>
                         </div>
                       )}
                     </div>
@@ -614,94 +643,106 @@ export default function GuidePage() {
               )}
 
               {activeTab === "followup" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <span className="text-[10px] uppercase font-extrabold tracking-widest text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 rounded-md">Chương 3</span>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Theo Dõi Lịch Hẹn & Chế Độ "Tạm Hoãn"</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      SalesPush cung cấp hai công cụ cực kỳ linh hoạt để bạn kiểm soát cuộc hẹn và thời gian chăm sóc hiệu quả mà không bị ngập đầu trong thông báo.
+                    <span className="text-[8px] uppercase font-black tracking-widest text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-md">Chương 3</span>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white mt-1.5">Theo Dõi Lịch Hẹn & Chế Độ &quot;Tạm Hoãn&quot;</h2>
+                    <p className="text-xs text-slate-555 dark:text-slate-400 mt-1 leading-relaxed font-semibold">
+                      Kiểm soát thời gian chăm sóc khoa học. Tự động ẩn bớt việc để tránh ngập đầu trong thông báo trễ hẹn.
                     </p>
                   </div>
 
-                  <hr className="border-slate-100 dark:border-slate-800" />
+                  <hr className="border-slate-100 dark:border-slate-800/80" />
 
-                  {/* Grid System for Followup */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-slate-150 dark:border-slate-800 p-5 rounded-2xl bg-white dark:bg-slate-950/10 space-y-3">
+                  {/* Clean cards for follow-up steps */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div className="border border-slate-200/80 dark:border-slate-800/80 p-4 rounded-xl bg-white dark:bg-slate-900 shadow-xs space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-indigo-500" />
-                        <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Lên lịch hẹn linh hoạt</h3>
+                        <Calendar className="w-4.5 h-4.5 text-primary-500" />
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white">Lên lịch hẹn nhanh qua Chips</h3>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Khi lưu tương tác, bạn có thể hẹn nhanh thời gian liên hệ lại theo các mốc có sẵn dạng Chips: **2 giờ, 4 giờ, Ngày mai, Tuần sau...** Hệ thống sẽ xếp đúng ngày vào mục **Lịch Hẹn** của bạn.
+                      <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                        Khi lưu báo cáo, chạm chọn nhanh các mốc giờ có sẵn: **2 giờ, 4 giờ, ngày mai, tuần sau** để hệ thống tự động sắp xếp vào lịch hẹn nhắc nhở.
                       </p>
                     </div>
 
-                    <div className="border border-slate-150 dark:border-slate-800 p-5 rounded-2xl bg-white dark:bg-slate-950/10 space-y-3">
+                    <div className="border border-slate-200/80 dark:border-slate-800/80 p-4 rounded-xl bg-white dark:bg-slate-900 shadow-xs space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-5 h-5 text-amber-500" />
-                        <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Tạm hoãn thông minh (Snooze)</h3>
+                        <Clock className="w-4.5 h-4.5 text-amber-500" />
+                        <h3 className="font-bold text-xs text-slate-900 dark:text-white">Tạm hoãn thông minh (Snooze)</h3>
                       </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Nếu đang bận và không muốn khách hiển thị ở danh sách ưu tiên trên Dashboard, hãy chọn **Tạm Hoãn (Snooze)**. Khách hàng sẽ bị ẩn đi một thời gian (ví dụ 4 tiếng, 8 tiếng) và chỉ xuất hiện lại khi thời gian tạm hoãn đã kết thúc.
+                      <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                        Nếu chưa rảnh để chăm sóc, chọn **Snooze** để tạm ẩn khách hàng khỏi Dashboard chính. Họ sẽ tự động hiển thị lại khi hết thời gian tạm ẩn.
                       </p>
                     </div>
                   </div>
 
-                  {/* Streak Warning */}
-                  <div className="border border-amber-200 dark:border-amber-900/30 p-4 bg-amber-50/50 dark:bg-amber-950/10 rounded-2xl flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-xs text-amber-800 dark:text-amber-400">Tính năng bảo vệ thời gian: Kháng Liên Lạc & Nguội Lạnh</h4>
-                      <p className="text-[11px] text-amber-700 dark:text-amber-500/80 mt-1 leading-relaxed">
-                        - **Kháng liên lạc (Unreachable Streak):** Nếu bạn lưu báo cáo là *"Chưa liên lạc được"* liên tục quá số lần cấu hình (ví dụ 5 lần), hệ thống tự động chuyển khách sang **"Ngủ đông"** và giãn lịch hẹn về sau 7 ngày.
+                  {/* Alert panel for cold streak warnings */}
+                  <div className="border border-amber-250 dark:border-amber-900/30 p-4 bg-amber-500/5 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
+                    <div className="space-y-2 w-full">
+                      <div>
+                        <h4 className="font-bold text-xs text-amber-800 dark:text-amber-400">Bảo vệ bộ nhớ: Kháng liên lạc &amp; Nguội lạnh</h4>
+                        <p className="text-[10px] text-amber-750 dark:text-amber-500/80 mt-0.5 font-semibold">CRM thông minh tự động dọn dẹp lead ảo để giải phóng năng lượng.</p>
+                      </div>
+                      
+                      <CollapsibleDetail title="Xem chi tiết cách hoạt động của cơ chế bảo vệ">
+                        - **Kháng liên lạc (Unreachable Streak):** Nếu bạn lưu báo cáo là &quot;Chưa liên lạc được&quot; liên tục quá 5 lần, hệ thống tự động đưa khách vào trạng thái **&quot;Ngủ đông&quot;** và giãn lịch hẹn về sau 7 ngày.
                         <br />
-                        - **Nguội lạnh (Cold Streak):** Nếu 3 cuộc chăm sóc liên tiếp không mang lại tiến triển (giữ nguyên hoặc thụt lùi mốc hành trình), khách cũng sẽ bị đẩy sang **"Ngủ đông"** để bạn tập trung cho lead mới tốt hơn.
-                      </p>
+                        - **Nguội lạnh (Cold Streak):** Nếu 3 lần chăm sóc liên tiếp không ghi nhận tiến triển đàm phán, khách cũng sẽ chuyển sang **&quot;Ngủ đông&quot;** để bạn tập trung cho lead mới tốt hơn.
+                      </CollapsibleDetail>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeTab === "team" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <span className="text-[10px] uppercase font-extrabold tracking-widest text-blue-500 bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1 rounded-md">Chương 4</span>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-2">Bán Hàng Đồng Đội (Team Mode)</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                      SalesPush cung cấp giải pháp B2B SaaS quản lý chuyên sâu dành cho đội nhóm lớn. Giao diện trực quan giúp phối hợp nhịp nhàng giữa Trưởng phòng (Leader) và Sales.
+                    <span className="text-[8px] uppercase font-black tracking-widest text-primary-500 bg-primary-50 dark:bg-primary-950/20 px-2 py-0.5 rounded-md">Chương 4</span>
+                    <h2 className="text-base font-black text-slate-900 dark:text-white mt-1.5">Bán Hàng Đồng Đội (Team Mode)</h2>
+                    <p className="text-xs text-slate-555 dark:text-slate-400 mt-1 leading-relaxed font-semibold">
+                      Giải pháp quản lý tối ưu cho đội nhóm lớn. Kết nối nhịp nhàng giữa Trưởng phòng (Leader) và nhân viên Sales.
                     </p>
                   </div>
 
-                  <hr className="border-slate-100 dark:border-slate-800" />
+                  <hr className="border-slate-100 dark:border-slate-800/80" />
 
-                  {/* Grid System for Team */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border border-slate-150 dark:border-slate-800 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 space-y-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Target className="w-4 h-4" /></div>
-                      <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Điều phối và chia Lead thông minh</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Trưởng phòng (Leader) có quyền xem toàn bộ lead của dự án chưa được bàn giao. Leader chỉ cần chọn một khách và chỉ định thành viên trong nhóm, khách hàng sẽ tự động xuất hiện tại Dashboard cá nhân của Sales đó ngay lập tức!
+                  {/* Clean Visual Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div className="border border-slate-200/80 dark:border-slate-800/80 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 space-y-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center">
+                        <Target className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-bold text-xs text-slate-950 dark:text-white">Bàn giao Lead 1-chạm</h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                        Leader duyệt danh sách khách chưa bàn giao, chạm chọn thành viên trong phòng để giao lead. Lead lập tức xuất hiện trên Dashboard của sales đó.
                       </p>
                     </div>
 
-                    <div className="border border-slate-150 dark:border-slate-800 p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 space-y-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center"><Users className="w-4 h-4" /></div>
-                      <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Bảng phân tích hiệu suất nhóm</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        Hệ thống tự động tổng hợp số liệu về số khách đang chăm, đang chờ, số giao dịch đã chốt và số tương tác của từng nhân sự hàng ngày/hàng tuần theo thời gian thực mà không làm giảm tốc độ của app.
+                    <div className="border border-slate-200/80 dark:border-slate-800/80 p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/40 space-y-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <h3 className="font-bold text-xs text-slate-950 dark:text-white">Bảng phân tích realtime</h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-450 leading-relaxed font-medium">
+                        Tự động tổng hợp số liệu về số khách đang chăm, lượng giao dịch chốt cọc của từng nhân viên hàng ngày/hàng tuần mà không làm giảm tốc độ app.
                       </p>
                     </div>
                   </div>
 
-                  {/* Least Privilege Mention */}
-                  <div className="p-4 bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-250 dark:border-emerald-900/30 rounded-2xl flex items-start gap-3">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-xs text-emerald-800 dark:text-emerald-400">Bảo mật thông tin khách hàng tuyệt đối</h4>
-                      <p className="text-[11px] text-emerald-700 dark:text-emerald-500/80 mt-1 leading-relaxed">
-                        Áp dụng nguyên tắc **Least Privilege (Quyền hạn tối thiểu)**: Trưởng phòng sau khi đã phân Lead cho nhân sự sẽ không nhìn thấy số điện thoại hay thông tin cuộc gọi chi tiết của khách hàng đó nữa, đảm bảo sự tôn trọng tính riêng tư của Sales và tránh rò rỉ dữ liệu.
-                      </p>
+                  {/* Privacy shield card */}
+                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-start gap-3">
+                    <ShieldAlert className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="space-y-2 w-full">
+                      <div>
+                        <h4 className="font-bold text-xs text-emerald-800 dark:text-emerald-400">Bảo mật thông tin tối đa (Least Privilege)</h4>
+                        <p className="text-[10px] text-emerald-700 dark:text-emerald-500/80 mt-0.5 font-semibold">Tôn trọng quyền riêng tư của sales và bảo vệ dữ liệu khách hàng tuyệt đối.</p>
+                      </div>
+
+                      <CollapsibleDetail title="Xem chi tiết nguyên lý bảo mật Least Privilege">
+                        Áp dụng nguyên tắc **Quyền Tối Thiểu (Least Privilege)**: Trưởng phòng sau khi đã bàn giao khách hàng cho sales phụ trách sẽ không nhìn thấy số điện thoại hay chi tiết lịch sử cuộc gọi/tương tác cá nhân của khách đó nữa. Giúp sales an tâm chăm sóc khách hàng và tránh rò rỉ dữ liệu ngoài ý muốn.
+                      </CollapsibleDetail>
                     </div>
                   </div>
                 </div>
@@ -710,15 +751,15 @@ export default function GuidePage() {
           </AnimatePresence>
         </div>
 
-        {/* Footer Guidance */}
-        <div className="text-center mt-8 space-y-4">
-          <p className="text-xs text-slate-400">Bạn đã sẵn sàng ứng dụng những kiến thức này để đột phá doanh thu?</p>
-          <div className="flex justify-center gap-3">
+        {/* Footer Navigation Action */}
+        <div className="text-center mt-6 space-y-3">
+          <p className="text-[11px] text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Bạn đã sẵn sàng ứng dụng để bứt phá doanh số?</p>
+          <div className="flex justify-center">
             <Link 
               href="/"
-              className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-transform shadow-sm"
+              className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-md block border border-slate-900 dark:border-white"
             >
-              Vào Dashboard làm việc ngay
+              Bắt đầu chăm sóc khách hàng ngay
             </Link>
           </div>
         </div>
@@ -727,26 +768,5 @@ export default function GuidePage() {
 
       <BottomNav />
     </div>
-  );
-}
-
-// Simple fallback helper component for SVG icon
-function ShieldCheck(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6z" />
-      <path d="m9 12 2 2 4-4" />
-    </svg>
   );
 }
