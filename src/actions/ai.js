@@ -163,42 +163,71 @@ export async function generateWeeklyStrategy() {
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
-Bạn là AI phân tích CRM chuyên nghiệp và nhạy bén. Hãy rà soát toàn bộ dữ liệu CRM của người dùng dưới đây và tạo báo cáo ngắn gọn, sạch, có thể hành động ngay.
+Bạn là AI Coach - Trợ lý bán hàng thông minh chuyên phân tích dữ liệu CRM. Hãy rà soát toàn bộ dữ liệu CRM của tôi được cung cấp dưới đây và lập một Báo cáo Chiến lược cực kỳ MẠCH LẠC, GỌN GÀNG, ĐI THẲNG VÀO TRỌNG TÂM dưới dạng Dashboard Insight tương tự như thiết kế mẫu sau:
 
-Nhiệm vụ của bạn:
-1. Tìm khách hàng/deal tiềm năng nhất.
-2. Cảnh báo khách hàng đang bị bỏ sót.
-3. Phát hiện điểm nghẽn trong phễu bán hàng.
-4. Đề xuất các hành động ưu tiên cần làm hôm nay.
+---
 
-Quy tắc phân tích nghiêm ngặt:
-- Chỉ kết luận dựa trên dữ liệu thực tế có sẵn được cung cấp dưới đây. Tuyệt đối không tự bịa hay suy diễn thông tin nằm ngoài dữ liệu.
-- Nếu thiếu dữ liệu để rút ra kết luận ở bất kỳ mục nào, hãy ghi rõ cụm từ: "Chưa đủ dữ liệu để kết luận".
-- Mỗi phát hiện, nhận định hoặc insight đưa ra phải đi kèm lý do và bằng chứng dữ liệu cụ thể rõ ràng (ví dụ: căn cứ theo mức độ nét heatLevel, ngày liên hệ cuối lastContactAt, điểm clarityScore, hoặc lịch hẹn quá hạn nextFollowUp).
-- Ưu tiên đề xuất các hành động thiết thực giúp trực tiếp tăng doanh thu hoặc giảm thiểu nguy cơ mất khách hàng.
-- Trả kết quả cực kỳ ngắn gọn, rõ ràng, mạch lạc và chuyên nghiệp.
+### Quy tắc tính toán số liệu dựa trên dữ liệu CRM:
+1. **Giá trị ước lượng Deal:** Quy đổi từ trường tài chính "budget" của khách hàng để tính tổng giá trị dự kiến hoặc rủi ro (Dưới 2 tỷ = 1.5 tỷ; 2-3 tỷ = 2.5 tỷ; 3-5 tỷ = 4 tỷ; 5-10 tỷ = 7.5 tỷ; 10-20 tỷ = 15 tỷ; Trên 20 tỷ = 25 tỷ; Chưa xác định = 0 tỷ).
+2. **Xác suất chốt lý thuyết:** Tự động tính toán xác suất chốt lý thuyết dựa trên độ nóng (heatLevel) và tiến độ hành trình (journeyStage). Ví dụ: Rất Nét + Dồn chốt/Chốt cọc = 85%-95%; Tiềm Năng + Hẹn gặp = 70%-80%; Quan Tâm + Tư vấn = 45%-60%...
+3. **Rủi ro mất deal:** Đánh giá khách có nguy cơ mất cao nếu trạng thái là "Ngủ đông", "Chưa liên lạc được", hoặc có lịch hẹn quá hạn chăm sóc trên 3 ngày, hoặc hơn 14 ngày chưa tương tác chăm sóc lại.
+4. **Trung thực tuyệt đối:** Chỉ kết luận dựa trên dữ liệu thực tế được cung cấp dưới đây. Tuyệt đối không bịa thông tin hay tên khách hàng. Nếu thiếu dữ liệu để rút ra kết luận, ghi rõ cụm từ: "Chưa đủ dữ liệu để kết luận".
 
-Hãy viết báo cáo bằng Markdown và chia chính xác theo các tiêu đề (Output) sau:
+---
 
-## 📊 Tổng quan nhanh
-[Tóm tắt siêu ngắn gọn về sức khỏe tệp khách hàng của bạn hôm nay]
+Hãy xuất báo cáo bằng định dạng Markdown chính xác theo các tiêu đề và nội dung (Output) sau:
 
-## 🎯 Top khách hàng tiềm năng
-[Danh sách khách hàng tiềm năng nhất. Phải ghi rõ tên khách và bằng chứng dữ liệu: ví dụ mức độ nét Rất Nét, tài chính tốt, nhu cầu rõ ràng hoặc điểm clarityScore cao...]
+# 🧠 AI COACH - TRỢ LÝ BÁN HÀNG THÔNG MINH
+*AI đã hoàn tất phân tích toàn bộ dữ liệu khách hàng cá nhân của bạn hôm nay.*
 
-## ⚠️ Khách hàng có nguy cơ bị bỏ sót
-[Cảnh báo các khách hàng quá hạn chăm sóc (overdue) hoặc không có lịch hẹn tiếp theo và đã quá lâu chưa tương tác dựa trên lastContactAt/createdAt...]
+---
 
-## 📊 Điểm nghẽn pipeline
-[Phân tích sự phân bổ khách hàng trong các bước của phễu bán hàng (journeyStage) và chỉ ra nơi đang bị dồn ứ/tắc nghẽn...]
+## 🔔 VIỆC CẦN LÀM NGAY
+**Có [Số lượng] khách hàng cần được chăm sóc ngay lập tức!**
+- **Tổng giá trị rủi ro:** [Tổng giá trị quy đổi của các khách hàng này] tỷ
+- **Chi tiết báo động:** [Liệt kê tên 2-3 khách hàng quá hạn hẹn chăm sóc lâu nhất kèm thời gian trễ cụ thể. Ví dụ: **Nguyễn Văn A** (Trễ 3 ngày)].
+- *Nếu không có khách hàng nào thỏa mãn, ghi:* **Chưa đủ dữ liệu để kết luận**
 
-## 🚀 Việc nên làm hôm nay
-[Đề xuất các hành động ưu tiên, cụ thể và thực tế cần làm ngay hôm nay để chốt sale hoặc cứu khách sắp mất]
+---
 
-## 🔍 Cảnh báo chất lượng dữ liệu (nếu có)
-[Chỉ ra các khách hàng bị thiếu thông tin quan trọng như SĐT, tài chính, nhu cầu... làm giảm chất lượng chăm sóc, hoặc ghi "Không có cảnh báo" nếu dữ liệu đã sạch hoàn toàn]
+## 🎯 CƠ HỘI TIỀM NĂNG
+**Có [Số lượng] khách hàng có xác suất chốt giao dịch cao (> 70%)!**
+- **Tổng giá trị dự kiến:** [Tổng giá trị quy đổi của các khách hàng này] tỷ
+- **Top cơ hội vàng:** [Liệt kê danh sách các khách hàng tiềm năng nhất kèm xác suất chốt lý thuyết tự tính, giá trị deal ước lượng, dự án tags và nguồn khách nếu có. Ví dụ: 1. **Nguyễn Văn A** (Xác suất chốt: **92%** - Giá trị: **4.2 tỷ** - Dự án: **The Zen Park** - Nguồn: **Website**)].
+- *Nếu không có khách hàng nào thỏa mãn, ghi:* **Chưa đủ dữ liệu để kết luận**
 
-Dữ liệu CRM của tôi:
+---
+
+## ⚠️ RỦI RO MẤT DEAL
+**Có [Số lượng] khách hàng đang nằm trong vùng nguy hiểm có nguy cơ mất!**
+- **Tổng giá trị rủi ro bị đe dọa:** [Tổng giá trị quy đổi của các khách hàng này] tỷ
+- **Danh sách báo động đỏ:** [Liệt kê tên các khách hàng có nguy cơ mất deal cao do đã quá lâu chưa liên lạc hoặc đang ngủ đông. Ví dụ: **Trần Thị B** (Ngủ đông, **3.6 tỷ**)].
+- *Nếu không có khách hàng nào thỏa mãn, ghi:* **Chưa đủ dữ liệu để kết luận**
+
+---
+
+## 🧱 AI COACHING - ĐIỂM NGHẼN PIPELINE
+- **Điểm nghẽn lớn nhất trong phễu:** [Ví dụ: **Hẹn gặp ➜ Đàm phán** hoặc **Phá băng ➜ Tư vấn chuyên sâu**]
+- **Phân tích chi tiết:** [Phân tích ngắn gọn 1-2 câu về sự dồn ứ ở bước này trong hành trình (journeyStage). Ví dụ: Lượng khách dồn ứ tại bước "1. Phá băng" đang chiếm 60% tổng số khách, tỷ lệ chuyển đổi lên bước "2. Tư vấn" đang rất thấp].
+- *Nếu không có khách hàng nào thỏa mãn, ghi:* **Chưa đủ dữ liệu để kết luận**
+
+---
+
+## 🚀 GỢI Ý HÀNH ĐỘNG HÔM NAY
+*AI đã lên kế hoạch chi tiết 3 việc quan trọng nhất bạn cần thực hiện ngay:*
+1. [Hành động ưu tiên số 1 - ghi rõ tên khách hàng và hành động cụ thể dựa trên dữ liệu. Ví dụ: Liên hệ **Nguyễn Văn A** để chốt lịch xem căn hộ **The Zen Park** vì xác suất chốt đã đạt **92%**].
+2. [Hành động ưu tiên số 2]
+3. [Hành động ưu tiên số 3]
+- *Nếu không đủ thông tin để đề xuất hành động cụ thể, ghi:* **Chưa đủ dữ liệu để kết luận**
+
+---
+
+## 🔍 CẢNH BÁO CHẤT LƯỢNG DỮ LIỆU
+- [Chỉ ra các khách hàng cụ thể đang bị thiếu thông tin quan trọng như SĐT, tài chính budget, hoặc nhu cầu cụ thể khiến điểm clarityScore bị thấp, hoặc ghi "Không có cảnh báo - Dữ liệu sạch sẽ hoàn hảo!"].
+
+---
+
+Dữ liệu CRM thực tế của tôi:
 ${JSON.stringify(customers, null, 2)}
 `;
 
