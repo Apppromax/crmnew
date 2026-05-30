@@ -192,8 +192,17 @@ export default function AiClient({ initialReports, customerCounts, dashboardStat
               ) : (
                 <>
                   <Sparkles className="w-10 h-10 text-primary-400" />
-                  <h3 className="text-xl font-black text-white">Cố vấn Chiến lược Tuần Tới</h3>
-                  <p className="text-slate-400 text-sm max-w-sm mx-auto">Phân tích toàn bộ data khách hàng hiện tại và đề xuất hành động cụ thể để bạn đạt KPI chốt sale nhanh nhất.</p>
+                  <h3 className="text-xl font-black text-white">Cố vấn Chiến lược AI</h3>
+                  <div className="text-slate-300 text-sm max-w-sm mx-auto text-left space-y-2 mt-1">
+                    <p className="font-semibold text-center text-slate-200">AI phân tích toàn bộ dữ liệu cá nhân của bạn để:</p>
+                    <ul className="list-disc pl-5 space-y-1 text-slate-400 text-xs">
+                      <li>Phát hiện khách hàng tiềm năng nhất</li>
+                      <li>Cảnh báo khách đang bị bỏ sót</li>
+                      <li>Chỉ ra điểm nghẽn trong phễu bán hàng</li>
+                      <li>Đề xuất hành động ưu tiên hôm nay</li>
+                    </ul>
+                    <p className="text-xs font-bold text-center text-primary-400 pt-1">Làm việc dựa trên dữ liệu thay vì cảm tính.</p>
+                  </div>
                 </>
               )}
             </div>

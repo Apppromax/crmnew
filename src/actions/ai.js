@@ -157,16 +157,28 @@ export async function generateWeeklyStrategy() {
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const prompt = `
-Bạn là Cố vấn Chiến lược Bán hàng (AI Engine) chuyên nghiệp.
-Phân tích danh sách khách hàng dưới đây và đưa ra:
-1. Đánh giá tình hình hiện tại (Tổng quan số lượng, chất lượng tệp khách hàng).
-2. Phân tích khả thi của các giao dịch (Tập trung vào khách Hot và khách có lịch hẹn).
-3. Định hướng & Hành động cụ thể trong 1 tuần tới để đạt mục tiêu chốt sale.
+Bạn là Cố vấn Chiến lược Bán hàng (AI Engine) chuyên nghiệp và nhạy bén.
+Hãy phân tích toàn bộ danh sách khách hàng dưới đây để lập một Báo cáo Chiến lược cực kỳ MẠCH LẠC, GỌN GÀNG, ĐI THẲNG VÀO TRỌNG TÂM dựa trên 4 mục tiêu sau:
 
-Danh sách khách hàng:
+1. 🎯 PHÁT HIỆN KHÁCH HÀNG TIỀM NĂNG NHẤT:
+   - Hãy chỉ đích danh tên và phân tích các khách hàng có tiềm năng giao dịch cao nhất dựa trên mức độ nét (heatLevel), tài chính (budget), và nhu cầu cụ thể (demand).
+
+2. ⚠️ CẢNH BÁO KHÁCH ĐANG BỊ BỎ SÓT:
+   - Liệt kê ngay các khách hàng có lịch hẹn đã quá hạn chăm sóc (overdue) hoặc đã lâu chưa được tương tác chăm sóc lại.
+
+3. 📊 ĐIỂM NGHẼN TRONG PHỄU BÁN HÀNG:
+   - Chỉ ra điểm nghẽn hiện tại (ví dụ: lượng khách đang dồn ứ quá nhiều ở bước "Phá băng" mà chưa chuyển qua "Tư vấn chuyên sâu", hoặc "Dồn chốt" bị tắc nghẽn) và đưa ra gợi ý tháo gỡ.
+
+4. 🚀 ĐỀ XUẤT HÀNH ĐỘNG ƯU TIÊN HÔM NAY:
+   - Liệt kê 3-5 hành động cụ thể, ưu tiên cần làm ngay hôm nay cho các khách hàng mục tiêu để tạo bước tiến trong phễu bán hàng.
+
+Nguyên tắc báo cáo quan trọng:
+- Tuyệt đối làm việc dựa trên dữ liệu phân tích thực tế từ danh sách khách hàng, không nhận định cảm tính.
+- Báo cáo phải cực kỳ mạch lạc, gọn gàng, có tiêu đề rõ ràng, sử dụng bullet points ngắn gọn và in đậm các từ khóa/tên khách hàng quan trọng.
+- KHÔNG lặp lại danh sách khách hàng dài dòng, chỉ tập trung vào phân tích chất lượng (insights) và hành động (actions) thực tế.
+
+Danh sách khách hàng của tôi:
 ${JSON.stringify(customers, null, 2)}
-
-Hãy viết báo cáo bằng Markdown. Định dạng thật rõ ràng, chuyên nghiệp, sử dụng bullet points, in đậm những ý quan trọng. Không cần lặp lại danh sách khách, hãy tập trung vào insights và action.
 `;
 
   try {
