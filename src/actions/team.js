@@ -616,6 +616,10 @@ export async function updateTeamProjectTags(teamId, tags) {
     data: { projectTags: tags }
   });
 
-  revalidatePath("/team");
+  try {
+    revalidatePath("/team");
+  } catch (error) {
+    console.error("Failed to revalidate paths after updateTeamProjectTags:", error);
+  }
   return { success: true };
 }

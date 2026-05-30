@@ -269,9 +269,13 @@ export async function completeCustomerAction({ customerId, note, nextFollowUp, s
 
   await prisma.$transaction(transactionOps);
 
-  revalidatePath("/");
-  revalidatePath("/customers");
-  revalidatePath("/schedule");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+    revalidatePath("/schedule");
+  } catch (error) {
+    console.error("Failed to revalidate paths after completeCustomerAction:", error);
+  }
 
   return { success: true };
 }
@@ -294,8 +298,12 @@ export async function snoozeCustomer(customerId, hours = null) {
     data: { snoozedUntil },
   });
 
-  revalidatePath("/");
-  revalidatePath("/customers");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+  } catch (error) {
+    console.error("Failed to revalidate paths after snoozeCustomer:", error);
+  }
 
   return { success: true };
 }
@@ -306,8 +314,12 @@ export async function clearAllSnoozes() {
     where: { userId },
     data: { snoozedUntil: null },
   });
-  revalidatePath("/");
-  revalidatePath("/customers");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+  } catch (error) {
+    console.error("Failed to revalidate paths after clearAllSnoozes:", error);
+  }
   return { success: true };
 }
 
@@ -373,9 +385,13 @@ export async function createCustomer({ name, phone, note, budget, area, timeline
     assignTeamInBackground(userId, customer.id, tags).catch(() => {});
   }
 
-  revalidatePath("/");
-  revalidatePath("/customers");
-  revalidatePath("/schedule");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+    revalidatePath("/schedule");
+  } catch (error) {
+    console.error("Failed to revalidate paths after createCustomer:", error);
+  }
 
   return { id: customer.id };
 }
@@ -448,8 +464,12 @@ export async function updateCustomer(customerId, data) {
     data: updateData,
   });
 
-  revalidatePath("/");
-  revalidatePath("/customers");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+  } catch (error) {
+    console.error("Failed to revalidate paths after updateCustomer:", error);
+  }
 
   return enrichStatus({
     ...updated,
@@ -468,8 +488,12 @@ export async function deleteCustomer(customerId) {
 
   await prisma.customer.delete({ where: { id: customerId } });
 
-  revalidatePath("/");
-  revalidatePath("/customers");
+  try {
+    revalidatePath("/");
+    revalidatePath("/customers");
+  } catch (error) {
+    console.error("Failed to revalidate paths after deleteCustomer:", error);
+  }
 
   return { success: true };
 }
@@ -542,7 +566,11 @@ export async function updateCustomerTags(customerId, tags) {
     data: { tags, teamId },
   });
 
-  revalidatePath("/customers");
+  try {
+    revalidatePath("/customers");
+  } catch (error) {
+    console.error("Failed to revalidate paths after updateCustomerTags:", error);
+  }
   return { success: true };
 }
 

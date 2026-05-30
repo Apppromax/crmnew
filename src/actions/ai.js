@@ -97,9 +97,13 @@ export async function createCustomerFromAI({ parsedData, rawNote }) {
       },
     });
 
-    revalidatePath("/");
-    revalidatePath("/customers");
-    revalidatePath("/schedule");
+    try {
+      revalidatePath("/");
+      revalidatePath("/customers");
+      revalidatePath("/schedule");
+    } catch (error) {
+      console.error("Failed to revalidate paths after createCustomerFromAI:", error);
+    }
 
     return { success: true, customerId: customer.id };
   } catch (error) {
