@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { generateWeeklyStrategy } from "@/actions/ai";
 import BottomNav from "@/components/BottomNav";
-import { Sparkles, BarChart3, Users, Flame, ThermometerSun, Snowflake, Loader2, Calendar, FileText, AlertTriangle, CalendarCheck, Trophy, TrendingUp } from "lucide-react";
+import { BrainCircuit, BarChart3, Users, Flame, ThermometerSun, Snowflake, Loader2, Calendar, FileText, AlertTriangle, CalendarCheck, Trophy, TrendingUp } from "lucide-react";
 
 import DOMPurify from 'isomorphic-dompurify';
+import AiLogo from "@/components/AiLogo";
 
 function formatMarkdown(text) {
   if (!text) return null;
@@ -63,8 +64,8 @@ export default function AiClient({ initialReports, customerCounts, dashboardStat
   return (
     <div className="min-h-screen bg-transparent pb-24 md:pb-0 md:pl-64 font-sans transition-all duration-300">
       <header className="pt-safe px-6 pt-6 pb-4 bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-10 flex justify-between items-center">
-        <h1 className="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-          <Sparkles className="w-8 h-8 text-primary-500" />
+        <h1 className="text-3xl font-black text-slate-800 dark:text-white flex items-center gap-2.5">
+          <AiLogo size="sm" />
           AI Engine
         </h1>
       </header>
@@ -180,7 +181,7 @@ export default function AiClient({ initialReports, customerCounts, dashboardStat
             className="relative w-full bg-slate-900 dark:bg-slate-800 border border-slate-700 p-6 rounded-3xl text-center active:scale-95 transition-transform overflow-hidden"
           >
             <div className="absolute -right-6 -top-6 opacity-10">
-              <Sparkles className="w-32 h-32 text-white" />
+              <BrainCircuit className="w-32 h-32 text-white animate-pulse" style={{ animationDuration: '6s' }} />
             </div>
             <div className="flex flex-col items-center gap-3 relative z-10">
               {isPending ? (
@@ -191,7 +192,7 @@ export default function AiClient({ initialReports, customerCounts, dashboardStat
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-10 h-10 text-primary-400" />
+                  <AiLogo size="lg" className="mb-2 shadow-lg shadow-primary-500/20" />
                   <h3 className="text-xl font-black text-white">Cố vấn Chiến lược AI</h3>
                   <div className="text-slate-300 text-sm max-w-sm mx-auto text-left space-y-2 mt-1">
                     <p className="font-semibold text-center text-slate-200">AI phân tích toàn bộ dữ liệu cá nhân của bạn để:</p>
