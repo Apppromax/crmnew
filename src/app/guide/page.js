@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, Sparkles, BrainCircuit, Users, Target, Clock, 
   Calendar, CheckCircle2, ChevronRight, Play, BookOpen, AlertCircle, RefreshCw,
   ChevronDown, ChevronUp, ShieldAlert, Award, ArrowRight, Flame, BarChart3, TrendingUp, AlertTriangle, ShieldCheck, UserCheck, Mail, Phone, PhoneCall, Check, Zap, Sparkle
 } from "lucide-react";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, AnimatePresence, useAnimation, useScroll, useTransform, useSpring } from "framer-motion";
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
@@ -33,8 +33,112 @@ function NeonBlob({ className, delay = 0, colors = "from-primary-500/20 to-indig
   );
 }
 
+const coachRecommendations = [
+  { id: "action1", name: "Ngô Quốc Mai", status: "Rủi ro cao", desc: "Khách đã không phản hồi 5 ngày.", suggestion: "Phát hiện tín hiệu chậm trễ! Hãy thực hiện một cuộc gọi hỏi thăm thân mật về tiến độ pháp lý dự án Masterise và đề xuất hỗ trợ thủ tục vay ngân hàng ưu đãi.", icon: <PhoneCall className="w-3.5 h-3.5" />, btnLabel: "Gọi ngay", badgeColor: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" },
+  { id: "action2", name: "Dương Mạnh Đức", status: "Cơ hội cao", desc: "Budget phù hợp, quan tâm dự án.", suggestion: "Cơ hội tốt! BĐS căn hộ đang khớp nhu cầu 2-3 tỷ. Hãy chủ động gửi file mặt bằng chi tiết tòa tháp căn hộ mới mở bán kèm bảng tính dòng tiền thanh toán chậm qua Zalo.", icon: <Mail className="w-3.5 h-3.5" />, btnLabel: "Gửi thông tin", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
+  { id: "action3", name: "Võ Hoàng Bảo", status: "Cơ hội cao", desc: "Đã xem bảng giá 3 lần.", suggestion: "Khách hàng rất quan tâm! Lập tức đặt lịch hẹn cà phê tư vấn chính sách chiết khấu 8% đợt mở bán đầu tiên để tạo tính khan hiếm thúc đẩy giao dịch.", icon: <Calendar className="w-3.5 h-3.5" />, btnLabel: "Đặt lịch hẹn", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
+  { id: "action4", name: "Tuấn Linh 1", status: "Chăm sóc", desc: "Đến hạn follow-up hôm nay.", suggestion: "Hành động cần làm: Gửi tin nhắn cập nhật tiến độ xây dựng móng hầm mới nhất cùng ảnh thực tế công trường để duy trì nhịp liên hệ tin cậy.", icon: <Clock className="w-3.5 h-3.5" />, btnLabel: "Nhắc lịch", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" }
+];
+
 export default function GuidePage() {
   const router = useRouter();
+
+  // --- STICKY SCROLL HOOKS & VARIABLES FOR CHAPTER 2 ---
+  const containerRef = useRef(null);
+  
+  // Safe client-side check for Desktop (to avoid Next.js hydration mismatch)
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsDesktop(media.matches);
+    const listener = (e) => setIsDesktop(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
+
+  // Framer Motion useScroll
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  // Smooth out the scroll progress using spring physics
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 20,
+    restDelta: 0.001
+  });
+
+  // --- TRANSFORMS FOR STICKY SEQUENCE (DESKTOP) ---
+  // Left Column (Overview & Title) - Appears early: 0% -> 15% progress
+  const leftOpacity = useTransform(smoothProgress, [0, 0.05, 0.15, 0.9, 0.95], [0, 1, 1, 1, 0]);
+  const leftY = useTransform(smoothProgress, [0, 0.05, 0.15], [30, 0, 0]);
+  const leftScale = useTransform(smoothProgress, [0, 0.05, 0.15], [0.98, 1, 1]);
+
+  const smoothLeftOpacity = useSpring(leftOpacity, { stiffness: 120, damping: 20 });
+  const smoothLeftY = useSpring(leftY, { stiffness: 120, damping: 20 });
+  const smoothLeftScale = useSpring(leftScale, { stiffness: 120, damping: 20 });
+
+  // Middle Column (Mockup Thiết bị) - Appears after left column: 15% -> 35%
+  const mockupOpacity = useTransform(smoothProgress, [0, 0.12, 0.22, 0.9, 0.95], [0, 0, 1, 1, 0]);
+  const mockupY = useTransform(smoothProgress, [0, 0.12, 0.25], [100, 50, 0]);
+  const mockupScale = useTransform(smoothProgress, [0, 0.12, 0.25], [0.85, 0.9, 1]);
+
+  const smoothMockupOpacity = useSpring(mockupOpacity, { stiffness: 100, damping: 18 });
+  const smoothMockupY = useSpring(mockupY, { stiffness: 100, damping: 18 });
+  const smoothMockupScale = useSpring(mockupScale, { stiffness: 100, damping: 18 });
+
+  // SVG Connection Lines (Tia vẽ chỉ dẫn) - Draws from 35% -> 66%
+  const path1Length = useTransform(smoothProgress, [0.35, 0.5], [0, 1]);
+  const path2Length = useTransform(smoothProgress, [0.4, 0.55], [0, 1]);
+  const path3Length = useTransform(smoothProgress, [0.45, 0.6], [0, 1]);
+  const path4Length = useTransform(smoothProgress, [0.5, 0.66], [0, 1]);
+
+  const smoothPath1Length = useSpring(path1Length, { stiffness: 80, damping: 15 });
+  const smoothPath2Length = useSpring(path2Length, { stiffness: 80, damping: 15 });
+  const smoothPath3Length = useSpring(path3Length, { stiffness: 80, damping: 15 });
+  const smoothPath4Length = useSpring(path4Length, { stiffness: 80, damping: 15 });
+
+  // Right Column cards (4 Cards) - Appears staggered from 35% to 69%
+  const card1Opacity = useTransform(smoothProgress, [0, 0.32, 0.42, 0.9, 0.95], [0, 0, 1, 1, 0]);
+  const card1X = useTransform(smoothProgress, [0, 0.32, 0.42], [40, 20, 0]);
+  
+  const card2Opacity = useTransform(smoothProgress, [0, 0.39, 0.49, 0.9, 0.95], [0, 0, 1, 1, 0]);
+  const card2X = useTransform(smoothProgress, [0, 0.39, 0.49], [40, 20, 0]);
+
+  const card3Opacity = useTransform(smoothProgress, [0, 0.46, 0.56, 0.9, 0.95], [0, 0, 1, 1, 0]);
+  const card3X = useTransform(smoothProgress, [0, 0.46, 0.56], [40, 20, 0]);
+
+  const card4Opacity = useTransform(smoothProgress, [0, 0.53, 0.63, 0.9, 0.95], [0, 0, 1, 1, 0]);
+  const card4X = useTransform(smoothProgress, [0, 0.53, 0.63], [40, 20, 0]);
+
+  const smoothCard1Opacity = useSpring(card1Opacity, { stiffness: 100, damping: 18 });
+  const smoothCard1X = useSpring(card1X, { stiffness: 100, damping: 18 });
+
+  const smoothCard2Opacity = useSpring(card2Opacity, { stiffness: 100, damping: 18 });
+  const smoothCard2X = useSpring(card2X, { stiffness: 100, damping: 18 });
+
+  const smoothCard3Opacity = useSpring(card3Opacity, { stiffness: 100, damping: 18 });
+  const smoothCard3X = useSpring(card3X, { stiffness: 100, damping: 18 });
+
+  const smoothCard4Opacity = useSpring(card4Opacity, { stiffness: 100, damping: 18 });
+  const smoothCard4X = useSpring(card4X, { stiffness: 100, damping: 18 });
+
+  const getCardAnim = (id) => {
+    switch (id) {
+      case "needs":
+        return { opacity: smoothCard1Opacity, x: smoothCard1X };
+      case "deals":
+        return { opacity: smoothCard2Opacity, x: smoothCard2X };
+      case "risks":
+        return { opacity: smoothCard3Opacity, x: smoothCard3X };
+      case "perf":
+        return { opacity: smoothCard4Opacity, x: smoothCard4X };
+      default:
+        return { opacity: 1, x: 0 };
+    }
+  };
 
   // --- GENERAL STATES ---
   const [activeSection, setActiveSection] = useState(0);
@@ -60,6 +164,7 @@ export default function GuidePage() {
         color: ["bg-emerald-400", "bg-primary-400", "bg-amber-400", "bg-pink-400", "bg-sky-400"][i % 5],
         delay: Math.random() * 0.15
       }));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setParticles(newParticles);
     } else {
       setParticles([]);
@@ -75,16 +180,10 @@ export default function GuidePage() {
   const [selectedCoachAction, setSelectedCoachAction] = useState(null);
   const [coachAITypingText, setCoachAITypingText] = useState("");
 
-  const coachRecommendations = [
-    { id: "action1", name: "Ngô Quốc Mai", status: "Rủi ro cao", desc: "Khách đã không phản hồi 5 ngày.", suggestion: "Phát hiện tín hiệu chậm trễ! Hãy thực hiện một cuộc gọi hỏi thăm thân mật về tiến độ pháp lý dự án Masterise và đề xuất hỗ trợ thủ tục vay ngân hàng ưu đãi.", icon: <PhoneCall className="w-3.5 h-3.5" />, btnLabel: "Gọi ngay", badgeColor: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20" },
-    { id: "action2", name: "Dương Mạnh Đức", status: "Cơ hội cao", desc: "Budget phù hợp, quan tâm dự án.", suggestion: "Cơ hội tốt! BĐS căn hộ đang khớp nhu cầu 2-3 tỷ. Hãy chủ động gửi file mặt bằng chi tiết tòa tháp căn hộ mới mở bán kèm bảng tính dòng tiền thanh toán chậm qua Zalo.", icon: <Mail className="w-3.5 h-3.5" />, btnLabel: "Gửi thông tin", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" },
-    { id: "action3", name: "Võ Hoàng Bảo", status: "Cơ hội cao", desc: "Đã xem bảng giá 3 lần.", suggestion: "Khách hàng rất quan tâm! Lập tức đặt lịch hẹn cà phê tư vấn chính sách chiết khấu 8% đợt mở bán đầu tiên để tạo tính khan hiếm thúc đẩy giao dịch.", icon: <Calendar className="w-3.5 h-3.5" />, btnLabel: "Đặt lịch hẹn", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" },
-    { id: "action4", name: "Tuấn Linh 1", status: "Chăm sóc", desc: "Đến hạn follow-up hôm nay.", suggestion: "Hành động cần làm: Gửi tin nhắn cập nhật tiến độ xây dựng móng hầm mới nhất cùng ảnh thực tế công trường để duy trì nhịp liên hệ tin cậy.", icon: <Clock className="w-3.5 h-3.5" />, btnLabel: "Nhắc lịch", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" }
-  ];
-
   // Simulated AI typing effect when selected action changes
   useEffect(() => {
     if (!selectedCoachAction) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCoachAITypingText("");
       return;
     }
@@ -131,7 +230,7 @@ export default function GuidePage() {
                 <BookOpen className="w-4.5 h-4.5 text-primary-500 animate-pulse" />
                 Bí Kíp Bán Hàng 1-Chạm
               </h1>
-              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Làm chủ SalesPush CRM trong 3 phút</p>
+              <p className="text-[9px] text-slate-455 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Làm chủ SalesPush CRM trong 3 phút</p>
             </div>
           </div>
           <Link 
@@ -162,7 +261,7 @@ export default function GuidePage() {
               transition={{ type: "spring", stiffness: 80, delay: 0.1 }}
               className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-none"
             >
-              Chinh Phục <span className="bg-gradient-to-r from-primary-500 via-blue-500 to-emerald-500 bg-clip-text text-transparent drop-shadow-sm">SalesPush CRM</span>
+              Chinh Phục <span className="bg-gradient-to-r from-primary-500 via-blue-550 to-emerald-500 bg-clip-text text-transparent drop-shadow-sm">SalesPush CRM</span>
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 25 }} 
@@ -200,7 +299,7 @@ export default function GuidePage() {
         {/* ========================================================
             CHƯƠNG 1: Cập nhật khách hàng thông minh (Smart Update)
             ======================================================== */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative">
           
           {/* Left Text / Features column */}
           <div className="lg:col-span-6 space-y-6">
@@ -289,7 +388,7 @@ export default function GuidePage() {
 
               {/* Dynamic simulated radar hint pointer inside mockup to guide click */}
               {formStep === 0 && (
-                <div className="absolute right-6 bottom-6 w-10 h-10 pointer-events-none z-30 flex items-center justify-center">
+                <div className="absolute right-6 bottom-6 w-10 h-10 pointer-events-none z-35 flex items-center justify-center">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-primary-500 opacity-30 animate-ping" />
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-primary-500 shadow-sm" />
                 </div>
@@ -577,252 +676,599 @@ export default function GuidePage() {
           </div>
         </section>
 
-
         {/* ========================================================
-            CHƯƠNG 2: Quản lý cả team trên một màn hình (Interactive Allocation)
+            CHƯƠNG 2: Quản lý cả team trên một màn hình (Sticky Scroll Sequence)
             ======================================================== */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Column: Simulated Desktop/Mobile Team Dashboard */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-center order-2 lg:order-1">
-            
-            {/* Visual device wrapper - iPhone frame representation with 3D Tilt */}
-            <motion.div 
-              whileHover={{ 
-                scale: 1.03, 
-                rotateY: 8, 
-                rotateX: 6,
-                z: 50,
-                transition: { type: "spring", stiffness: 200, damping: 15 } 
-              }}
-              className="relative w-[280px] sm:w-[315px] aspect-[9/19.2] rounded-[48px] bg-slate-950 border-[7px] border-slate-850 shadow-2xl p-1.5 overflow-hidden ring-4 ring-slate-800/10 transition-all select-none perspective-1000"
-            >
+        {isDesktop ? (
+          <section ref={containerRef} className="relative w-full lg:h-[230vh] h-auto">
+            <div className="lg:sticky lg:top-24 lg:h-[calc(100vh-140px)] w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center overflow-visible">
               
-              {/* Phone Glass reflection */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none z-30" />
-
-              {/* Notch */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-slate-850 rounded-b-2xl z-30 flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-black/80 mr-2" />
-                <div className="w-12 h-1 bg-slate-950 rounded-full" />
-              </div>
-
-              {/* Status Bar */}
-              <div className="absolute top-4 inset-x-0 px-6 flex justify-between items-center text-[10px] font-bold text-slate-500 z-20">
-                <span>09:41</span>
-                <div className="flex items-center gap-1">
-                  <span>LTE</span>
-                  <div className="w-4 h-2.5 border border-slate-400 rounded-xs p-0.2"><div className="h-full bg-slate-500 w-4/5 rounded-3xs" /></div>
+              {/* Left Column: Title and Overview info */}
+              <motion.div 
+                style={{ 
+                  opacity: smoothLeftOpacity, 
+                  y: smoothLeftY, 
+                  scale: smoothLeftScale 
+                }} 
+                className="lg:col-span-3 space-y-6 flex flex-col justify-center h-full z-10"
+              >
+                <div className="space-y-2">
+                  <span className="text-[10px] uppercase font-black tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block shadow-3xs">
+                    Chương 2
+                  </span>
+                  <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                    Quản lý cả team<br/>trên một màn hình
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                    Bao quát toàn bộ hoạt động bán hàng của từng nhân viên theo thời gian thực. Phát hiện điểm nghẽn tức thì để tối ưu hiệu suất đội ngũ mà không cần các buổi họp báo cáo rườm rà.
+                  </p>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Simulated Screen Body */}
-              <div className="relative w-full h-full rounded-[42px] overflow-hidden bg-slate-50 dark:bg-slate-900 flex flex-col pt-10 pb-5 px-4 transition-colors duration-300">
-                
-                {/* Header Section from Team Dashboard */}
-                <div className="flex justify-between items-center pb-2.5 shrink-0">
-                  <div className="text-left">
-                    <h3 className="text-xs font-black text-slate-900 dark:text-white leading-none">Dashboard Team</h3>
-                    <span className="text-[7.5px] text-slate-450 dark:text-slate-500 font-bold block mt-0.5">Tổng quan hiệu suất team hôm nay</span>
+              {/* Middle Column: Device mockup & SVG indicators */}
+              <motion.div 
+                style={{ 
+                  opacity: smoothMockupOpacity, 
+                  y: smoothMockupY, 
+                  scale: smoothMockupScale 
+                }} 
+                className="lg:col-span-5 flex flex-col items-center justify-center relative h-full select-none"
+              >
+                {/* Connection SVG Canvas overlay */}
+                <svg className="absolute left-[calc(50%+90px)] top-[10%] w-[250px] h-[75%] pointer-events-none -z-10 overflow-visible">
+                  <defs>
+                    <linearGradient id="gradient-needs" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.2" />
+                    </linearGradient>
+                    <linearGradient id="gradient-deals" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
+                    </linearGradient>
+                    <linearGradient id="gradient-risks" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#ef4444" stopOpacity="0.2" />
+                    </linearGradient>
+                    <linearGradient id="gradient-perf" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.2" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* SVG Connection Paths */}
+                  {/* Path 1: Cần chăm -> Needs Card */}
+                  <motion.path
+                    d="M -75 80 Q 20 80, 80 40"
+                    fill="none"
+                    stroke="url(#gradient-needs)"
+                    strokeWidth="2"
+                    strokeDasharray="4 4"
+                    style={{ pathLength: smoothPath1Length }}
+                  />
+
+                  {/* Path 2: Gắn chốt -> Deals Card */}
+                  <motion.path
+                    d="M 45 80 Q 95 80, 80 120"
+                    fill="none"
+                    stroke="url(#gradient-deals)"
+                    strokeWidth="2"
+                    strokeDasharray="4 4"
+                    style={{ pathLength: smoothPath2Length }}
+                  />
+
+                  {/* Path 3: Risks member -> Risks Card */}
+                  <motion.path
+                    d="M 45 170 Q 110 170, 80 200"
+                    fill="none"
+                    stroke="url(#gradient-risks)"
+                    strokeWidth="2"
+                    strokeDasharray="4 4"
+                    style={{ pathLength: smoothPath3Length }}
+                  />
+
+                  {/* Path 4: Perf chart -> Perf Card */}
+                  <motion.path
+                    d="M 45 285 Q 90 285, 80 280"
+                    fill="none"
+                    stroke="url(#gradient-perf)"
+                    strokeWidth="2"
+                    strokeDasharray="4 4"
+                    style={{ pathLength: smoothPath4Length }}
+                  />
+                </svg>
+
+                {/* iPhone device wrapper */}
+                <div 
+                  className="relative w-[315px] aspect-[9/19.2] rounded-[48px] bg-slate-950 border-[7px] border-slate-850 shadow-2xl p-1.5 overflow-hidden ring-4 ring-slate-800/10 transition-all select-none perspective-1000"
+                >
+                  {/* Phone Glass reflection */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none z-30" />
+
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-slate-850 rounded-b-2xl z-30 flex items-center justify-center">
+                    <div className="w-2 h-2 rounded-full bg-black/80 mr-2" />
+                    <div className="w-12 h-1 bg-slate-950 rounded-full" />
                   </div>
-                  
-                  {/* Icons row */}
-                  <div className="flex items-center gap-1.5 shrink-0 scale-90">
-                    <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 hover:bg-slate-100"><RefreshCw className="w-2.5 h-2.5" /></div>
-                    <div className="w-7 h-7 rounded-full bg-primary-500 shadow-md text-white flex items-center justify-center text-[12px] font-black hover:scale-105 active:scale-90 cursor-pointer">+</div>
-                    <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 relative">
-                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-red-500" />
-                      <span className="text-[9px]">🔔</span>
+
+                  {/* Status Bar */}
+                  <div className="absolute top-4 inset-x-0 px-6 flex justify-between items-center text-[10px] font-bold text-slate-500 z-20">
+                    <span>09:41</span>
+                    <div className="flex items-center gap-1">
+                      <span>LTE</span>
+                      <div className="w-4 h-2.5 border border-slate-400 rounded-xs p-0.2"><div className="h-full bg-slate-500 w-4/5 rounded-3xs" /></div>
                     </div>
                   </div>
-                </div>
 
-                {/* Sub tabs selector simulation */}
-                <div className="flex gap-1.5 mb-2.5 shrink-0">
-                  {["Tổng quan", "Nhân sự (12)", "Điều phối"].map((tabLabel, i) => (
-                    <span key={i} className={`px-2.5 py-1 rounded-md text-[8.5px] font-black ${i === 0 ? 'bg-primary-500 text-white shadow-2xs' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
-                      {tabLabel}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Simulated Widgets */}
-                <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-0.5">
-                  
-                  {/* 4 Summary Stats row grid with active glow animation */}
-                  <div className={`grid grid-cols-2 gap-2 p-1 border rounded-2xl transition-all duration-300 relative ${
-                    teamHoveredFeature === 'needs' ? 'border-amber-400 bg-amber-500/5 shadow-md shadow-amber-500/5 scale-98' :
-                    teamHoveredFeature === 'deals' ? 'border-emerald-400 bg-emerald-500/5 shadow-md shadow-emerald-500/5 scale-98' :
-                    'border-transparent'
-                  }`}>
+                  {/* Simulated Screen Body */}
+                  <div className="relative w-full h-full rounded-[42px] overflow-hidden bg-slate-50 dark:bg-slate-900 flex flex-col pt-10 pb-5 px-4 transition-colors duration-300">
                     
-                    {/* Card 1 */}
-                    <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 relative shadow-3xs transition-all ${
-                      teamHoveredFeature === 'needs' ? 'border-amber-300 dark:border-amber-700/50 scale-102 ring-2 ring-amber-500/10' : 'border-slate-100 dark:border-slate-800'
-                    }`}>
-                      <div className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-500 flex items-center justify-center shrink-0">
-                        <Flame className="w-4 h-4 fill-current animate-pulse" />
+                    {/* Header Section from Team Dashboard */}
+                    <div className="flex justify-between items-center pb-2.5 shrink-0">
+                      <div className="text-left">
+                        <h3 className="text-xs font-black text-slate-900 dark:text-white leading-none">Dashboard Team</h3>
+                        <span className="text-[7.5px] text-slate-450 dark:text-slate-500 font-bold block mt-0.5">Tổng quan hiệu suất team hôm nay</span>
                       </div>
-                      <div>
-                        <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Cần chăm</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[12px] font-black dark:text-white">44</span>
-                          <span className="text-[8px] font-black text-red-550">+4</span>
+                      
+                      <div className="flex items-center gap-1.5 shrink-0 scale-90">
+                        <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 hover:bg-slate-100"><RefreshCw className="w-2.5 h-2.5" /></div>
+                        <div className="w-7 h-7 rounded-full bg-primary-500 shadow-md text-white flex items-center justify-center text-[12px] font-black hover:scale-105 active:scale-90 cursor-pointer">+</div>
+                        <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 relative">
+                          <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-red-500" />
+                          <span className="text-[9px]">🔔</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Card 2 */}
-                    <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-500 flex items-center justify-center shrink-0">📅</div>
-                      <div>
-                        <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Lịch hẹn</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[12px] font-black dark:text-white">0</span>
-                          <span className="text-[8px] font-black text-blue-550">+1</span>
-                        </div>
-                      </div>
+                    {/* Sub tabs selector */}
+                    <div className="flex gap-1.5 mb-2.5 shrink-0">
+                      {["Tổng quan", "Nhân sự (12)", "Điều phối"].map((tabLabel, i) => (
+                        <span key={i} className={`px-2.5 py-1 rounded-md text-[8.5px] font-black ${i === 0 ? 'bg-primary-500 text-white shadow-2xs' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                          {tabLabel}
+                        </span>
+                      ))}
                     </div>
 
-                    {/* Card 3 */}
-                    <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 shadow-3xs transition-all ${
-                      teamHoveredFeature === 'deals' ? 'border-emerald-300 dark:border-emerald-700/50 scale-102 ring-2 ring-emerald-500/10' : 'border-slate-100 dark:border-slate-800'
-                    }`}>
-                      <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 flex items-center justify-center shrink-0">🎯</div>
-                      <div>
-                        <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Gắn chốt</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-[12px] font-black dark:text-white">18</span>
-                          <span className="text-[8px] font-black text-emerald-555">+2</span>
+                    {/* Widgets body */}
+                    <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-0.5">
+                      
+                      {/* Stat grid */}
+                      <div className={`grid grid-cols-2 gap-2 p-1 border rounded-2xl transition-all duration-300 relative ${
+                        teamHoveredFeature === 'needs' ? 'border-amber-400 bg-amber-500/5 shadow-md shadow-amber-550/5 scale-98' :
+                        teamHoveredFeature === 'deals' ? 'border-emerald-400 bg-emerald-500/5 shadow-md shadow-emerald-555/5 scale-98' :
+                        'border-transparent'
+                      }`}>
+                        {/* Card 1 */}
+                        <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 relative shadow-3xs transition-all ${
+                          teamHoveredFeature === 'needs' ? 'border-amber-300 dark:border-amber-700/50 scale-102 ring-2 ring-amber-500/10' : 'border-slate-100 dark:border-slate-800'
+                        }`}>
+                          <div className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-500 flex items-center justify-center shrink-0">
+                            <Flame className="w-4 h-4 fill-current animate-pulse" />
+                          </div>
+                          <div>
+                            <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Cần chăm</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[12px] font-black dark:text-white">44</span>
+                              <span className="text-[8px] font-black text-red-550">+4</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card 2 */}
+                        <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-500 flex items-center justify-center shrink-0">📅</div>
+                          <div>
+                            <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Lịch hẹn</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[12px] font-black dark:text-white">0</span>
+                              <span className="text-[8px] font-black text-blue-550">+1</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card 3 */}
+                        <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 shadow-3xs transition-all ${
+                          teamHoveredFeature === 'deals' ? 'border-emerald-300 dark:border-emerald-700/50 scale-102 ring-2 ring-emerald-500/10' : 'border-slate-100 dark:border-slate-800'
+                        }`}>
+                          <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 flex items-center justify-center shrink-0">🎯</div>
+                          <div>
+                            <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Gắn chốt</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[12px] font-black dark:text-white">18</span>
+                              <span className="text-[8px] font-black text-emerald-555">+2</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card 4 */}
+                        <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0">⚙️</div>
+                          <div>
+                            <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Follow-up</span>
+                            <span className="text-[12px] font-black block dark:text-white">2%</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Card 4 */}
-                    <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0">⚙️</div>
-                      <div>
-                        <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Follow-up</span>
-                        <span className="text-[12px] font-black block dark:text-white">2%</span>
+                      {/* Priority list */}
+                      <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 relative ${
+                        teamHoveredFeature === 'risks' ? 'border-red-400 bg-red-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
+                      }`}>
+                        {teamHoveredFeature === 'risks' && (
+                          <div className="absolute top-2 right-2 w-5 h-5 pointer-events-none">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-40 animate-ping" />
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                          <span className="text-[8.5px] font-black text-slate-855 dark:text-slate-200 uppercase tracking-wider">Ưu tiên xử lý nhân sự</span>
+                          <span className="text-[7.5px] font-black text-primary-500">Xem tất cả</span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          {[
+                            { name: "tuanlinh.hoang28", count: 19 },
+                            { name: "tuanhoang.samrealty", count: 10 },
+                            { name: "Tuấn Linh 1", count: 9 }
+                          ].map((member, idx) => (
+                            <button 
+                              key={idx} 
+                              onClick={() => setSelectedTeamMember(member.name)}
+                              className={`w-full flex justify-between items-center p-2 rounded-xl text-[9px] font-medium border text-left cursor-pointer transition-all duration-200 ${
+                                selectedTeamMember === member.name
+                                  ? "bg-slate-100 dark:bg-slate-800 border-primary-500 shadow-2xs font-bold scale-[1.01]"
+                                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-700/50 hover:bg-slate-100/50"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center font-black text-[8px] text-white shadow-2xs ${
+                                  selectedTeamMember === member.name ? "bg-primary-500 animate-pulse" : "bg-slate-400 dark:bg-slate-655"
+                                }`}>
+                                  {member.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[80px]">{member.name}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-1 shrink-0">
+                                <span className={`text-[7.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded border shrink-0 ${
+                                  selectedTeamMember === member.name ? "bg-red-500 text-white border-red-500" : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/10"
+                                }`}>{member.count} quá hạn</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
+
+                      {/* Chart widget */}
+                      <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 ${
+                        teamHoveredFeature === 'perf' ? 'border-primary-400 bg-primary-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
+                      }`}>
+                        <span className="text-[8.5px] font-black text-slate-855 dark:text-slate-200 block uppercase tracking-wider">Theo hành trình bán hàng</span>
+                        
+                        <div className="grid grid-cols-5 gap-1.5 pt-1">
+                          {[
+                            { label: "Phá băng", val: 10 },
+                            { label: "Tư vấn", val: 7 },
+                            { label: "Lòng tin", val: 10 },
+                            { label: "Hẹn gặp", val: 8 },
+                            { label: "Dẫn chốt", val: 4 }
+                          ].map((col, idx) => (
+                            <div key={idx} className="flex flex-col items-center space-y-1">
+                              <div className="w-full bg-slate-100 dark:bg-slate-800 h-12 rounded-lg flex items-end overflow-hidden shadow-2xs">
+                                <div 
+                                  className={`w-full rounded-b-lg transition-all duration-500 relative overflow-hidden ${
+                                    idx === 4 ? "bg-emerald-500" : "bg-primary-500"
+                                  }`} 
+                                  style={{ height: `${col.val * 10}%` }} 
+                                >
+                                  <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/15 to-white/0 translate-y-[-100%] animate-shimmer" style={{ animationDuration: '3s' }} />
+                                </div>
+                              </div>
+                              <span className="text-[7px] font-bold text-slate-400 dark:text-slate-500 truncate w-full text-center leading-none mt-1">{col.label}</span>
+                              <span className="text-[8.5px] font-black text-slate-700 dark:text-slate-300">{col.val}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                     </div>
                   </div>
+                </div>
+              </motion.div>
 
-                  {/* Urgently need handling members list with interactive click highlights */}
-                  <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 relative ${
-                    teamHoveredFeature === 'risks' ? 'border-red-400 bg-red-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
-                  }`}>
-                    
-                    {/* Pulsing ring indicator in mockup to draw focus */}
-                    {teamHoveredFeature === 'risks' && (
-                      <div className="absolute top-2 right-2 w-5 h-5 pointer-events-none">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-40 animate-ping" />
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 dark:border-slate-800 shrink-0">
-                      <span className="text-[8.5px] font-black text-slate-850 dark:text-slate-200 uppercase tracking-wider">Ưu tiên xử lý nhân sự</span>
-                      <span className="text-[7.5px] font-black text-primary-500">Xem tất cả</span>
-                    </div>
-
-                    {/* Member rows mockup */}
-                    <div className="space-y-1.5">
-                      {[
-                        { name: "tuanlinh.hoang28", count: 19 },
-                        { name: "tuanhoang.samrealty", count: 10 },
-                        { name: "Tuấn Linh 1", count: 9 }
-                      ].map((member, idx) => (
-                        <button 
-                          key={idx} 
-                          onClick={() => setSelectedTeamMember(member.name)}
-                          className={`w-full flex justify-between items-center p-2 rounded-xl text-[9px] font-medium border text-left cursor-pointer transition-all duration-200 ${
-                            selectedTeamMember === member.name
-                              ? "bg-slate-100 dark:bg-slate-800 border-primary-500 shadow-2xs font-bold scale-[1.01]"
-                              : "bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-700/50 hover:bg-slate-100/50"
+              {/* Right Column: Interactive description cards */}
+              <div className="lg:col-span-4 space-y-6 flex flex-col justify-center h-full z-10">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                    Tính năng quản lý cốt lõi (Hover/Click thử để xem highlight):
+                  </p>
+                  
+                  <div className="grid grid-cols-1 gap-3.5">
+                    {[
+                      {
+                        id: "needs",
+                        title: "🔥 44 khách cần chăm",
+                        desc: "Tự động phát hiện và cảnh báo các cơ hội bị lãng quên để trưởng nhóm đôn đốc kịp thời."
+                      },
+                      {
+                        id: "deals",
+                        title: "🎯 18 deal gần chốt",
+                        desc: "Định vị và tập trung cao độ nguồn lực vào các thương vụ có xác suất chốt cọc cao nhất phòng."
+                      },
+                      {
+                        id: "risks",
+                        title: "⚠️ Ưu tiên xử lý nhân sự",
+                        desc: "Biết chính xác nhân sự nào đang quá hạn follow-up hoặc bị ngập đầu trong lượng lead ảo."
+                      },
+                      {
+                        id: "perf",
+                        title: "📊 Theo dõi hiệu suất",
+                        desc: "Đo lường tiến độ chuyển đổi theo từng giai đoạn bán hàng để đề ra chiến lược bám đuổi phù hợp."
+                      }
+                    ].map((feature) => {
+                      const cardAnim = getCardAnim(feature.id);
+                      return (
+                        <motion.button
+                          key={feature.id}
+                          style={{
+                            opacity: cardAnim.opacity,
+                            x: cardAnim.x
+                          }}
+                          onMouseEnter={() => setTeamHoveredFeature(feature.id)}
+                          onMouseLeave={() => setTeamHoveredFeature(null)}
+                          onClick={() => setTeamHoveredFeature(teamHoveredFeature === feature.id ? null : feature.id)}
+                          className={`text-left p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden active:scale-98 cursor-pointer ${
+                            teamHoveredFeature === feature.id
+                              ? "bg-white dark:bg-slate-900 border-emerald-500 shadow-lg shadow-emerald-500/5 translate-y-[-2px] ring-1 ring-emerald-500/20"
+                              : "bg-white/40 dark:bg-slate-900/10 border-slate-200/60 dark:border-slate-800 hover:bg-white hover:border-slate-300"
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center font-black text-[8px] text-white shadow-2xs ${
-                              selectedTeamMember === member.name ? "bg-primary-500 animate-pulse" : "bg-slate-400 dark:bg-slate-655"
-                            }`}>
-                              {member.name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[80px]">{member.name}</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1 shrink-0">
-                            <span className={`text-[7.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded border shrink-0 ${
-                              selectedTeamMember === member.name ? "bg-red-500 text-white border-red-500" : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/10"
-                            }`}>{member.count} quá hạn</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                          {teamHoveredFeature === feature.id && (
+                            <motion.div 
+                              layoutId="activeTeamGlow"
+                              className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-500 to-teal-500" 
+                            />
+                          )}
+                          <h3 className="font-black text-xs text-slate-800 dark:text-slate-100 flex items-center justify-between">
+                            {feature.title}
+                            {teamHoveredFeature === feature.id && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                            )}
+                          </h3>
+                          <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">
+                            {feature.desc}
+                          </p>
+                        </motion.button>
+                      );
+                    })}
                   </div>
+                </div>
+              </div>
 
-                  {/* Simulated timeline mini chart widget */}
-                  <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 ${
-                    teamHoveredFeature === 'perf' ? 'border-primary-400 bg-primary-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
-                  }`}>
-                    <span className="text-[8.5px] font-black text-slate-855 dark:text-slate-200 block uppercase tracking-wider">Theo hành trình bán hàng</span>
+            </div>
+          </section>
+        ) : (
+          /* Mobile Stacked Layout (Performance optimized with Viewport Entry transitions) */
+          <section className="grid grid-cols-1 gap-12 py-8">
+            {/* Left Column (Overview & Title) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+              className="space-y-4"
+            >
+              <span className="text-[10px] uppercase font-black tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block shadow-3xs">
+                Chương 2
+              </span>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
+                Quản lý cả team<br/>trên một màn hình
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                Bao quát toàn bộ hoạt động bán hàng của từng nhân viên theo thời gian thực. Phát hiện điểm nghẽn tức thì để tối ưu hiệu suất đội ngũ mà không cần các buổi họp báo cáo rườm rà.
+              </p>
+            </motion.div>
+
+            {/* Middle Column (iPhone Mockup) */}
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ type: "spring", stiffness: 100, damping: 15 }}
+              className="flex flex-col items-center justify-center"
+            >
+              <div 
+                className="relative w-[280px] sm:w-[315px] aspect-[9/19.2] rounded-[48px] bg-slate-950 border-[7px] border-slate-850 shadow-2xl p-1.5 overflow-hidden ring-4 ring-slate-800/10 transition-all select-none perspective-1000"
+              >
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/10 pointer-events-none z-30" />
+                
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-slate-850 rounded-b-2xl z-30 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-black/80 mr-2" />
+                  <div className="w-12 h-1 bg-slate-950 rounded-full" />
+                </div>
+
+                <div className="absolute top-4 inset-x-0 px-6 flex justify-between items-center text-[10px] font-bold text-slate-500 z-20">
+                  <span>09:41</span>
+                  <div className="flex items-center gap-1">
+                    <span>LTE</span>
+                    <div className="w-4 h-2.5 border border-slate-400 rounded-xs p-0.2"><div className="h-full bg-slate-500 w-4/5 rounded-3xs" /></div>
+                  </div>
+                </div>
+
+                <div className="relative w-full h-full rounded-[42px] overflow-hidden bg-slate-50 dark:bg-slate-900 flex flex-col pt-10 pb-5 px-4 transition-colors duration-300">
+                  
+                  <div className="flex justify-between items-center pb-2.5 shrink-0">
+                    <div className="text-left">
+                      <h3 className="text-xs font-black text-slate-900 dark:text-white leading-none">Dashboard Team</h3>
+                      <span className="text-[7.5px] text-slate-455 dark:text-slate-500 font-bold block mt-0.5">Tổng quan hiệu suất team hôm nay</span>
+                    </div>
                     
-                    <div className="grid grid-cols-5 gap-1.5 pt-1">
-                      {[
-                        { label: "Phá băng", val: 10 },
-                        { label: "Tư vấn", val: 7 },
-                        { label: "Lòng tin", val: 10 },
-                        { label: "Hẹn gặp", val: 8 },
-                        { label: "Dẫn chốt", val: 4 }
-                      ].map((col, idx) => (
-                        <div key={idx} className="flex flex-col items-center space-y-1">
-                          <div className="w-full bg-slate-100 dark:bg-slate-800 h-12 rounded-lg flex items-end overflow-hidden shadow-2xs">
-                            <div 
-                              className={`w-full rounded-b-lg transition-all duration-500 relative overflow-hidden ${
-                                idx === 4 ? "bg-emerald-500" : "bg-primary-500"
-                              }`} 
-                              style={{ height: `${col.val * 10}%` }} 
-                            >
-                              {/* Glass shimmer bar moving across the bars */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/15 to-white/0 translate-y-[-100%] animate-shimmer" style={{ animationDuration: '3s' }} />
-                            </div>
-                          </div>
-                          <span className="text-[7px] font-bold text-slate-400 dark:text-slate-500 truncate w-full text-center leading-none mt-1">{col.label}</span>
-                          <span className="text-[8.5px] font-black text-slate-700 dark:text-slate-300">{col.val}</span>
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-1.5 shrink-0 scale-90">
+                      <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 hover:bg-slate-100"><RefreshCw className="w-2.5 h-2.5" /></div>
+                      <div className="w-7 h-7 rounded-full bg-primary-500 shadow-md text-white flex items-center justify-center text-[12px] font-black hover:scale-105 active:scale-90 cursor-pointer">+</div>
+                      <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 shadow-3xs flex items-center justify-center text-slate-600 relative">
+                        <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span className="text-[9px]">🔔</span>
+                      </div>
                     </div>
                   </div>
 
+                  <div className="flex gap-1.5 mb-2.5 shrink-0">
+                    {["Tổng quan", "Nhân sự (12)", "Điều phối"].map((tabLabel, i) => (
+                      <span key={i} className={`px-2.5 py-1 rounded-md text-[8.5px] font-black ${i === 0 ? 'bg-primary-500 text-white shadow-2xs' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                        {tabLabel}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-0.5">
+                    
+                    <div className={`grid grid-cols-2 gap-2 p-1 border rounded-2xl transition-all duration-300 relative ${
+                      teamHoveredFeature === 'needs' ? 'border-amber-400 bg-amber-500/5 shadow-md shadow-amber-500/5 scale-98' :
+                      teamHoveredFeature === 'deals' ? 'border-emerald-400 bg-emerald-500/5 shadow-md shadow-emerald-500/5 scale-98' :
+                      'border-transparent'
+                    }`}>
+                      
+                      <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 relative shadow-3xs transition-all ${
+                        teamHoveredFeature === 'needs' ? 'border-amber-300 dark:border-amber-700/50 scale-102 ring-2 ring-amber-500/10' : 'border-slate-100 dark:border-slate-800'
+                      }`}>
+                        <div className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-500 flex items-center justify-center shrink-0">
+                          <Flame className="w-4 h-4 fill-current animate-pulse" />
+                        </div>
+                        <div>
+                          <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Cần chăm</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[12px] font-black dark:text-white">44</span>
+                            <span className="text-[8px] font-black text-red-550">+4</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-500 flex items-center justify-center shrink-0">📅</div>
+                        <div>
+                          <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Lịch hẹn</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[12px] font-black dark:text-white">0</span>
+                            <span className="text-[8px] font-black text-blue-550">+1</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={`bg-white dark:bg-slate-850 p-2.5 rounded-xl border flex items-center gap-2 shadow-3xs transition-all ${
+                        teamHoveredFeature === 'deals' ? 'border-emerald-300 dark:border-emerald-700/50 scale-102 ring-2 ring-emerald-550/10' : 'border-slate-100 dark:border-slate-800'
+                      }`}>
+                        <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 flex items-center justify-center shrink-0">🎯</div>
+                        <div>
+                          <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Gắn chốt</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[12px] font-black dark:text-white">18</span>
+                            <span className="text-[8px] font-black text-emerald-555">+2</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white dark:bg-slate-850 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-2 shadow-3xs shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-850 text-slate-500 flex items-center justify-center shrink-0">⚙️</div>
+                        <div>
+                          <span className="text-[7.5px] uppercase font-bold text-slate-400 block leading-tight">Follow-up</span>
+                          <span className="text-[12px] font-black block dark:text-white">2%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 relative ${
+                      teamHoveredFeature === 'risks' ? 'border-red-400 bg-red-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
+                    }`}>
+                      {teamHoveredFeature === 'risks' && (
+                        <div className="absolute top-2 right-2 w-5 h-5 pointer-events-none">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-40 animate-ping" />
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center pb-1.5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <span className="text-[8.5px] font-black text-slate-855 dark:text-slate-200 uppercase tracking-wider">Ưu tiên xử lý nhân sự</span>
+                        <span className="text-[7.5px] font-black text-primary-500">Xem tất cả</span>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {[
+                          { name: "tuanlinh.hoang28", count: 19 },
+                          { name: "tuanhoang.samrealty", count: 10 },
+                          { name: "Tuấn Linh 1", count: 9 }
+                        ].map((member, idx) => (
+                          <button 
+                            key={idx} 
+                            onClick={() => setSelectedTeamMember(member.name)}
+                            className={`w-full flex justify-between items-center p-2 rounded-xl text-[9px] font-medium border text-left cursor-pointer transition-all duration-200 ${
+                              selectedTeamMember === member.name
+                                ? "bg-slate-100 dark:bg-slate-800 border-primary-500 shadow-2xs font-bold scale-[1.01]"
+                                : "bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-700/50 hover:bg-slate-100/50"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center font-black text-[8px] text-white shadow-2xs ${
+                                selectedTeamMember === member.name ? "bg-primary-500 animate-pulse" : "bg-slate-400 dark:bg-slate-655"
+                              }`}>
+                                {member.name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[80px]">{member.name}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className={`text-[7.5px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded border shrink-0 ${
+                                selectedTeamMember === member.name ? "bg-red-500 text-white border-red-500" : "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/10"
+                              }`}>{member.count} quá hạn</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={`p-3 bg-white dark:bg-slate-850 rounded-2xl border transition-all duration-300 shadow-3xs space-y-2 ${
+                      teamHoveredFeature === 'perf' ? 'border-primary-400 bg-primary-500/5 scale-98 shadow-md' : 'border-slate-100 dark:border-slate-800'
+                    }`}>
+                      <span className="text-[8.5px] font-black text-slate-855 dark:text-slate-200 block uppercase tracking-wider">Theo hành trình bán hàng</span>
+                      
+                      <div className="grid grid-cols-5 gap-1.5 pt-1">
+                        {[
+                          { label: "Phá băng", val: 10 },
+                          { label: "Tư vấn", val: 7 },
+                          { label: "Lòng tin", val: 10 },
+                          { label: "Hẹn gặp", val: 8 },
+                          { label: "Dẫn chốt", val: 4 }
+                        ].map((col, idx) => (
+                          <div key={idx} className="flex flex-col items-center space-y-1">
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 h-12 rounded-lg flex items-end overflow-hidden shadow-2xs">
+                              <div 
+                                className={`w-full rounded-b-lg transition-all duration-500 relative overflow-hidden ${
+                                  idx === 4 ? "bg-emerald-500" : "bg-primary-500"
+                                }`} 
+                                style={{ height: `${col.val * 10}%` }} 
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-t from-white/0 via-white/15 to-white/0 translate-y-[-100%] animate-shimmer" style={{ animationDuration: '3s' }} />
+                              </div>
+                            </div>
+                            <span className="text-[7px] font-bold text-slate-400 dark:text-slate-500 truncate w-full text-center leading-none mt-1">{col.label}</span>
+                            <span className="text-[8.5px] font-black text-slate-700 dark:text-slate-300">{col.val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </div>
             </motion.div>
 
-          </div>
-
-          {/* Right Column: Text and explanation list cards */}
-          <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
-            <div className="space-y-2">
-              <span className="text-[10px] uppercase font-black tracking-widest text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20 inline-block shadow-3xs">
-                Chương 2
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
-                Quản lý cả team<br/>trên một màn hình
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
-                Bao quát toàn bộ hoạt động bán hàng của từng nhân viên theo thời gian thực. Phát hiện điểm nghẽn tức thì để tối ưu hiệu suất đội ngũ mà không cần các buổi họp báo cáo rườm rà.
-              </p>
-            </div>
-
-            <hr className="border-slate-200/60 dark:border-slate-800/80" />
-
-            {/* Glowing Interactive explanation cards list */}
-            <div className="space-y-3">
+            {/* Right Column (Explanation cards) */}
+            <div className="space-y-6">
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
                 Tính năng quản lý cốt lõi (Hover/Click thử để xem highlight):
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   {
                     id: "needs",
@@ -858,7 +1304,7 @@ export default function GuidePage() {
                   >
                     {teamHoveredFeature === feature.id && (
                       <motion.div 
-                        layoutId="activeTeamGlow"
+                        layoutId="activeTeamGlowMobile"
                         className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-500 to-teal-500" 
                       />
                     )}
@@ -876,6 +1322,7 @@ export default function GuidePage() {
               </div>
             </div>
 
+            {/* Security Warning Alert */}
             <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5 text-emerald-500" />
@@ -887,10 +1334,23 @@ export default function GuidePage() {
                 </p>
               </div>
             </div>
+          </section>
+        )}
 
+        {/* Absolute Security Alert Block - scrolls naturally below the Sticky area on Desktop */}
+        {isDesktop && (
+          <div className="max-w-4xl mx-auto mt-12 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-start gap-3.5 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-500">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-black text-xs sm:text-sm text-emerald-800 dark:text-emerald-400">Bảo mật Least Privilege tuyệt đối</h4>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-semibold">
+                Trưởng phòng sau khi bàn giao khách cho Sales phụ trách sẽ không thể thấy thông tin liên hệ chi tiết hay lịch sử tương tác riêng tư của lead đó nữa. Sales an tâm chăm sóc và nâng cao bảo mật dữ liệu.
+              </p>
+            </div>
           </div>
-        </section>
-
+        )}
 
         {/* ========================================================
             CHƯƠNG 3: AI Coach - Trợ lý thông minh của Sales (Interactive typing)
@@ -914,7 +1374,7 @@ export default function GuidePage() {
             <hr className="border-slate-200/60 dark:border-slate-800/80" />
 
             <div className="space-y-3.5">
-              <p className="text-[10px] font-black text-slate-450 dark:text-slate-505 uppercase tracking-widest flex items-center gap-1.5">
+              <p className="text-[10px] font-black text-slate-450 dark:text-slate-550 uppercase tracking-widest flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 4 sứ mệnh đột phá của AI Coach:
               </p>
@@ -974,7 +1434,7 @@ export default function GuidePage() {
                     <BrainCircuit className="w-4.5 h-4.5 animate-pulse text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-black text-slate-850 dark:text-white leading-none">AI Coach</h3>
+                    <h3 className="text-xs font-black text-slate-855 dark:text-white leading-none">AI Coach</h3>
                     <span className="text-[7.5px] text-slate-450 dark:text-slate-500 font-bold block mt-0.5">Tổng quan thông minh • Hôm nay, 24/05/2026</span>
                   </div>
                 </div>
@@ -1020,12 +1480,12 @@ export default function GuidePage() {
                       >
                         <div className="space-y-0.5 min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[9.5px] font-black text-slate-850 dark:text-slate-100 truncate">{rec.name}</span>
+                            <span className="text-[9.5px] font-black text-slate-855 dark:text-slate-100 truncate">{rec.name}</span>
                             <span className={`text-[6.5px] font-black uppercase tracking-wider px-1.5 rounded-sm border shrink-0 ${rec.badgeColor}`}>
                               {rec.status}
                             </span>
                           </div>
-                          <span className="text-[7.5px] text-slate-450 dark:text-slate-500 font-semibold block truncate">{rec.desc}</span>
+                          <span className="text-[7.5px] text-slate-455 text-slate-450 dark:text-slate-500 font-semibold block truncate">{rec.desc}</span>
                         </div>
 
                         <span className="text-[8px] font-black text-primary-500 border border-primary-500/10 px-2 py-0.8 rounded-lg bg-primary-50 dark:bg-primary-950/20 shrink-0 shadow-3xs">
@@ -1044,7 +1504,7 @@ export default function GuidePage() {
                       {[
                         { label: "Rất nóng", count: 12, color: "bg-red-500/10 text-red-500 border-red-500/10" },
                         { label: "Nóng", count: 28, color: "bg-orange-500/10 text-orange-500 border-orange-500/10" },
-                        { label: "Ấm", count: 36, color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/10" },
+                        { label: "Ấm", count: 36, color: "bg-yellow-500/10 text-yellow-650 dark:text-yellow-450 border-yellow-500/10" },
                         { label: "Lạnh", count: 64, color: "bg-blue-500/10 text-blue-500 border-blue-500/10" }
                       ].map((h, i) => (
                         <div key={i} className={`p-1.5 border rounded-lg flex flex-col items-center justify-center shrink-0 transition-all ${h.color} hover:scale-105 shadow-3xs`}>
